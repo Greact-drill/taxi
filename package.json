@@ -1,0 +1,13 @@
+{
+  "name": "poc-connection-monitor",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter server dev\" \"pnpm --filter passenger dev\" \"pnpm --filter dispatcher dev\"",
+    "build": "pnpm --filter server build && pnpm --filter passenger build && pnpm --filter dispatcher build",
+    "start": "concurrently \"pnpm --filter server start\" \"pnpm --filter passenger preview\" \"pnpm --filter dispatcher preview\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "typescript": "^5.7.0"
+  }
+}
