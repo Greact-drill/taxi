@@ -13,9 +13,10 @@ const httpServer = createServer((req, res) => {
 });
 
 const io = new Server(httpServer, {
-  cors: {
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
-  },
+  path: '/ws',
+  // cors: {
+  //   origin: ['http://localhost:5173', 'http://localhost:5174'],
+  // },
   pingInterval: 1000,
   pingTimeout: 1000,
 });

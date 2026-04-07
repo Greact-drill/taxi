@@ -3,4 +3,12 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      '/ws': {
+        target: 'http://localhost:3001',
+        ws: true,
+      },
+    },
+  },
 });
