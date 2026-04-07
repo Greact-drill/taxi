@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { ConnectionInfo } from '@poc/shared';
+import type { ConnectionInfo } from '@packages/shared';
 import { socket } from './socket';
 import './app.css';
 

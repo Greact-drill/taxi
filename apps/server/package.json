@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "socket.io": "^4.8.1",
-    "@poc/shared": "workspace:*"
+    "@packages/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

@@ -17,7 +17,7 @@ importers:
 
   apps/dispatcher:
     dependencies:
-      '@poc/shared':
+      '@packages/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       react:
@@ -48,6 +48,9 @@ importers:
 
   apps/passenger:
     dependencies:
+      '@packages/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       react:
         specifier: ^19.0.0
         version: 19.2.4
@@ -76,7 +79,7 @@ importers:
 
   apps/server:
     dependencies:
-      '@poc/shared':
+      '@packages/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       socket.io:

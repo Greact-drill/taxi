@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
-import type { ConnectionInfo } from '@poc/shared';
+import type { ConnectionInfo } from '@packages/shared';
 
 const PORT = 3001;
 
@@ -14,9 +14,6 @@ const httpServer = createServer((req, res) => {
 
 const io = new Server(httpServer, {
   path: '/ws',
-  // cors: {
-  //   origin: ['http://localhost:5173', 'http://localhost:5174'],
-  // },
   pingInterval: 1000,
   pingTimeout: 1000,
 });
