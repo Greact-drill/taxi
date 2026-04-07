@@ -35,10 +35,10 @@ export default function App() {
         Активных соединений: <strong>{connections.length}</strong>
       </p>
       <ul className="list">
-        {connections.map((item) => (
-          <li key={item.clientId} className="list__item">
-            <span>{item.clientId}</span>
+        {connections.map((item, index) => (
+          <li key={index} className="list__item">
             <span>{item.role}</span>
+            <span>{item.token}</span>
           </li>
         ))}
       </ul>

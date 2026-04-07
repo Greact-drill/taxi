@@ -1,11 +1,8 @@
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
-import type { ClientRole, ConnectionInfo } from '@poc/shared';
+import type { ConnectionInfo } from '@poc/shared';
 
 const PORT = 3001;
-
-/** Tracks which Socket.IO instance owns the row (stable clientId vs reconnect race). */
-type TrackedConnection = ConnectionInfo & { socketId: string };
 
 const httpServer = createServer((req, res) => {
   if (req.url === '/health') {
@@ -23,43 +20,26 @@ const io = new Server(httpServer, {
   pingTimeout: 1000,
 });
 
-const connections = new Map<string, TrackedConnection>();
-
-function emitConnections(): void {
-  const list: ConnectionInfo[] = Array.from(connections.values()).map(
-    ({ clientId, role }) => ({ clientId, role }),
-  );
-  io.to('dispatchers').emit('connections', list);
+async function emitConnections(): Promise<void> {
+  const sockets = await io.fetchSockets();
+  const list: ConnectionInfo[] = [];
+  for (const s of sockets) {
+    const { role, token } = s.handshake.auth;
+    list.push({ role, token });
+  }
+  io.to('role:dispatcher').emit('connections', list);
 }
 
 io.on('connection', (socket) => {
-  const role = socket.handshake.auth.role as ClientRole | undefined;
+  const { role, token } = socket.handshake.auth;
 
-  if (role !== 'passenger' && role !== 'dispatcher') {
-    socket.disconnect(true);
-    return;
-  }
+  socket.join(`role:${role}`);
+  socket.join(`token:${token}`);
 
-  const rawClientId = socket.handshake.auth.clientId;
-  const clientId =
-    typeof rawClientId === 'string' && rawClientId.length > 0
-      ? rawClientId
-      : socket.id;
-
-  connections.set(clientId, { clientId, role, socketId: socket.id });
-
-  if (role === 'dispatcher') {
-    socket.join('dispatchers');
-  }
-
-  emitConnections();
+  void emitConnections();
 
   socket.on('disconnect', () => {
-    const row = connections.get(clientId);
-    if (row?.socketId === socket.id) {
-      connections.delete(clientId);
-      emitConnections();
-    }
+    void emitConnections();
   });
 });
 
