@@ -16,45 +16,22 @@ import {
 } from '@chakra-ui/react';
 import type {
   AuthCheckResponse,
-  AuthRegisterResponse,
   MeGetResponse,
-  Order,
-  OrdersCreateResponse,
-  OrdersDeleteResponse,
-  OrdersListResponse,
-  OrdersUpdateResponse,
-  PassengerOrdersPayload,
   Passenger,
 } from '@packages/shared';
 import { call } from './api';
 import { socket } from './socket';
 import { clearStoredToken, getStoredToken, setStoredToken } from './socket';
 import { HamburgerIcon } from './components/HamburgerIcon';
-import { RegisterMode } from './modes/RegisterMode';
-import { OrdersListMode } from './modes/OrdersListMode';
-import { OrderCreateMode } from './modes/OrderCreateMode';
-import { OrderEditMode } from './modes/OrderEditMode';
+import { PassengerAppContentScreen } from './screens/PassengerAppContentScreen';
 
 export default function App() {
   const [isOnline, setIsOnline] = useState(() => socket.connected);
   const [token, setToken] = useState<string | null>(() => getStoredToken());
   const [passenger, setPassenger] = useState<Passenger | null>(null);
-  const [passengerName, setPassengerName] = useState('');
-  const [passengerPhone, setPassengerPhone] = useState('');
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [activeOrder, setActiveOrder] = useState<Order | null>(null);
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [mode, setMode] = useState<'list' | 'create' | 'edit'>(() => 'list');
-  const [errorText, setErrorText] = useState<string | null>(null);
 
   function resetAuthedState(): void {
     setPassenger(null);
-    setOrders([]);
-    setActiveOrder(null);
-    setMode('list');
-    setFrom('');
-    setTo('');
   }
 
   function logoutLocal(): void {
@@ -82,23 +59,6 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    const onPassengerOrders = (payload: PassengerOrdersPayload) => {
-      setOrders(payload.items);
-      if (activeOrder && !payload.items.some((o) => o.id === activeOrder.id)) {
-        setActiveOrder(null);
-        setMode('list');
-        setFrom('');
-        setTo('');
-      }
-    };
-
-    socket.on('passenger:orders', onPassengerOrders);
-    return () => {
-      socket.off('passenger:orders', onPassengerOrders);
-    };
-  }, [activeOrder]);
-
   async function ensureTokenIsValid(): Promise<boolean> {
     if (!token) return false;
     const checkRes = (await call<{ token?: string }, AuthCheckResponse>('auth:check', {
@@ -106,7 +66,6 @@ export default function App() {
     })) as AuthCheckResponse;
 
     if (!checkRes.ok) {
-      setErrorText(checkRes.error.message);
       return false;
     }
 
@@ -120,9 +79,7 @@ export default function App() {
     return true;
   }
 
-  async function refreshMeAndOrders(): Promise<void> {
-    setErrorText(null);
-
+  async function refreshMe(): Promise<void> {
     const meRes = (await call<{}, MeGetResponse>('me:get', {})) as MeGetResponse;
     if (!meRes.ok) {
       if (meRes.error.code === 'UNAUTHORIZED') {
@@ -130,19 +87,10 @@ export default function App() {
         reconnectWithToken(undefined);
         return;
       }
-      setErrorText(meRes.error.message);
       return;
     }
 
     setPassenger(meRes.data.passenger);
-
-    const listRes = (await call<{}, OrdersListResponse>('orders:list', {})) as OrdersListResponse;
-    if (!listRes.ok) {
-      setErrorText(listRes.error.message);
-      return;
-    }
-
-    setOrders(listRes.data.items);
   }
 
   useEffect(() => {
@@ -151,148 +99,16 @@ export default function App() {
     void (async () => {
       const valid = await ensureTokenIsValid();
       if (!valid) return;
-      await refreshMeAndOrders();
+      await refreshMe();
     })();
   }, [token, isOnline]);
 
-  async function onRegister(): Promise<void> {
-    setErrorText(null);
-    const res = (await call<
-      { name: string; phone: string },
-      AuthRegisterResponse
-    >('auth:register', { name: passengerName, phone: passengerPhone })) as AuthRegisterResponse;
-
-    if (!res.ok) {
-      setErrorText(res.error.message);
-      return;
-    }
-
-    setStoredToken(res.data.token);
-    setToken(res.data.token);
-    setPassenger(res.data.passenger);
-
-    reconnectWithToken(res.data.token);
-  }
-
   async function onLogout(): Promise<void> {
-    setErrorText(null);
     logoutLocal();
     reconnectWithToken(undefined);
   }
 
-  async function onCreateOrder(): Promise<void> {
-    setErrorText(null);
-    const res = (await call<
-      { from: string; to: string },
-      OrdersCreateResponse
-    >('orders:create', { from, to })) as OrdersCreateResponse;
-
-    if (!res.ok) {
-      setErrorText(res.error.message);
-      return;
-    }
-
-    setMode('list');
-    setFrom('');
-    setTo('');
-  }
-
-  async function onUpdateOrder(): Promise<void> {
-    if (!activeOrder) return;
-    setErrorText(null);
-
-    const res = (await call<
-      { id: number; from: string; to: string },
-      OrdersUpdateResponse
-    >('orders:update', { id: activeOrder.id, from, to })) as OrdersUpdateResponse;
-
-    if (!res.ok) {
-      setErrorText(res.error.message);
-      return;
-    }
-
-    setActiveOrder(null);
-    setMode('list');
-    setFrom('');
-    setTo('');
-  }
-
-  async function onDeleteOrder(): Promise<void> {
-    if (!activeOrder) return;
-    setErrorText(null);
-
-    const res = (await call<{ id: number }, OrdersDeleteResponse>('orders:delete', {
-      id: activeOrder.id,
-    })) as OrdersDeleteResponse;
-
-    if (!res.ok) {
-      setErrorText(res.error.message);
-      return;
-    }
-
-    setActiveOrder(null);
-    setMode('list');
-    setFrom('');
-    setTo('');
-  }
-
   const statusLabel = useMemo(() => (isOnline ? 'В сети' : 'Нет сети'), [isOnline]);
-
-  const screen =
-    !token ? (
-      <RegisterMode
-        name={passengerName}
-        phone={passengerPhone}
-        onChangeName={setPassengerName}
-        onChangePhone={setPassengerPhone}
-        onSubmit={() => void onRegister()}
-      />
-    ) : mode === 'list' ? (
-      <OrdersListMode
-        orders={orders}
-        onCreate={() => {
-          setMode('create');
-          setActiveOrder(null);
-          setFrom('');
-          setTo('');
-        }}
-        onOpenOrder={(o) => {
-          setActiveOrder(o);
-          setMode('edit');
-          setFrom(o.from);
-          setTo(o.to);
-        }}
-      />
-    ) : mode === 'create' ? (
-      <OrderCreateMode
-        from={from}
-        to={to}
-        onChangeFrom={setFrom}
-        onChangeTo={setTo}
-        onSubmit={() => void onCreateOrder()}
-        onCancel={() => {
-          setMode('list');
-          setFrom('');
-          setTo('');
-        }}
-      />
-    ) : activeOrder ? (
-      <OrderEditMode
-        order={activeOrder}
-        from={from}
-        to={to}
-        onChangeFrom={setFrom}
-        onChangeTo={setTo}
-        onSubmit={() => void onUpdateOrder()}
-        onDelete={() => void onDeleteOrder()}
-        onBack={() => {
-          setMode('list');
-          setActiveOrder(null);
-          setFrom('');
-          setTo('');
-        }}
-      />
-    ) : null;
 
   return (
     <Box bg="gray.50" minH="100dvh">
@@ -360,21 +176,19 @@ export default function App() {
 
         <Box as="main" position="relative" flex="1" px="4" py="6">
           <VStack gap="3" align="stretch">
-            {errorText ? (
-              <Box
-                borderWidth="1px"
-                borderColor="red.200"
-                bg="red.50"
-                color="red.800"
-                px="3"
-                py="2"
-                borderRadius="md"
-                fontSize="sm"
-              >
-                {errorText}
-              </Box>
-            ) : null}
-            {screen}
+            <PassengerAppContentScreen
+              token={token}
+              onRegistered={(nextToken: string, nextPassenger: Passenger) => {
+                setStoredToken(nextToken);
+                setToken(nextToken);
+                setPassenger(nextPassenger);
+                reconnectWithToken(nextToken);
+              }}
+              onUnauthorized={() => {
+                logoutLocal();
+                reconnectWithToken(undefined);
+              }}
+            />
           </VStack>
 
           {!isOnline ? (
