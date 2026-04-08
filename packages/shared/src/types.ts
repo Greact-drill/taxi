@@ -18,14 +18,11 @@ export type Ok<T> = { ok: true; data: T };
 export type Fail = { ok: false; error: { code: ErrorCode; message: string } };
 export type Result<T> = Ok<T> | Fail;
 
-export type AuthCheckPayload = { token?: string };
-export type AuthCheckResponse = Result<{ passenger?: Passenger }>;
+export type AuthRegisterPayload = Partial<Passenger>;
+export type AuthRegisterResponse = { token: string; };
 
-export type AuthRegisterPayload = { name: string; phone: string };
-export type AuthRegisterResponse = Result<{ token: string; passenger: Passenger }>;
-
-export type MeGetPayload = Record<string, never>;
-export type MeGetResponse = Result<{ passenger: Passenger }>;
+export type MeGetPayload = undefined;
+export type MeGetResponse = { passenger: Passenger };
 
 export type OrdersListPayload = Record<string, never>;
 export type OrdersListResponse = Result<{ items: Order[] }>;

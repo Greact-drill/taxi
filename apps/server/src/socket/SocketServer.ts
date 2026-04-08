@@ -1,8 +1,7 @@
 import type { Server as HttpServer } from 'node:http';
 import { Server } from 'socket.io';
 import type {
-  AuthCheckPayload,
-  AuthCheckResponse,
+
   AuthRegisterPayload,
   AuthRegisterResponse,
   DispatcherConnectionsPayload,
@@ -111,23 +110,12 @@ export function createSocketServer(httpServer: HttpServer): Server {
       socket.join(`passenger:${socket.data.passenger.id}`);
     }
 
-    socket.on('auth:check', (payload: AuthCheckPayload, ack?: Ack<AuthCheckResponse>) => {
-      const token = payload?.token ?? socket.handshake.auth?.token;
-      if (!isNonEmptyString(token)) {
-        ack?.(ok({}));
-        return;
-      }
+    // socket.on('send:me:profile', () => {
+    //   console.log('server:send:me:profile', socket.data.passenger);
+    //   if (socket.data.passenger) socket.emit('me:profile', { passenger: socket.data.passenger });
+    // });
 
-      const passenger = authService.findPassengerByToken(token);
-      if (!passenger) {
-        ack?.(ok({}));
-        return;
-      }
-
-      ack?.(ok({ passenger }));
-    });
-
-    socket.on('auth:register', (payload: AuthRegisterPayload, ack?: Ack<AuthRegisterResponse>) => {
+    socket.on('auth:register', (payload: AuthRegisterPayload, ack?: Ack<Result<AuthRegisterResponse>>) => {
       if (!isNonEmptyString(payload?.name) || !isNonEmptyString(payload?.phone)) {
         ack?.(fail('BAD_REQUEST', 'name and phone are required'));
         return;
@@ -137,7 +125,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
       ack?.(ok({ token: passenger.token, passenger }));
     });
 
-    socket.on('me:get', (_: MeGetPayload, ack?: Ack<MeGetResponse>) => {
+    socket.on('me:get', (_: MeGetPayload, ack?: Ack<Result<MeGetResponse>>) => {
       const passenger = requirePassengerOrAck(socket, ack);
       if (!passenger) return;
       ack?.(ok({ passenger }));

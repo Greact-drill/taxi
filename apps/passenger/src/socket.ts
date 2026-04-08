@@ -1,24 +1,38 @@
 import { io } from 'socket.io-client';
-
-const TOKEN_STORAGE_KEY = 'taxi_token';
-
-export function getStoredToken(): string | null {
-  return localStorage.getItem(TOKEN_STORAGE_KEY);
-}
-
-export function setStoredToken(token: string): void {
-  localStorage.setItem(TOKEN_STORAGE_KEY, token);
-}
-
-export function clearStoredToken(): void {
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
-}
+import { store } from './store';
+import { Passenger } from '@packages/shared';
 
 export const socket = io({
   path: '/ws',
   autoConnect: true,
-  auth: {
-    role: 'passenger',
-    token: getStoredToken() ?? undefined,
+  auth: (callback) => {
+    callback({
+      role: 'passenger',
+      token: store.token,
+    });
   },
 });
+
+socket.on('connect', async () => {
+  store.setOnline(true);
+});
+
+socket.on('disconnect', () => {
+  store.setOnline(false);
+});
+
+socket.on('profile:update', (user: Passenger) => {
+  store.setCurrentUser(user);
+});
+
+export function setTokenReconnect(token: string): void {
+  store.setToken(token);
+  socket.disconnect();
+  socket.connect();
+}
+
+export function clearTokenReconnect(): void {
+  store.clearToken();
+  socket.disconnect();
+  socket.connect();
+}
