@@ -1,39 +1,58 @@
+import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
 import { useState } from 'react';
 import type { Passenger } from '@packages/shared';
-import { RegisterMode } from '../modes/RegisterMode';
 import { setTokenReconnect } from '../socket';
 import { useStore } from '../store';
 import { api } from '../api';
+import { observer } from 'mobx-react-lite';
 
-export function PassengerRegisterScreen() {
+function PassengerRegisterScreen() {
   const store = useStore();
-  const [passengerDraft, setPassengerDraft] = useState<Partial<Passenger>>({});
+  const [passenger, setPassenger] = useState<Partial<Passenger>>({});
+
+  const name = (passenger.name ?? '').trim();
+  const phone = (passenger.phone ?? '').trim();
+  const isPhoneValid = /^\+?\d+$/.test(phone);
+  const canSubmit = name.length > 0 && phone.length > 0 && isPhoneValid;
 
   async function onRegister(): Promise<void> {
     store.clearError();
-    const name = passengerDraft.name?.trim() ?? '';
-    const phone = passengerDraft.phone?.trim() ?? '';
 
-    // const res = (await call<
-    //   { name: string; phone: string },
-    //   AuthRegisterResponse
-    // >('auth:register', { name, phone })) as AuthRegisterResponse;
-
-    // if (!res.ok) {
-    //   props.onError(res.error.message);
-    //   return;
-    // }
-    const res = await api.register({ name, phone });
+    const res = await api.register(passenger);
     if (res.ok) setTokenReconnect(res.data.token);
     else store.setError(res.error.message);
   }
 
   return (
-    <RegisterMode
-      value={passengerDraft}
-      onChange={(patch) => setPassengerDraft((prev) => ({ ...prev, ...patch }))}
-      onSubmit={() => void onRegister()}
-    />
+    <Box borderWidth="1px" borderColor="blackAlpha.200" borderRadius="lg" p="4">
+      <Text fontSize="lg" fontWeight="semibold">
+        Регистрация
+      </Text>
+      <VStack gap="3" align="stretch" mt="3">
+        <Input
+          placeholder="Имя"
+          value={name}
+          onChange={(e) =>
+            setPassenger((prev) => ({ ...prev, name: e.target.value }))
+          }
+        />
+        <Input
+          placeholder="Телефон"
+          value={phone}
+          onChange={(e) =>
+            setPassenger((prev) => ({ ...prev, phone: e.target.value }))
+          }
+        />
+        <Button
+          onClick={() => void onRegister()}
+          size="lg"
+          disabled={!canSubmit}
+        >
+          Зарегистрироваться
+        </Button>
+      </VStack>
+    </Box>
   );
 }
 
+export default observer(PassengerRegisterScreen);

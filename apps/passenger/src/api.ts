@@ -1,4 +1,4 @@
-import type { ErrorCode, Result, AuthRegisterResponse, AuthRegisterPayload, MeGetPayload, MeGetResponse } from '@packages/shared';
+import type { ErrorCode, Result, AuthRegisterResponse, AuthRegisterPayload, MeGetPayload, MeGetResponse, PassengerOrdersListPayload, PassengerOrdersListResponse } from '@packages/shared';
 import { socket } from './socket';
 
 const TIMEOUT_MS = 5000;
@@ -22,4 +22,5 @@ export async function call<TPayload, TResponse>(
 export const api = {
   register: (payload: AuthRegisterPayload) => call<AuthRegisterPayload, AuthRegisterResponse>('auth:register', payload),
   me: () => call<MeGetPayload, MeGetResponse>('me:get'),
+  orders: () => call<PassengerOrdersListPayload, PassengerOrdersListResponse>('orders:list'),
 };

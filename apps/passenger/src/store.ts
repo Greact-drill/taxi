@@ -1,4 +1,4 @@
-import { Order, Passenger } from "@packages/shared";
+import { PassengerOrder, Passenger } from "@packages/shared";
 import { makeAutoObservable } from "mobx";
 
 const TOKEN_STORAGE_KEY = 'taxi_token';
@@ -43,6 +43,13 @@ class Store {
 
   clearCurrentUser() {
     this.currentUser = undefined;
+  }
+
+  // orders
+  orders: PassengerOrder[] = [];
+
+  setOrders(orders: PassengerOrder[]) {
+    this.orders = orders;
   }
 
   // constructor

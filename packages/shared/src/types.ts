@@ -5,12 +5,22 @@ export type Passenger = {
   token: string;
 };
 
+export type Driver = {
+  id: number;
+  name: string;
+  car: string;
+  token: string;
+};
+
 export type Order = {
   id: number;
   from: string;
   to: string;
-  passengerId: number;
+  passenger: Passenger;
+  driver?: Driver;
 };
+
+export type PassengerOrder = Omit<Order, 'passenger'>;
 
 export type ErrorCode = 'UNAUTHORIZED' | 'NOT_FOUND' | 'FORBIDDEN' | 'BAD_REQUEST';
 
@@ -24,8 +34,8 @@ export type AuthRegisterResponse = { token: string; };
 export type MeGetPayload = undefined;
 export type MeGetResponse = { passenger: Passenger };
 
-export type OrdersListPayload = Record<string, never>;
-export type OrdersListResponse = Result<{ items: Order[] }>;
+export type PassengerOrdersListPayload = undefined;
+export type PassengerOrdersListResponse = { items: PassengerOrder[] };
 
 export type OrdersGetPayload = { id: number };
 export type OrdersGetResponse = Result<{ item: Order }>;
@@ -45,4 +55,4 @@ export type DispatcherConnectionsPayload = { items: DispatcherConnectionsItem[] 
 export type DriverOrderCreatedPayload = { item: Order };
 export type DriverOrderUpdatedPayload = { item: Order };
 
-export type PassengerOrdersPayload = { items: Order[] };
+export type PassengerOrdersPayload = PassengerOrder[];

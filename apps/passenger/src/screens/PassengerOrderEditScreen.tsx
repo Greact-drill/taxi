@@ -1,63 +1,66 @@
 import { useEffect, useState } from 'react';
-import type { Order, OrdersDeleteResponse, OrdersUpdateResponse } from '@packages/shared';
+import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
+import type { PassengerOrder, OrdersDeleteResponse, OrdersUpdateResponse } from '@packages/shared';
 import { call } from '../api';
-import { OrderEditMode } from '../modes/OrderEditMode';
+import { useStore } from '../store';
+import { observer } from 'mobx-react-lite';
 
-export function PassengerOrderEditScreen(props: {
-  order: Order;
-  onBack: () => void;
-  onError: (message: string | null) => void;
+function PassengerOrderEditScreen(props: {
+  order: PassengerOrder;
+  onEdited: () => void;
+  onDeleted: () => void;
+  onCancel: () => void;
 }) {
-  const [draft, setDraft] = useState<Partial<Order>>({ from: props.order.from, to: props.order.to });
-
-  useEffect(() => {
-    setDraft({ from: props.order.from, to: props.order.to });
-  }, [props.order.id, props.order.from, props.order.to]);
+  const store = useStore();
+  const [draft, setDraft] = useState<Partial<PassengerOrder>>({ ...props.order });
 
   async function onSubmit(): Promise<void> {
-    props.onError(null);
-    const from = draft.from?.trim() ?? '';
-    const to = draft.to?.trim() ?? '';
+    store.clearError();
+    const from = (draft?.from ?? '').trim();
+    const to = (draft?.to ?? '').trim();
+    const canSubmit = from.length > 0 && to.length > 0;
 
-    const res = (await call<{ id: number; from: string; to: string }, OrdersUpdateResponse>('orders:update', {
-      id: props.order.id,
-      from,
-      to,
-    })) as OrdersUpdateResponse;
-
-    if (!res.ok) {
-      props.onError(res.error.message);
-      return;
-    }
-
-    props.onBack();
+    const response = (await call<Partial<PassengerOrder>, OrdersUpdateResponse>('orders:update', draft)) as OrdersUpdateResponse;
+    if (response.ok) props.onEdited();
+    else store.setError(response.error.message);
   }
 
   async function onDelete(): Promise<void> {
-    props.onError(null);
-    const res = (await call<{ id: number }, OrdersDeleteResponse>('orders:delete', {
-      id: props.order.id,
-    })) as OrdersDeleteResponse;
+    store.clearError();
 
-    if (!res.ok) {
-      props.onError(res.error.message);
-      return;
-    }
-
-    props.onBack();
+    const response = (await call<Partial<PassengerOrder>, OrdersDeleteResponse>('orders:delete', draft)) as OrdersDeleteResponse;
+    if (response.ok) props.onDeleted();
+    else store.setError(response.error.message);
   }
 
   return (
-    <OrderEditMode
-      order={props.order}
-      from={draft.from ?? ''}
-      to={draft.to ?? ''}
-      onChangeFrom={(v) => setDraft((prev) => ({ ...prev, from: v }))}
-      onChangeTo={(v) => setDraft((prev) => ({ ...prev, to: v }))}
-      onSubmit={() => void onSubmit()}
-      onDelete={() => void onDelete()}
-      onBack={props.onBack}
-    />
+    <Box borderWidth="1px" borderColor="blackAlpha.200" borderRadius="lg" p="4" bg="white">
+      <Text fontSize="lg" fontWeight="semibold">
+        Заявка #{props.order.id}
+      </Text>
+      <VStack gap="3" align="stretch" mt="3">
+        <Input
+          placeholder="Откуда"
+          value={draft.from ?? ''}
+          onChange={(e) => setDraft((prev) => ({ ...prev, from: e.target.value }))}
+        />
+        <Input
+          placeholder="Куда"
+          value={draft.to ?? ''}
+          onChange={(e) => setDraft((prev) => ({ ...prev, to: e.target.value }))}
+        />
+        <Button size="lg" onClick={() => void onSubmit()}>
+          Сохранить
+        </Button>
+        <Button colorPalette="red" variant="outline" onClick={() => void onDelete()}>
+          Удалить
+        </Button>
+        <Button variant="ghost" onClick={props.onCancel}>
+          Назад
+        </Button>
+      </VStack>
+    </Box>
   );
 }
 
+export default observer(PassengerOrderEditScreen);

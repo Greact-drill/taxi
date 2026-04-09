@@ -1,69 +1,67 @@
-import { useEffect, useState } from 'react';
-import type { Order, OrdersListResponse, PassengerOrdersPayload } from '@packages/shared';
-import { call } from '../api';
-import { socket } from '../socket';
-import { OrdersListMode } from '../modes/OrdersListMode';
+import { useEffect } from 'react';
+import { Box, Button, Text, VStack } from '@chakra-ui/react';
+import type { PassengerOrder } from '@packages/shared';
+import { api } from '../api';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../store';
 
-export function PassengerOrdersListScreen(props: {
-  token: string;
-  onError: (message: string | null) => void;
-  onUnauthorized: () => void;
-  onOrdersUpdated: (items: Order[]) => void;
+function PassengerOrdersListScreen(props: {
   onCreate: () => void;
-  onOpenOrder: (order: Order) => void;
+  onOpenOrder: (order: PassengerOrder) => void;
 }) {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isOnline, setIsOnline] = useState(() => socket.connected);
+  const store = useStore();
 
   useEffect(() => {
-    const onConnect = () => setIsOnline(true);
-    const onDisconnect = () => setIsOnline(false);
-
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isOnline) return;
-    if (!props.token) return;
-
-    const onPassengerOrders = (payload: PassengerOrdersPayload) => {
-      setOrders(payload.items);
-      props.onOrdersUpdated(payload.items);
-    };
-
-    socket.on('passenger:orders', onPassengerOrders);
-    return () => {
-      socket.off('passenger:orders', onPassengerOrders);
-    };
-  }, [isOnline, props.token]);
-
-  useEffect(() => {
-    if (!isOnline) return;
-    if (!props.token) return;
-
     void (async () => {
-      props.onError(null);
-      const listRes = (await call<{}, OrdersListResponse>('orders:list', {})) as OrdersListResponse;
-      if (!listRes.ok) {
-        if (listRes.error.code === 'UNAUTHORIZED') {
-          props.onUnauthorized();
-          return;
-        }
-        props.onError(listRes.error.message);
-        return;
-      }
-
-      setOrders(listRes.data.items);
-      props.onOrdersUpdated(listRes.data.items);
+      const response = await api.orders();
+      if (response.ok) store.setOrders(response.data.items);
+      else store.setError(response.error.message);
     })();
-  }, [isOnline, props.token]);
+  }, [store]);
 
-  return <OrdersListMode orders={orders} onCreate={props.onCreate} onOpenOrder={props.onOpenOrder} />;
+  return (
+    <>
+      <Text fontSize="lg" fontWeight="semibold">
+        Мои заявки
+      </Text>
+
+      <Button
+        size="lg"
+        variant="outline"
+        borderStyle="dashed"
+        borderWidth="2px"
+        py="10"
+        onClick={props.onCreate}
+      >
+        Создать
+      </Button>
+
+      <VStack gap="3" align="stretch">
+        {store.orders.map((o) => (
+          <Box
+            key={o.id}
+            borderWidth="1px"
+            borderColor="blackAlpha.200"
+            borderRadius="lg"
+            p="4"
+            bg="white"
+            cursor="pointer"
+            onClick={() => props.onOpenOrder(o)}
+          >
+            <Text fontWeight="semibold" fontSize="sm">
+              #{o.id}
+            </Text>
+            <Text fontSize="sm" color="gray.700" mt="2">
+              from: {o.from}
+            </Text>
+            <Text fontSize="sm" color="gray.700">
+              to: {o.to}
+            </Text>
+          </Box>
+        ))}
+      </VStack>
+    </>
+  );
 }
 
+export default observer(PassengerOrdersListScreen);

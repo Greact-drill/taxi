@@ -16,13 +16,13 @@ import type {
   OrdersDeleteResponse,
   OrdersGetPayload,
   OrdersGetResponse,
-  OrdersListPayload,
-  OrdersListResponse,
   OrdersUpdatePayload,
   OrdersUpdateResponse,
   PassengerOrdersPayload,
   Passenger,
   Result,
+  PassengerOrdersListPayload,
+  PassengerOrdersListResponse,
 } from '@packages/shared';
 import { PassengerStore } from '../stores/PassengerStore.js';
 import { OrderStore } from '../stores/OrderStore.js';
@@ -131,7 +131,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
       ack?.(ok({ passenger }));
     });
 
-    socket.on('orders:list', (_: OrdersListPayload, ack?: Ack<OrdersListResponse>) => {
+    socket.on('orders:list', (_: PassengerOrdersListPayload, ack?: Ack<Result<PassengerOrdersListResponse>>) => {
       const passenger = requirePassengerOrAck(socket, ack);
       if (!passenger) return;
 
@@ -167,7 +167,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
       io.to('driver').emit('driver:orderCreated', { item } satisfies DriverOrderCreatedPayload);
       io
         .to(`passenger:${passenger.id}`)
-        .emit('passenger:orders', { items: orderService.listOrders(passenger.id) } satisfies PassengerOrdersPayload);
+        .emit('passenger:orders', orderService.listOrders(passenger.id) satisfies PassengerOrdersPayload);
       ack?.(ok({ item }));
     });
 
@@ -192,7 +192,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
       io.to('driver').emit('driver:orderUpdated', { item } satisfies DriverOrderUpdatedPayload);
       io
         .to(`passenger:${passenger.id}`)
-        .emit('passenger:orders', { items: orderService.listOrders(passenger.id) } satisfies PassengerOrdersPayload);
+        .emit('passenger:orders', orderService.listOrders(passenger.id) satisfies PassengerOrdersPayload);
       ack?.(ok({ item }));
     });
 
@@ -212,7 +212,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
 
       io
         .to(`passenger:${passenger.id}`)
-        .emit('passenger:orders', { items: orderService.listOrders(passenger.id) } satisfies PassengerOrdersPayload);
+        .emit('passenger:orders', orderService.listOrders(passenger.id) satisfies PassengerOrdersPayload);
       ack?.(ok({}));
     });
   });

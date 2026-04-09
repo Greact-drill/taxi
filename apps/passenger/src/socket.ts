@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import { store } from './store';
-import { Passenger } from '@packages/shared';
+import { Passenger, PassengerOrder } from '@packages/shared';
 
 export const socket = io({
   path: '/ws',
@@ -36,3 +36,7 @@ export function clearTokenReconnect(): void {
   socket.disconnect();
   socket.connect();
 }
+
+socket.on('passenger:orders', (orders: PassengerOrder[]) => {
+  store.setOrders(orders);
+});
