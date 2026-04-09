@@ -215,6 +215,24 @@ export function createSocketServer(httpServer: HttpServer): Server {
         .emit('passenger:orders', orderService.listOrders(passenger.id) satisfies PassengerOrdersPayload);
       ack?.(ok({}));
     });
+
+    socket.on('orders:request', () => {
+      const passenger = requirePassengerOrAck(socket, () => void 0);
+      if (!passenger) return;
+      io
+        .to(`passenger:${passenger.id}`)
+        .emit('passenger:orders', orderService.listOrders(passenger.id) satisfies PassengerOrdersPayload);
+    });
+
+    socket.on('me:request', () => {
+      const passenger = requirePassengerOrAck(socket, () => void 0);
+      if (!passenger) return;
+      io
+        .to(`passenger:${passenger.id}`)
+        .emit('profile:update', passenger);
+    });
+
+
   });
 
   return io;

@@ -8,6 +8,7 @@ import PassengerOrderEditScreen from './PassengerOrderEditScreen';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
 import { api } from '../api';
+import { socket } from '../socket';
 
 function PassengerAppContentScreen() {
 
@@ -19,13 +20,21 @@ function PassengerAppContentScreen() {
   >({ name: 'list' });
 
   // protected zone
-  useEffect(() => {
-    void (async () => {
-      const response = await api.me();
-      if (response.ok) store.setCurrentUser(response.data.passenger);
-      else store.clearCurrentUser();
-    })();
-  }, [store.token]);
+  // useEffect(() => {
+  //   void (async () => {
+  //     const response = await api.me();
+  //     if (response.ok) store.setCurrentUser(response.data.passenger);
+  //     else store.clearCurrentUser();
+  //   })();
+  // }, [store.token]);
+
+  // useEffect(() => {
+  //   socket.emit('me:request')
+  // }, [store.token]);
+
+  // ^^^ это перенесено просто в socket.ts on 'connect' emit 'me:request'
+  // TODO убрать api
+
 
   const content = !store.currentUser ? (
     <PassengerRegisterScreen />

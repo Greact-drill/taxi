@@ -15,6 +15,7 @@ export const socket = io({
 
 socket.on('connect', async () => {
   store.setOnline(true);
+  socket.emit('me:request')
 });
 
 socket.on('disconnect', () => {

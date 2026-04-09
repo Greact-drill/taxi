@@ -4,6 +4,7 @@ import type { PassengerOrder } from '@packages/shared';
 import { api } from '../api';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../store';
+import { socket } from '../socket';
 
 function PassengerOrdersListScreen(props: {
   onCreate: () => void;
@@ -11,13 +12,18 @@ function PassengerOrdersListScreen(props: {
 }) {
   const store = useStore();
 
+  // useEffect(() => {
+  //   void (async () => {
+  //     const response = await api.orders();
+  //     if (response.ok) store.setOrders(response.data.items);
+  //     else store.setError(response.error.message);
+  //   })();
+  // }, [store]);
   useEffect(() => {
-    void (async () => {
-      const response = await api.orders();
-      if (response.ok) store.setOrders(response.data.items);
-      else store.setError(response.error.message);
-    })();
-  }, [store]);
+    socket.emit('orders:request')
+  }, []);
+  // ^^^ это перенесено просто в emit 'orders:request'
+  // TODO убрать api
 
   return (
     <>
