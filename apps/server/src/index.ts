@@ -11,8 +11,11 @@ const httpServer = createServer((req, res) => {
   res.writeHead(404).end();
 });
 
-createSocketServer(httpServer);
+async function main(): Promise<void> {
+  await createSocketServer(httpServer);
+  httpServer.listen(PORT, () => {
+    console.log(`Socket.IO server on :${PORT}`);
+  });
+}
 
-httpServer.listen(PORT, () => {
-  console.log(`Socket.IO server on :${PORT}`);
-});
+void main();

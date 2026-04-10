@@ -7,11 +7,23 @@ export type Passenger = {
   token: string;
 };
 
+export type PassengerRegister = {
+  name: string;
+  phone: string;
+};
+
 export type Driver = {
   id: number;
   name: string;
   car: string;
+  login: string;
+  hash: string;
   token: string;
+};
+
+export type DriverLogin = {
+  login: string;
+  password: string;
 };
 
 export enum OrderStatus {

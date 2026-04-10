@@ -15,7 +15,7 @@ export const socket = io({
 
 socket.on('connect', () => {
   store.setOnline(true);
-  socket.emit('auth:request');
+  socket.emit('passenger:auth:request');
 });
 
 socket.on('disconnect', () => {

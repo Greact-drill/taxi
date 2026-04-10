@@ -10,7 +10,7 @@ function PassengerOrdersListScreen() {
   const store = useStore();
 
   useEffect(() => {
-    socket.emit('orders:request');
+    socket.emit('passenger:orders:request');
   }, []);
 
   const canAdd = store.orders.length < 1;

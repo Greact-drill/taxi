@@ -1,5 +1,5 @@
 import { Box, HStack, Text } from '@chakra-ui/react';
-import type { PassengerOrder } from '@packages/shared';
+import { OrderStatus, type PassengerOrder } from '@packages/shared';
 import { PassengerOrderStatusBadge } from './PassengerOrderStatusBadge';
 import { PassengerOrderWaitingDial } from './PassengerOrderWaitingDial';
 
@@ -36,7 +36,19 @@ export function PassengerOrderPreview({ order, onClick }: PassengerOrderPreviewP
       <Text fontSize="sm" color="gray.700">
         Куда: {order.to}
       </Text>
-      <PassengerOrderWaitingDial createdAt={order.createdAt} />
+      {order.status === OrderStatus.AWAITING_DRIVER && (
+        <PassengerOrderWaitingDial createdAt={order.createdAt} />
+      )}
+      {order.status === OrderStatus.DRIVER_ASSIGNED && (
+        <Text fontSize="sm" color="gray.700" mt="2">
+          Водитель:{' '}
+          <Text as="span" fontWeight="medium">
+            {order.driver?.name}
+          </Text>
+          {' · '}
+          {order.driver?.car}
+        </Text>
+      )}
     </Box>
   );
 }

@@ -17,7 +17,7 @@ function PassengerRegisterScreen() {
 
   async function onRegister(): Promise<void> {
     store.clearError();
-    socket.emit('auth:register', passenger);
+    socket.emit('passenger:auth:register', passenger);
   }
 
   return (

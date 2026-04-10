@@ -1,4 +1,4 @@
-import { OrderStatus, type Order, type PassengerOrder } from '@packages/shared';
+import { DriverOrder, OrderStatus, type Order, type PassengerOrder } from '@packages/shared';
 
 export class OrderStore {
   private orderStore = new Map<number, Order>();
@@ -11,7 +11,7 @@ export class OrderStore {
     const canSubmit = passenger && from.length > 0 && to.length > 0;
     // TODO validation messages
     if (!canSubmit) {
-      throw Error('Incorrect order data: ${from} ${to}');
+      throw Error(`Некорректные данные заказа: ${from} ${to}`);
     }
 
     const order: Order = {
@@ -30,6 +30,22 @@ export class OrderStore {
     const items: Order[] = [];
     for (const order of this.orderStore.values()) {
       if (order.passenger.id === passengerId) items.push(order);
+    }
+    return items;
+  }
+
+  listOfDriver(driverId: number): DriverOrder[] {
+    const items: DriverOrder[] = [];
+    for (const order of this.orderStore.values()) {
+      if (order.driver?.id === driverId) items.push(order);
+    }
+    return items;
+  }
+
+  listOfActive(): DriverOrder[] {
+    const items: DriverOrder[] = [];
+    for (const order of this.orderStore.values()) {
+      if (order.status === OrderStatus.AWAITING_DRIVER) items.push(order);
     }
     return items;
   }

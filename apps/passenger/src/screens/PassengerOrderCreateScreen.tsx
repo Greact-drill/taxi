@@ -13,7 +13,7 @@ function PassengerOrderCreateScreen() {
 
   function onSubmit(): void {
     store.clearError();
-    socket.emit('orders:create', store.screenFormData);
+    socket.emit('passenger:orders:create', store.screenFormData);
   }
 
   return (

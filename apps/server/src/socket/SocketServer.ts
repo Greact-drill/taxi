@@ -1,10 +1,21 @@
 import type { Server as HttpServer } from 'node:http';
+import { inspect } from 'node:util';
 import { Server, Socket } from 'socket.io';
 import { PassengerStore } from '../stores/PassengerStore.js';
+import { DriverStore } from '../stores/DriverStore.js';
 import { OrderStore } from '../stores/OrderStore.js';
-import type { DispatcherConnectionsItem, Passenger, PassengerOrder } from '@packages/shared';
+import {
+  OrderStatus,
+  type DispatcherConnectionsItem,
+  type Driver,
+  type DriverLogin,
+  type DriverOrder,
+  type Passenger,
+  type PassengerOrder,
+  type PassengerRegister,
+} from '@packages/shared';
 
-export function createSocketServer(httpServer: HttpServer): Server {
+export async function createSocketServer(httpServer: HttpServer): Promise<Server> {
   const io = new Server(httpServer, {
     path: '/ws',
     pingInterval: 1000,
@@ -12,6 +23,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
   });
 
   const passengerStore = new PassengerStore();
+  const driverStore = new DriverStore();
   const orderStore = new OrderStore();
 
   async function getConnections(): Promise<DispatcherConnectionsItem[]> {
@@ -28,10 +40,16 @@ export function createSocketServer(httpServer: HttpServer): Server {
   }
 
   io.use((socket, next) => {
+    const role = socket.handshake.auth?.role;
     const token = socket.handshake.auth?.token;
     if (token) {
-      const passenger = passengerStore.findByToken(token);
-      if (passenger) socket.data.passenger = passenger;
+      if (role === 'passenger') {
+        const passenger = passengerStore.findByToken(token);
+        if (passenger) socket.data.passenger = passenger;
+      } else if (role === 'driver') {
+        const driver = driverStore.findByToken(token);
+        if (driver) socket.data.driver = driver;
+      }
     }
     next();
   });
@@ -52,13 +70,19 @@ export function createSocketServer(httpServer: HttpServer): Server {
 
     const driver = socket.data.driver;
     if (driver) {
-      socket.join(`driver:${passenger.id}`);
+      socket.join(`driver:${driver.id}`);
     }
 
     function requirePassenger(): Passenger {
       const passenger = socket.data.passenger;
       if (passenger) return passenger;
-      else throw Error('Passenger must be authorized')
+      else throw Error('Пассажир должен быть авторизован')
+    }
+
+    function requireDriver(): Driver {
+      const driver = socket.data.driver;
+      if (driver) return driver;
+      else throw Error('Водитель должен быть авторизован')
     }
 
     function on<P extends unknown[]>(
@@ -68,6 +92,12 @@ export function createSocketServer(httpServer: HttpServer): Server {
       socket.on(event, (...args: P) => {
         void handler(...args).catch((error: unknown) => {
           const message = error instanceof Error ? error.message : 'Unknown server error';
+          if (error instanceof Error) {
+            console.error(error.stack ?? `${error.name}: ${error.message}`);
+            if (error.cause) console.error('cause:', error.cause);
+          } else {
+            console.error(inspect(error, { depth: 4, colors: true }));
+          }
           socket.emit('error', message);
         });
       });
@@ -85,68 +115,122 @@ export function createSocketServer(httpServer: HttpServer): Server {
     });
 
     // auth events
-    on('auth:register', async (userData: Partial<Passenger>) => {
+    on('passenger:auth:register', async (userData: PassengerRegister) => {
       const passenger = passengerStore.create(userData);
       socket.emit('auth:token', passenger.token);
     });
 
-    on('auth:request', async () => {
+    on('driver:auth:register', async () => {
+      throw Error('Самостоятельная регистрация не доступна для водителя');
+    });
+
+    on('passenger:auth:login', async () => {
+      throw Error('Авторизация пока не доступна для пассажира');
+    });
+
+    on('driver:auth:login', async (credentials: DriverLogin) => {
+      const driver = await driverStore.login(credentials);
+      socket.emit('auth:token', driver.token);
+    });
+
+    on('passenger:auth:request', async () => {
       const passenger = socket.data.passenger;
       socket.emit('auth:profile', passenger);
     });
 
-    on('profile:update', async (profile: Partial<Passenger>) => {
-      const passenger = requirePassenger();
+    on('driver:auth:request', async () => {
+      const driver = socket.data.driver;
+      socket.emit('auth:profile', driver);
+    });
 
+    on('passenger:profile:update', async (profile: Partial<Passenger>) => {
+      const passenger = requirePassenger();
       const result = passengerStore.update(passenger.id, profile);
       io.to(`passenger:${passenger.id}`).emit('passenger:profile', result);
     });
 
+    on('driver:profile:update', async (profile: Partial<Driver>) => {
+      const driver = requireDriver();
+      const result = driverStore.update(driver.id, profile);
+      io.to(`driver:${driver.id}`).emit('driver:profile', result);
+    });
+
     // orders events
-    on('orders:create', async (input: Partial<PassengerOrder>) => {
+    on('passenger:orders:create', async (input: Partial<PassengerOrder>) => {
       const passenger = requirePassenger();
       const result = orderStore.create({ ...input, passenger });
 
-      io.to('driver').emit('driver:orderCreated', result);
+      io.to('driver').emit('driver:orders:created', result);
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
         orderStore.listOfPassenger(passenger.id),
       );
     });
 
-    on('orders:update', async (input: Partial<PassengerOrder>) => {
+    on('passenger:orders:update', async (input: Partial<PassengerOrder>) => {
       const passenger = requirePassenger();
-      if (!input.id) throw Error('Order ID is required');
+      if (!input.id) throw Error('Номер заказа должен быть указан');
       const result = orderStore.update(input.id, { ...input });
 
-      io.to('driver').emit('driver:orderUpdated', result);
+      io.to('driver').emit('driver:orders:updated', result);
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
         orderStore.listOfPassenger(passenger.id),
       );
     });
 
-    on('orders:delete', async (input: Partial<PassengerOrder>) => {
+    on('passenger:orders:delete', async (input: Partial<PassengerOrder>) => {
       const passenger = requirePassenger();
-      if (!input.id) throw Error('Order ID is required');
+      if (!input.id) throw Error('Номер заказа должен быть указан');
       const result = orderStore.delete(input.id);
 
-      io.to('driver').emit('driver:orderDeleted', result);
+      io.to('driver').emit('driver:orders:deleted', result);
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
         orderStore.listOfPassenger(passenger.id),
       );
     });
 
-    on('orders:request', async () => {
+    on('passenger:orders:request', async () => {
       const passenger = requirePassenger();
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
         orderStore.listOfPassenger(passenger.id),
+      );
+    });
+
+    on('driver:orders:take', async (order: DriverOrder) => {
+      const driver = requireDriver();
+      if (!order.id) throw Error('Номер заказа должен быть указан');
+      const result = orderStore.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED, assignedAt: new Date().toISOString() });
+
+      io.to('driver').emit('driver:orders:taken', result);
+      io.to(`passenger:${order.passenger.id}`).emit(
+        'passenger:orders',
+        orderStore.listOfPassenger(order.passenger.id),
+      );
+    });
+
+    on('driver:orders:active:request', async () => {
+      const driver = requireDriver();
+      io.to(`driver:${driver.id}`).emit(
+        'driver:orders:active',
+        orderStore.listOfActive(),
+      );
+    });
+
+    on('driver:orders:request', async () => {
+      const driver = requireDriver();
+      io.to(`driver:${driver.id}`).emit(
+        'driver:orders',
+        orderStore.listOfDriver(driver.id),
       );
     });
 
   });
+
+  /** Тестовые водители для локальной разработки (логин = пароль). */
+  await driverStore.bootstrap();
 
   return io;
 }

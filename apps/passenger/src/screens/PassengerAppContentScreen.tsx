@@ -9,25 +9,25 @@ import { observer } from 'mobx-react-lite';
 function PassengerAppContentScreen() {
   const store = useStore();
 
-  const ordersBlock = (
-    <Box overflow="hidden" w="100%">
-      <Box
-        display="flex"
-        w="200%"
-        transform={store.screen === 'form' ? 'translateX(-50%)' : 'translateX(0)'}
-        transition="transform 0.3s ease"
-      >
-        <Box w="50%" flexShrink={0}>
-          <PassengerOrdersListScreen />
-        </Box>
-        <Box w="50%" flexShrink={0}>
-          {store.screenForm === 'new' ? <PassengerOrderCreateScreen /> : <PassengerOrderEditScreen />}
+  const content = !store.currentUser ?
+    <PassengerRegisterScreen /> :
+    (
+      <Box overflow="hidden" w="100%">
+        <Box
+          display="flex"
+          w="200%"
+          transform={store.screen === 'form' ? 'translateX(-50%)' : 'translateX(0)'}
+          transition="transform 0.3s ease"
+        >
+          <Box w="50%" flexShrink={0}>
+            <PassengerOrdersListScreen />
+          </Box>
+          <Box w="50%" flexShrink={0}>
+            {store.screenForm === 'new' ? <PassengerOrderCreateScreen /> : <PassengerOrderEditScreen />}
+          </Box>
         </Box>
       </Box>
-    </Box>
-  );
-
-  const content = !store.currentUser ? <PassengerRegisterScreen /> : ordersBlock;
+    );
 
   return (
     <>

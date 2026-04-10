@@ -38,9 +38,9 @@ function PassengerProfileEditDialog(props: {
   const isPhoneValid = /^\+?\d+$/.test(phone);
   const canSubmit = draft != null && name.length > 0 && phone.length > 0 && isPhoneValid;
   // TODO validation messages
-  
+
   function onSubmit(): void {
-    socket.emit('profile:update', draft);
+    socket.emit('passenger:profile:update', draft);
     props.onOpenChange(false);
   }
 

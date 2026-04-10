@@ -2,6 +2,7 @@ import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
 import { socket } from '../socket';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
+import { OrderStatus } from '@packages/shared';
 
 function PassengerOrderEditScreen() {
   const store = useStore();
@@ -13,12 +14,12 @@ function PassengerOrderEditScreen() {
 
   function onSubmit(): void {
     store.clearError();
-    socket.emit('orders:update', store.screenFormData);
+    socket.emit('passenger:orders:update', store.screenFormData);
   }
 
   function onDelete(): void {
     store.clearError();
-    socket.emit('orders:delete', store.screenFormData);
+    socket.emit('passenger:orders:delete', store.screenFormData);
   }
 
   return (
@@ -44,9 +45,11 @@ function PassengerOrderEditScreen() {
         <Button size="lg" onClick={onSubmit} disabled={!canSubmit}>
           Сохранить
         </Button>
-        <Button colorPalette="red" variant="outline" onClick={onDelete}>
-          Удалить
-        </Button>
+        {store.screenFormData.status === OrderStatus.AWAITING_DRIVER && (
+          <Button colorPalette="red" variant="outline" onClick={onDelete}>
+            Удалить
+          </Button>
+        )}
         <Button variant="ghost" onClick={() => store.openOrdersList()}>
           Назад
         </Button>

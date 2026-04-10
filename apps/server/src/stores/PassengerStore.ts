@@ -12,7 +12,7 @@ export class PassengerStore {
     const canSubmit = name.length > 0 && phone.length > 0 && isPhoneValid;
     // TODO validation messages
     if (!canSubmit) {
-      throw Error('Incorrect registration data: ${name} ${phone}');
+      throw Error(`Некорректные данные регистрации: ${name} ${phone}`);
     }
 
     const passenger: Passenger = { id: this.nextId++, name, phone, token: randomUUID() };

@@ -7,6 +7,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "argon2": "^0.41.0",
     "socket.io": "^4.8.1",
     "@packages/shared": "workspace:*"
   },

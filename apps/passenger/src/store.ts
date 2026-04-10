@@ -49,7 +49,7 @@ class Store {
   orders: PassengerOrder[] = [];
 
   setOrders(orders: PassengerOrder[]) {
-    this.orders = orders;
+    this.orders = [...orders];
   }
 
   // passenger main UI: list vs form carousel
@@ -64,13 +64,13 @@ class Store {
   openCreateOrderForm() {
     this.screen = 'form';
     this.screenForm = 'new';
-    this.screenFormData = {};    
+    this.screenFormData = {};
   }
 
   openEditOrderForm(order: PassengerOrder) {
     this.screen = 'form';
     this.screenForm = 'edit';
-    this.screenFormData = { ...order };    
+    this.screenFormData = { ...order };
   }
 
   setScreenFormData(updater: (prev: Partial<PassengerOrder>) => Partial<PassengerOrder>) {
