@@ -19,7 +19,7 @@ function PassengerOrderCreateScreen() {
   return (
     <Box borderWidth="1px" borderColor="blackAlpha.200" borderRadius="lg" p="4" bg="white">
       <Text fontSize="lg" fontWeight="semibold">
-        Новая заявка
+        Новый заказ
       </Text>
       <VStack gap="3" align="stretch" mt="3">
         <Input

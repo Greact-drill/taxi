@@ -18,6 +18,11 @@ function PassengerAppHeader() {
       justify="space-between"
     >
       <HStack gap="3" minW="0" align="center">
+        {currentUser && (
+          <Text fontSize="xs" color="gray.600" flex="none" whiteSpace="nowrap">
+            #{currentUser.id}
+          </Text>
+        )}
         <Badge
           px="2"
           py="1"
@@ -29,21 +34,16 @@ function PassengerAppHeader() {
         >
           {statusLabel}
         </Badge>
-        {currentUser ? (
-          <>
-            <Text fontSize="xs" color="gray.600" flex="none" whiteSpace="nowrap">
-              #{currentUser.id}
+        {currentUser && (
+          <VStack gap="0" align="start" minW="0" lineHeight="shorter" flex="1">
+            <Text fontSize="sm" fontWeight="semibold" truncate>
+              {currentUser.name}
             </Text>
-            <VStack gap="0" align="start" minW="0" lineHeight="shorter" flex="1">
-              <Text fontSize="sm" fontWeight="semibold" truncate>
-                {currentUser.name}
-              </Text>
-              <Text fontSize="xs" color="gray.600" truncate>
-                {currentUser.phone}
-              </Text>
-            </VStack>
-          </>
-        ) : null}
+            <Text fontSize="xs" color="gray.600" truncate>
+              {currentUser.phone}
+            </Text>
+          </VStack>
+        )}
       </HStack>
       <HStack gap="3">
         <PassengerAppMenu />

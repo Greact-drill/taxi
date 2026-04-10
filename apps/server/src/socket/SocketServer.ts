@@ -74,6 +74,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
       });
     }
 
+    // connect and disconnect events
     (async () => {
       const items = await getConnections()
       io.to('dispatcher').emit('dispatcher:connections', items);
@@ -84,6 +85,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
       io.to('dispatcher').emit('dispatcher:connections', items);
     });
 
+    // auth events
     on('auth:register', async (userData: Partial<Passenger>) => {
       const passenger = passengerStore.create(userData);
       socket.emit('auth:token', passenger.token);
@@ -101,6 +103,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
       io.to(`passenger:${passenger.id}`).emit('passenger:profile', result);
     });
 
+    // orders events
     on('orders:create', async (input: Partial<PassengerOrder>) => {
       const passenger = requirePassenger();
       const result = orderStore.create({ ...input, passenger });

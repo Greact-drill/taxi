@@ -31,12 +31,15 @@ function PassengerAppMenu() {
           <MenuPositioner>
             <MenuContent>
               {store.currentUser ? (
-                <MenuItem
-                  value="profile"
-                  onClick={() => setProfileOpen(true)}
-                >
-                  Изменить свои данные
-                </MenuItem>
+                <>
+                  <MenuItem
+                    value="profile"
+                    onClick={() => setProfileOpen(true)}
+                  >
+                    Изменить свои данные
+                  </MenuItem>
+                  <MenuItem value="order-history">История заказов</MenuItem>
+                </>
               ) : null}
               <MenuItem value="logout" onClick={() => void clearTokenReconnect()}>
                 Выход

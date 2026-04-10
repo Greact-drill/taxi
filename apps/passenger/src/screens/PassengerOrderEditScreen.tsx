@@ -24,7 +24,7 @@ function PassengerOrderEditScreen() {
   return (
     <Box borderWidth="1px" borderColor="blackAlpha.200" borderRadius="lg" p="4" bg="white">
       <Text fontSize="lg" fontWeight="semibold">
-        Заявка #{store.screenFormData.id ?? '-'}
+        Заказ #{store.screenFormData.id ?? '-'}
       </Text>
       <VStack gap="3" align="stretch" mt="3">
         <Input

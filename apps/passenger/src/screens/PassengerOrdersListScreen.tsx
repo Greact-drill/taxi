@@ -14,29 +14,29 @@ function PassengerOrdersListScreen() {
   return (
     <>
       <Text fontSize="lg" fontWeight="semibold">
-        Мои заявки
+        Мои заказы
       </Text>
 
       <VStack gap="3" align="stretch">
-        {store.orders.map((o) => (
+        {store.orders.map((order) => (
           <Box
-            key={o.id}
+            key={order.id}
             borderWidth="1px"
             borderColor="blackAlpha.200"
             borderRadius="lg"
             p="4"
             bg="white"
             cursor="pointer"
-            onClick={() => store.openEditOrderForm(o)}
+            onClick={() => store.openEditOrderForm(order)}
           >
             <Text fontWeight="semibold" fontSize="sm">
-              #{o.id}
+              #{order.id}
             </Text>
             <Text fontSize="sm" color="gray.700" mt="2">
-              from: {o.from}
+              from: {order.from}
             </Text>
             <Text fontSize="sm" color="gray.700">
-              to: {o.to}
+              to: {order.to}
             </Text>
           </Box>
         ))}
