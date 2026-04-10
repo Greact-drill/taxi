@@ -1,6 +1,7 @@
 import { Box, HStack, Text } from '@chakra-ui/react';
 import type { PassengerOrder } from '@packages/shared';
 import { PassengerOrderStatusBadge } from './PassengerOrderStatusBadge';
+import { PassengerOrderWaitingDial } from './PassengerOrderWaitingDial';
 
 export type PassengerOrderPreviewProps = {
   order: PassengerOrder;
@@ -35,6 +36,7 @@ export function PassengerOrderPreview({ order, onClick }: PassengerOrderPreviewP
       <Text fontSize="sm" color="gray.700">
         Куда: {order.to}
       </Text>
+      <PassengerOrderWaitingDial createdAt={order.createdAt} />
     </Box>
   );
 }
