@@ -1,61 +1,54 @@
 import { Box } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import type { PassengerOrder } from '@packages/shared';
 import PassengerRegisterScreen from './PassengerRegisterScreen';
 import PassengerOrdersListScreen from './PassengerOrdersListScreen';
 import PassengerOrderCreateScreen from './PassengerOrderCreateScreen';
 import PassengerOrderEditScreen from './PassengerOrderEditScreen';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
-import { api } from '../api';
-import { socket } from '../socket';
 
 function PassengerAppContentScreen() {
-
   const store = useStore();
-  const [screen, setScreen] = useState<
-    | { name: 'list' }
-    | { name: 'create' }
-    | { name: 'edit'; activeOrder: PassengerOrder }
-  >({ name: 'list' });
 
-  // protected zone
-  // useEffect(() => {
-  //   void (async () => {
-  //     const response = await api.me();
-  //     if (response.ok) store.setCurrentUser(response.data.passenger);
-  //     else store.clearCurrentUser();
-  //   })();
-  // }, [store.token]);
+  const goList = () => store.setScreen('list');
+  const noop = () => {};
 
-  // useEffect(() => {
-  //   socket.emit('me:request')
-  // }, [store.token]);
-
-  // ^^^ это перенесено просто в socket.ts on 'connect' emit 'me:request'
-  // TODO убрать api
-
-
-  const content = !store.currentUser ? (
-    <PassengerRegisterScreen />
-  ) : screen.name === 'list' ? (
-    <PassengerOrdersListScreen
-      onCreate={() => setScreen({ name: 'create' })}
-      onOpenOrder={(o) => setScreen({ name: 'edit', activeOrder: o })}
-    />
-  ) : screen.name === 'create' ? (
-    <PassengerOrderCreateScreen
-      onCreated={() => setScreen({ name: 'list' })}
-      onCancel={() => setScreen({ name: 'list' })}
-    />
-  ) : (
-    <PassengerOrderEditScreen
-      order={screen.activeOrder}
-      onEdited={() => setScreen({ name: 'list' })}
-      onDeleted={() => setScreen({ name: 'list' })}
-      onCancel={() => setScreen({ name: 'list' })}
-    />
+  const ordersBlock = (
+    <Box overflow="hidden" w="100%">
+      <Box
+        display="flex"
+        w="200%"
+        transform={store.screen === 'form' ? 'translateX(-50%)' : 'translateX(0)'}
+        transition="transform 0.3s ease"
+      >
+        <Box w="50%" flexShrink={0}>
+          <PassengerOrdersListScreen
+            onCreate={() => {
+              store.setScreenOrder('new');
+              store.setScreen('form');
+            }}
+            onOpenOrder={(o) => {
+              store.setScreenOrder(o);
+              store.setScreen('form');
+            }}
+          />
+        </Box>
+        <Box w="50%" flexShrink={0}>
+          {store.screenOrder === 'new' ? (
+            <PassengerOrderCreateScreen onCreated={noop} onCancel={goList} />
+          ) : (
+            <PassengerOrderEditScreen
+              order={store.screenOrder}
+              onEdited={noop}
+              onDeleted={noop}
+              onCancel={goList}
+            />
+          )}
+        </Box>
+      </Box>
+    </Box>
   );
+
+  const content = !store.currentUser ? <PassengerRegisterScreen /> : ordersBlock;
 
   return (
     <>

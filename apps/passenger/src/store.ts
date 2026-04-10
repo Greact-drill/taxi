@@ -52,6 +52,19 @@ class Store {
     this.orders = orders;
   }
 
+  // passenger main UI: list vs form carousel
+  screen: 'list' | 'form' = 'list';
+
+  setScreen(screen: 'list' | 'form') {
+    this.screen = screen;
+  }
+
+  screenOrder: 'new' | PassengerOrder = 'new';
+
+  setScreenOrder(order: 'new' | PassengerOrder) {
+    this.screenOrder = order;
+  }
+
   // constructor
   constructor() {
     makeAutoObservable(this);

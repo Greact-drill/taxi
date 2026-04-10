@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
 import type { PassengerOrder, OrdersDeleteResponse, OrdersUpdateResponse } from '@packages/shared';
 import { call } from '../api';
@@ -14,11 +14,12 @@ function PassengerOrderEditScreen(props: {
   const store = useStore();
   const [draft, setDraft] = useState<Partial<PassengerOrder>>({ ...props.order });
 
+  const from = (draft?.from ?? '').trim();
+  const to = (draft?.to ?? '').trim();
+  const canSubmit = from.length > 0 && to.length > 0;
+
   async function onSubmit(): Promise<void> {
     store.clearError();
-    const from = (draft?.from ?? '').trim();
-    const to = (draft?.to ?? '').trim();
-    const canSubmit = from.length > 0 && to.length > 0;
 
     const response = (await call<Partial<PassengerOrder>, OrdersUpdateResponse>('orders:update', draft)) as OrdersUpdateResponse;
     if (response.ok) props.onEdited();
@@ -49,7 +50,7 @@ function PassengerOrderEditScreen(props: {
           value={draft.to ?? ''}
           onChange={(e) => setDraft((prev) => ({ ...prev, to: e.target.value }))}
         />
-        <Button size="lg" onClick={() => void onSubmit()}>
+        <Button size="lg" onClick={() => void onSubmit()} disabled={!canSubmit}>
           Сохранить
         </Button>
         <Button colorPalette="red" variant="outline" onClick={() => void onDelete()}>
