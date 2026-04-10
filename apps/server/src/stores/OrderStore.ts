@@ -1,4 +1,4 @@
-import type { Order, PassengerOrder } from '@packages/shared';
+import { OrderStatus, type Order, type PassengerOrder } from '@packages/shared';
 
 export class OrderStore {
   private orderStore = new Map<number, Order>();
@@ -13,8 +13,15 @@ export class OrderStore {
     if (!canSubmit) {
       throw Error('Incorrect order data: ${from} ${to}');
     }
-      
-    const order: Order = { id: this.nextId++, passenger, from, to };
+
+    const order: Order = {
+      id: this.nextId++,
+      passenger,
+      from,
+      to,
+      status: input.status ?? OrderStatus.AWAITING_DRIVER,
+      createdAt: new Date().toISOString(),
+    };
     this.orderStore.set(order.id, order);
     return order;
   }

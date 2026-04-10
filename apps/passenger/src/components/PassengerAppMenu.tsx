@@ -8,9 +8,8 @@ import {
   MenuTrigger,
   Portal,
 } from '@chakra-ui/react';
+import { AlignJustify } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-
-import { HamburgerIcon } from './HamburgerIcon';
 import PassengerProfileEditDialog from './PassengerProfileEditDialog';
 import { clearTokenReconnect } from '../socket';
 import { useStore } from '../store';
@@ -24,7 +23,7 @@ function PassengerAppMenu() {
       <MenuRoot positioning={{ placement: 'bottom-end' }}>
         <MenuTrigger asChild>
           <Button variant="ghost" size="sm" px="2" aria-label="Меню">
-            <HamburgerIcon />
+            <AlignJustify size={20} strokeWidth={2} aria-hidden />
           </Button>
         </MenuTrigger>
         <Portal>

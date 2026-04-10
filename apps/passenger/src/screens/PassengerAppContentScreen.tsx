@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Box } from '@chakra-ui/react';
 import PassengerRegisterScreen from './PassengerRegisterScreen';
 import PassengerOrdersListScreen from './PassengerOrdersListScreen';
@@ -6,12 +5,10 @@ import PassengerOrderCreateScreen from './PassengerOrderCreateScreen';
 import PassengerOrderEditScreen from './PassengerOrderEditScreen';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
-import { socket } from '../socket';
-
 
 function PassengerAppContentScreen() {
   const store = useStore();
-  
+
   const ordersBlock = (
     <Box overflow="hidden" w="100%">
       <Box

@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Box, Button, Text, VStack } from '@chakra-ui/react';
+import { Plus } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
+import { PassengerOrderPreview } from '../components/PassengerOrderPreview';
 import { useStore } from '../store';
 import { socket } from '../socket';
 
@@ -11,35 +13,18 @@ function PassengerOrdersListScreen() {
     socket.emit('orders:request');
   }, []);
 
-  return (
-    <>
-      <Text fontSize="lg" fontWeight="semibold">
-        Мои заказы
-      </Text>
+  const canAdd = store.orders.length < 1;
 
-      <VStack gap="3" align="stretch">
-        {store.orders.map((order) => (
-          <Box
-            key={order.id}
-            borderWidth="1px"
-            borderColor="blackAlpha.200"
-            borderRadius="lg"
-            p="4"
-            bg="white"
-            cursor="pointer"
-            onClick={() => store.openEditOrderForm(order)}
-          >
-            <Text fontWeight="semibold" fontSize="sm">
-              #{order.id}
-            </Text>
-            <Text fontSize="sm" color="gray.700" mt="2">
-              from: {order.from}
-            </Text>
-            <Text fontSize="sm" color="gray.700">
-              to: {order.to}
-            </Text>
-          </Box>
-        ))}
+  return (
+    <VStack gap="3" align="stretch">
+      {store.orders.map((order) => (
+        <PassengerOrderPreview
+          key={order.id}
+          order={order}
+          onClick={() => store.openEditOrderForm(order)}
+        />
+      ))}
+      {canAdd && (
         <Button
           type="button"
           variant="outline"
@@ -56,16 +41,16 @@ function PassengerOrdersListScreen() {
           onClick={() => store.openCreateOrderForm()}
         >
           <VStack gap="1" align="center">
-            <Text fontSize="3xl" lineHeight="1" fontWeight="medium" color="gray.600">
-              +
-            </Text>
+            <Box color="gray.600" lineHeight="0">
+              <Plus size={32} strokeWidth={2} aria-hidden />
+            </Box>
             <Text fontSize="sm" fontWeight="semibold" color="gray.700" textAlign="center">
               Создать новый заказ
             </Text>
           </VStack>
         </Button>
-      </VStack>
-    </>
+      )}
+    </VStack>
   );
 }
 
