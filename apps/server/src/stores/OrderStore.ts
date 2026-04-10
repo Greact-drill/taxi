@@ -1,35 +1,41 @@
-import type { Order } from '@packages/shared';
+import type { Order, PassengerOrder } from '@packages/shared';
 
 export class OrderStore {
   private orderStore = new Map<number, Order>();
   private nextId = 1;
 
-  create(order: Order): Order {
+  create(input: Partial<Order>): Order {
+    const passenger = input.passenger;
+    const from = (input.from ?? '').trim();
+    const to = (input.to ?? '').trim();
+    const canSubmit = passenger && from.length > 0 && to.length > 0;
+    // TODO validation messages
+    if (!canSubmit) {
+      throw Error('Incorrect order data: ${from} ${to}');
+    }
+      
+    const order: Order = { id: this.nextId++, passenger, from, to };
     this.orderStore.set(order.id, order);
     return order;
   }
 
-  listByPassengerId(passengerId: number): Order[] {
+  listOfPassenger(passengerId: number): PassengerOrder[] {
     const items: Order[] = [];
     for (const order of this.orderStore.values()) {
-      if (order.passengerId === passengerId) items.push(order);
+      if (order.passenger.id === passengerId) items.push(order);
     }
     return items;
-  }
-
-  createWithNewId(input: Omit<Order, 'id'>): Order {
-    const order: Order = { ...input, id: this.nextId++ };
-    this.orderStore.set(order.id, order);
-    return order;
   }
 
   findById(id: number): Order | null {
     return this.orderStore.get(id) ?? null;
   }
 
-  update(order: Order): Order {
-    this.orderStore.set(order.id, order);
-    return order;
+  update(id: number, patch: Partial<Order>): Order | undefined {
+    const record = this.orderStore.get(id);
+    if (!record) return undefined;
+    Object.assign(record, patch, { id });
+    return record;
   }
 
   delete(id: number): void {

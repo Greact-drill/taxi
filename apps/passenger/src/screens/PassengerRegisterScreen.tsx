@@ -1,9 +1,8 @@
 import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
 import { useState } from 'react';
 import type { Passenger } from '@packages/shared';
-import { setTokenReconnect } from '../socket';
+import { socket } from '../socket';
 import { useStore } from '../store';
-import { api } from '../api';
 import { observer } from 'mobx-react-lite';
 
 function PassengerRegisterScreen() {
@@ -14,13 +13,11 @@ function PassengerRegisterScreen() {
   const phone = (passenger.phone ?? '').trim();
   const isPhoneValid = /^\+?\d+$/.test(phone);
   const canSubmit = name.length > 0 && phone.length > 0 && isPhoneValid;
+  // TODO validation messages
 
   async function onRegister(): Promise<void> {
     store.clearError();
-
-    const res = await api.register(passenger);
-    if (res.ok) setTokenReconnect(res.data.token);
-    else store.setError(res.error.message);
+    socket.emit('auth:register', passenger);
   }
 
   return (

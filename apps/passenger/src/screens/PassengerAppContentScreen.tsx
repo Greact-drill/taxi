@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Box } from '@chakra-ui/react';
 import PassengerRegisterScreen from './PassengerRegisterScreen';
 import PassengerOrdersListScreen from './PassengerOrdersListScreen';
@@ -5,13 +6,12 @@ import PassengerOrderCreateScreen from './PassengerOrderCreateScreen';
 import PassengerOrderEditScreen from './PassengerOrderEditScreen';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
+import { socket } from '../socket';
+
 
 function PassengerAppContentScreen() {
   const store = useStore();
-
-  const goList = () => store.setScreen('list');
-  const noop = () => {};
-
+  
   const ordersBlock = (
     <Box overflow="hidden" w="100%">
       <Box
@@ -21,28 +21,10 @@ function PassengerAppContentScreen() {
         transition="transform 0.3s ease"
       >
         <Box w="50%" flexShrink={0}>
-          <PassengerOrdersListScreen
-            onCreate={() => {
-              store.setScreenOrder('new');
-              store.setScreen('form');
-            }}
-            onOpenOrder={(o) => {
-              store.setScreenOrder(o);
-              store.setScreen('form');
-            }}
-          />
+          <PassengerOrdersListScreen />
         </Box>
         <Box w="50%" flexShrink={0}>
-          {store.screenOrder === 'new' ? (
-            <PassengerOrderCreateScreen onCreated={noop} onCancel={goList} />
-          ) : (
-            <PassengerOrderEditScreen
-              order={store.screenOrder}
-              onEdited={noop}
-              onDeleted={noop}
-              onCancel={goList}
-            />
-          )}
+          {store.screenForm === 'new' ? <PassengerOrderCreateScreen /> : <PassengerOrderEditScreen />}
         </Box>
       </Box>
     </Box>

@@ -1,28 +1,15 @@
 import { useEffect } from 'react';
 import { Box, Button, Text, VStack } from '@chakra-ui/react';
-import type { PassengerOrder } from '@packages/shared';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../store';
 import { socket } from '../socket';
 
-function PassengerOrdersListScreen(props: {
-  onCreate: () => void;
-  onOpenOrder: (order: PassengerOrder) => void;
-}) {
+function PassengerOrdersListScreen() {
   const store = useStore();
 
-  // useEffect(() => {
-  //   void (async () => {
-  //     const response = await api.orders();
-  //     if (response.ok) store.setOrders(response.data.items);
-  //     else store.setError(response.error.message);
-  //   })();
-  // }, [store]);
   useEffect(() => {
-    socket.emit('orders:request')
+    socket.emit('orders:request');
   }, []);
-  // ^^^ это перенесено просто в emit 'orders:request'
-  // TODO убрать api
 
   return (
     <>
@@ -40,7 +27,7 @@ function PassengerOrdersListScreen(props: {
             p="4"
             bg="white"
             cursor="pointer"
-            onClick={() => props.onOpenOrder(o)}
+            onClick={() => store.openEditOrderForm(o)}
           >
             <Text fontWeight="semibold" fontSize="sm">
               #{o.id}
@@ -66,7 +53,7 @@ function PassengerOrdersListScreen(props: {
           display="flex"
           alignItems="center"
           justifyContent="center"
-          onClick={props.onCreate}
+          onClick={() => store.openCreateOrderForm()}
         >
           <VStack gap="1" align="center">
             <Text fontSize="3xl" lineHeight="1" fontWeight="medium" color="gray.600">

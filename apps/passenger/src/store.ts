@@ -53,20 +53,35 @@ class Store {
   }
 
   // passenger main UI: list vs form carousel
-  screen: 'list' | 'form' = 'list';
+  screen: 'list' | 'form';
+  screenForm: 'new' | 'edit';
+  screenFormData: Partial<PassengerOrder>;
 
-  setScreen(screen: 'list' | 'form') {
-    this.screen = screen;
+  openOrdersList() {
+    this.screen = 'list';
   }
 
-  screenOrder: 'new' | PassengerOrder = 'new';
+  openCreateOrderForm() {
+    this.screen = 'form';
+    this.screenForm = 'new';
+    this.screenFormData = {};    
+  }
 
-  setScreenOrder(order: 'new' | PassengerOrder) {
-    this.screenOrder = order;
+  openEditOrderForm(order: PassengerOrder) {
+    this.screen = 'form';
+    this.screenForm = 'edit';
+    this.screenFormData = { ...order };    
+  }
+
+  setScreenFormData(updater: (prev: Partial<PassengerOrder>) => Partial<PassengerOrder>) {
+    this.screenFormData = updater(this.screenFormData);
   }
 
   // constructor
   constructor() {
+    this.screen = 'list';
+    this.screenForm = 'new';
+    this.screenFormData = {};
     makeAutoObservable(this);
   }
 }

@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import { store } from './store';
-import { Passenger, PassengerOrder } from '@packages/shared';
+import type { Passenger, PassengerOrder } from '@packages/shared';
 
 export const socket = io({
   path: '/ws',
@@ -13,17 +13,13 @@ export const socket = io({
   },
 });
 
-socket.on('connect', async () => {
+socket.on('connect', () => {
   store.setOnline(true);
-  socket.emit('me:request')
+  socket.emit('auth:request');
 });
 
 socket.on('disconnect', () => {
   store.setOnline(false);
-});
-
-socket.on('profile:update', (user: Passenger) => {
-  store.setCurrentUser(user);
 });
 
 export function setTokenReconnect(token: string): void {
@@ -38,6 +34,24 @@ export function clearTokenReconnect(): void {
   socket.connect();
 }
 
+socket.on('error', (message: string) => {
+  store.setError(message);
+});
+
+socket.on('auth:token', (token: string) => {
+  setTokenReconnect(token);
+});
+
+socket.on('auth:profile', (user?: Passenger) => {
+  if (user) store.setCurrentUser(user);
+  else store.clearCurrentUser();
+});
+
+socket.on('passenger:profile', (user: Passenger) => {
+  store.setCurrentUser(user);
+});
+
 socket.on('passenger:orders', (orders: PassengerOrder[]) => {
   store.setOrders(orders);
+  store.openOrdersList();
 });

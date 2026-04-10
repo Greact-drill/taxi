@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import type { DispatcherConnectionsPayload } from '@packages/shared';
+import type { DispatcherConnectionsItem } from '@packages/shared';
 import { socket } from './socket';
 import './app.css';
 
 export default function App() {
-  const [connections, setConnections] = useState<DispatcherConnectionsPayload['items']>([]);
+  const [connections, setConnections] = useState<DispatcherConnectionsItem[]>([]);
   const [connected, setConnected] = useState(socket.connected);
 
   useEffect(() => {
-    const onConnections = (payload: DispatcherConnectionsPayload) => setConnections(payload.items);
+    const onConnections = (items: DispatcherConnectionsItem[]) => setConnections(items);
     const onConnect = () => setConnected(true);
     const onDisconnect = () => setConnected(false);
 

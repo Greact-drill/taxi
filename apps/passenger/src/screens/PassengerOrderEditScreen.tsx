@@ -1,62 +1,53 @@
-import { useState } from 'react';
 import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
-import type { PassengerOrder, OrdersDeleteResponse, OrdersUpdateResponse } from '@packages/shared';
-import { call } from '../api';
+import { socket } from '../socket';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
 
-function PassengerOrderEditScreen(props: {
-  order: PassengerOrder;
-  onEdited: () => void;
-  onDeleted: () => void;
-  onCancel: () => void;
-}) {
+function PassengerOrderEditScreen() {
   const store = useStore();
-  const [draft, setDraft] = useState<Partial<PassengerOrder>>({ ...props.order });
 
-  const from = (draft?.from ?? '').trim();
-  const to = (draft?.to ?? '').trim();
+  const from = (store.screenFormData?.from ?? '').trim();
+  const to = (store.screenFormData?.to ?? '').trim();
   const canSubmit = from.length > 0 && to.length > 0;
+  // TODO validation messages
 
-  async function onSubmit(): Promise<void> {
+  function onSubmit(): void {
     store.clearError();
-
-    const response = (await call<Partial<PassengerOrder>, OrdersUpdateResponse>('orders:update', draft)) as OrdersUpdateResponse;
-    if (response.ok) props.onEdited();
-    else store.setError(response.error.message);
+    socket.emit('orders:update', store.screenFormData);
   }
 
-  async function onDelete(): Promise<void> {
+  function onDelete(): void {
     store.clearError();
-
-    const response = (await call<Partial<PassengerOrder>, OrdersDeleteResponse>('orders:delete', draft)) as OrdersDeleteResponse;
-    if (response.ok) props.onDeleted();
-    else store.setError(response.error.message);
+    socket.emit('orders:delete', store.screenFormData);
   }
 
   return (
     <Box borderWidth="1px" borderColor="blackAlpha.200" borderRadius="lg" p="4" bg="white">
       <Text fontSize="lg" fontWeight="semibold">
-        Заявка #{props.order.id}
+        Заявка #{store.screenFormData.id ?? '-'}
       </Text>
       <VStack gap="3" align="stretch" mt="3">
         <Input
           placeholder="Откуда"
-          value={draft.from ?? ''}
-          onChange={(e) => setDraft((prev) => ({ ...prev, from: e.target.value }))}
+          value={store.screenFormData.from ?? ''}
+          onChange={(e) => {
+            store.setScreenFormData((prev) => ({ ...prev, from: e.target.value }));
+          }}
         />
         <Input
           placeholder="Куда"
-          value={draft.to ?? ''}
-          onChange={(e) => setDraft((prev) => ({ ...prev, to: e.target.value }))}
+          value={store.screenFormData.to ?? ''}
+          onChange={(e) => {
+            store.setScreenFormData((prev) => ({ ...prev, to: e.target.value }));
+          }}
         />
-        <Button size="lg" onClick={() => void onSubmit()} disabled={!canSubmit}>
+        <Button size="lg" onClick={onSubmit} disabled={!canSubmit}>
           Сохранить
         </Button>
-        <Button colorPalette="red" variant="outline" onClick={() => void onDelete()}>
+        <Button colorPalette="red" variant="outline" onClick={onDelete}>
           Удалить
         </Button>
-        <Button variant="ghost" onClick={props.onCancel}>
+        <Button variant="ghost" onClick={() => store.openOrdersList()}>
           Назад
         </Button>
       </VStack>

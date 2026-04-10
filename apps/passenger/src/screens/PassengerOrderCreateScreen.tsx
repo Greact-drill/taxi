@@ -1,27 +1,19 @@
-import { useState } from 'react';
 import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
-import type { Order, OrdersCreateResponse, PassengerOrder } from '@packages/shared';
-import { call } from '../api';
+import { socket } from '../socket';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
 
-function PassengerOrderCreateScreen(props: {
-  onCreated: () => void;
-  onCancel: () => void;
-}) {
+function PassengerOrderCreateScreen() {
   const store = useStore();
-  const [draft, setDraft] = useState<Partial<PassengerOrder>>({});
 
-  const from = (draft?.from ?? '').trim();
-  const to = (draft?.to ?? '').trim();
+  const from = (store.screenFormData?.from ?? '').trim();
+  const to = (store.screenFormData?.to ?? '').trim();
   const canSubmit = from.length > 0 && to.length > 0;
+  // TODO validation messages
 
-  async function onSubmit(): Promise<void> {
+  function onSubmit(): void {
     store.clearError();
-
-    const response = (await call<Partial<PassengerOrder>, OrdersCreateResponse>('orders:create', draft)) as OrdersCreateResponse;
-    if (response.ok) props.onCreated();
-    else store.setError(response.error.message);
+    socket.emit('orders:create', store.screenFormData);
   }
 
   return (
@@ -30,12 +22,24 @@ function PassengerOrderCreateScreen(props: {
         Новая заявка
       </Text>
       <VStack gap="3" align="stretch" mt="3">
-        <Input placeholder="Откуда" value={draft.from ?? ''} onChange={(e) => setDraft((prev) => ({ ...prev, from: e.target.value }))} />
-        <Input placeholder="Куда" value={draft.to ?? ''} onChange={(e) => setDraft((prev) => ({ ...prev, to: e.target.value }))} />
-        <Button size="lg" onClick={() => void onSubmit()} disabled={!canSubmit}>
+        <Input
+          placeholder="Откуда"
+          value={store.screenFormData.from ?? ''}
+          onChange={(e) => {
+            store.setScreenFormData((prev) => ({ ...prev, from: e.target.value }));
+          }}
+        />
+        <Input
+          placeholder="Куда"
+          value={store.screenFormData.to ?? ''}
+          onChange={(e) => {
+            store.setScreenFormData((prev) => ({ ...prev, to: e.target.value }));
+          }}
+        />
+        <Button size="lg" onClick={onSubmit} disabled={!canSubmit}>
           Создать
         </Button>
-        <Button variant="ghost" onClick={props.onCancel}>
+        <Button variant="ghost" onClick={() => store.openOrdersList()}>
           Отмена
         </Button>
       </VStack>
