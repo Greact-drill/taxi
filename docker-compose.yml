@@ -1,0 +1,42 @@
+services:
+  taxi_server:
+    container_name: taxi_server
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    networks:
+      - proxy
+
+  taxi_dispatcher:
+    container_name: taxi_dispatcher
+    build:
+      context: .
+      dockerfile: Dockerfile.spa
+      args:
+        APP: dispatcher
+    networks:
+      - proxy
+
+  taxi_driver:
+    container_name: taxi_driver
+    build:
+      context: .
+      dockerfile: Dockerfile.spa
+      args:
+        APP: driver
+    networks:
+      - proxy
+
+  taxi_passenger:
+    container_name: taxi_passenger
+    build:
+      context: .
+      dockerfile: Dockerfile.spa
+      args:
+        APP: passenger
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
