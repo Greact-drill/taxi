@@ -99,22 +99,30 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       else throw Error('Водитель должен быть авторизован')
     }
 
+    function handleAsyncError(error: unknown): void {
+      const message = error instanceof Error ? error.message : 'Unknown server error';
+      if (error instanceof Error) {
+        console.error(error.stack ?? `${error.name}: ${error.message}`);
+        if (error.cause) console.error('cause:', error.cause);
+      } else {
+        console.error(inspect(error, { depth: 4, colors: true }));
+      }
+      socket.emit('error', message);
+    }
+
     function on<P extends unknown[]>(
       event: string,
       handler: (...args: P) => Promise<void>,
     ): void {
       socket.on(event, (...args: P) => {
-        void handler(...args).catch((error: unknown) => {
-          const message = error instanceof Error ? error.message : 'Unknown server error';
-          if (error instanceof Error) {
-            console.error(error.stack ?? `${error.name}: ${error.message}`);
-            if (error.cause) console.error('cause:', error.cause);
-          } else {
-            console.error(inspect(error, { depth: 4, colors: true }));
-          }
-          socket.emit('error', message);
-        });
+        void handler(...args).catch(handleAsyncError);
       });
+    }
+
+    function timeout(delayMs: number, handler: () => Promise<void>): ReturnType<typeof setTimeout> {
+      return setTimeout(() => {
+        void handler().catch(handleAsyncError);
+      }, delayMs);
     }
 
     // connect and disconnect events
@@ -277,7 +285,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
     });
 
     function deleteAfterTimeout(order: DriverOrder): void {
-      setTimeout(async () => {
+      timeout(CLEAN_TIMEOUT, async () => {
         if (await orderService.findById(order.id)) {
           await orderService.delete(order.id);
           io.to(`passenger:${order.passenger.id}`).emit(
@@ -289,7 +297,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
             await orderService.listOfDriver(driver.id),
           );
         }
-      }, CLEAN_TIMEOUT);
+      });
     }
 
     on('driver:orders:next', async (order: DriverOrder, status: OrderStatus) => {
