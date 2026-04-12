@@ -2,13 +2,16 @@ import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
 import { socket } from '../socket';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
-import { OrderStatus } from '@packages/shared';
+import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
+
+const deletable = [OrderStatus.AWAITING_DRIVER, ...DELETABLE_ORDER_STATUSES];
 
 function PassengerOrderEditScreen() {
   const store = useStore();
 
   const from = (store.screenFormData?.from ?? '').trim();
   const to = (store.screenFormData?.to ?? '').trim();
+  const status = store.screenFormData?.status;
   const canSubmit = from.length > 0 && to.length > 0;
   // TODO validation messages
 
@@ -50,7 +53,7 @@ function PassengerOrderEditScreen() {
         <Button size="lg" onClick={onSubmit} disabled={!canSubmit}>
           Сохранить
         </Button>
-        {store.screenFormData.status === OrderStatus.AWAITING_DRIVER && (
+        {status && deletable.includes(status) && (
           <Button colorPalette="red" variant="outline" onClick={onDelete}>
             Удалить
           </Button>

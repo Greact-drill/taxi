@@ -35,6 +35,11 @@ export enum OrderStatus {
   CANCELLED = 'cancelled',
 }
 
+export const DELETABLE_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.COMPLETED,
+  OrderStatus.CANCELLED,
+];
+
 export type Order = {
   id: number;
   /** UTC instant, ISO 8601 with `Z` (e.g. from `Date.prototype.toISOString()`). */
@@ -47,6 +52,7 @@ export type Order = {
   to: string;
   driver?: Driver;
   status: OrderStatus;
+  cancelReason?: string;
 
 };
 

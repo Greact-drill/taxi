@@ -5,11 +5,13 @@ import { PassengerStore } from '../stores/PassengerStore.js';
 import { DriverStore } from '../stores/DriverStore.js';
 import { OrderStore } from '../stores/OrderStore.js';
 import {
+  DELETABLE_ORDER_STATUSES,
   OrderStatus,
   type DispatcherConnectionsItem,
   type Driver,
   type DriverLogin,
   type DriverOrder,
+  type Order,
   type Passenger,
   type PassengerOrder,
   type PassengerRegister,
@@ -204,15 +206,22 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
     on('passenger:orders:delete', async (input: Partial<PassengerOrder>) => {
       const passenger = requirePassenger();
       if (!input.id) throw Error('Номер заказа должен быть указан');
-      if (input.status !== OrderStatus.AWAITING_DRIVER) {
-        throw Error('Заказ не может быть удалён, так как он не находится в статусе ожидания водителя');
+      const deletable = [OrderStatus.AWAITING_DRIVER, ...DELETABLE_ORDER_STATUSES]
+      if (input.status && !deletable.includes(input.status)) {
+        throw Error(`Заказ можно удалить только в статусах ${DELETABLE_ORDER_STATUSES}`);
       }
-      const result = orderStore.delete(input.id);
+      orderStore.delete(input.id);
 
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
         orderStore.listOfPassenger(passenger.id),
       );
+      if (input.driver) {
+        io.to(`driver:${input.driver.id}`).emit(
+          'driver:orders',
+          orderStore.listOfDriver(input.driver.id),
+        );
+      }
       io.to('driver').emit(
         'driver:orders:active',
         orderStore.listOfActive(),
@@ -238,8 +247,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     on('driver:orders:take', async (order: DriverOrder) => {
       const driver = requireDriver();
-      if (!order.id) throw Error('Номер заказа должен быть указан');
-      const result = orderStore.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED, assignedAt: new Date().toISOString() });
+      orderStore.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED, assignedAt: new Date().toISOString() });
 
       io.to(`passenger:${order.passenger.id}`).emit(
         'passenger:orders',
@@ -254,6 +262,73 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
         orderStore.listOfActive(),
       );
 
+    });
+
+    on('driver:orders:next', async (order: DriverOrder, status: OrderStatus) => {
+      const driver = requireDriver();
+      const patch: Partial<Order> = { status };
+      orderStore.update(order.id, patch);
+
+      io.to(`passenger:${order.passenger.id}`).emit(
+        'passenger:orders',
+        orderStore.listOfPassenger(order.passenger.id),
+      );
+      io.to(`driver:${driver.id}`).emit(
+        'driver:orders',
+        orderStore.listOfDriver(driver.id),
+      );
+    });
+
+    on('driver:orders:complete', async (order: DriverOrder) => {
+      const driver = requireDriver();
+      orderStore.update(order.id, {
+        status: OrderStatus.COMPLETED,
+        completedAt: new Date().toISOString()
+      });
+
+      io.to(`passenger:${order.passenger.id}`).emit(
+        'passenger:orders',
+        orderStore.listOfPassenger(order.passenger.id),
+      );
+      io.to(`driver:${driver.id}`).emit(
+        'driver:orders',
+        orderStore.listOfDriver(driver.id),
+      );
+    });
+
+    on('driver:orders:cancel', async (order: DriverOrder, reason: string) => {
+      const driver = requireDriver();
+      orderStore.update(order.id, {
+        status: OrderStatus.CANCELLED,
+        cancelReason: reason,
+        completedAt: new Date().toISOString(),
+      });
+
+      io.to(`passenger:${order.passenger.id}`).emit(
+        'passenger:orders',
+        orderStore.listOfPassenger(order.passenger.id),
+      );
+      io.to(`driver:${driver.id}`).emit(
+        'driver:orders',
+        orderStore.listOfDriver(driver.id),
+      );
+    });
+
+    on('driver:orders:delete', async (order: DriverOrder) => {
+      const driver = requireDriver();
+      if (order.status && !DELETABLE_ORDER_STATUSES.includes(order.status)) {
+        throw Error(`Заказ можно удалить только в статусах ${DELETABLE_ORDER_STATUSES}`);
+      }
+      orderStore.delete(order.id);
+
+      io.to(`passenger:${order.passenger.id}`).emit(
+        'passenger:orders',
+        orderStore.listOfPassenger(order.passenger.id),
+      );
+      io.to(`driver:${driver.id}`).emit(
+        'driver:orders',
+        orderStore.listOfDriver(driver.id),
+      );
     });
 
   });

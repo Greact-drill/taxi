@@ -1,6 +1,7 @@
 import { Box } from '@chakra-ui/react';
 import { OrderStatus, type PassengerOrder } from '@packages/shared';
 import {
+  OrderCancelReasonRow,
   OrderCardHeader,
   OrderDriverRow,
   OrderRouteRow,
@@ -25,6 +26,9 @@ export function PassengerOrderPreview({ order, onClick }: PassengerOrderPreviewP
     >
       <OrderCardHeader orderId={order.id} status={order.status} placementAt={order.createdAt} />
       <OrderRouteRow from={order.from} to={order.to} />
+      {order.status === OrderStatus.CANCELLED && (
+        <OrderCancelReasonRow cancelReason={order.cancelReason} />
+      )}
       {order.status === OrderStatus.AWAITING_DRIVER && (
         <PassengerOrderWaitingDial createdAt={order.createdAt} />
       )}

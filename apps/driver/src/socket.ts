@@ -1,4 +1,4 @@
-import type { Driver, DriverOrder, Order, OrderStatus } from '@packages/shared';
+import { Driver, DriverOrder, Order, OrderStatus } from '@packages/shared';
 import { io } from 'socket.io-client';
 import { orderToDriverOrder, store } from './store';
 
@@ -49,6 +49,13 @@ socket.on('auth:profile', (user: Driver) => {
 
 socket.on('driver:orders:active', (orders: DriverOrder[]) => {
   store.setActiveOrders(orders);
+  if (store.screen === 'form' &&
+    store.screenFormData &&
+    store.screenFormData.status === OrderStatus.AWAITING_DRIVER) {
+    const data = store.activeOrders.find((order) => order.id === store.screenFormData!.id);
+    if (data) store.openOrderForm(data);
+    else store.openOrdersList();
+  }
 });
 
 socket.on('driver:orders', (orders: DriverOrder[]) => {
