@@ -58,7 +58,7 @@ function PassengerOrderEditScreen() {
             Удалить
           </Button>
         )}
-        <Button variant="ghost" onClick={() => store.openOrdersList()}>
+        <Button variant="outline" onClick={() => store.openOrdersList()}>
           Назад
         </Button>
       </VStack>

@@ -15,17 +15,17 @@ const ORDER_STATUS_VISUAL: Record<OrderStatus, StatusVisual> = {
   [OrderStatus.AWAITING_DRIVER]: {
     Icon: Search,
     colorPalette: 'yellow',
-    label: 'Ожидание водителя',
+    label: 'Подбираем водителя',
   },
   [OrderStatus.DRIVER_ASSIGNED]: {
     Icon: Car,
     colorPalette: 'green',
-    label: 'Назначен',
+    label: 'Водитель назначен',
   },
   [OrderStatus.DRIVER_ARRIVED]: {
     Icon: MapPin,
     colorPalette: 'blue',
-    label: 'На месте',
+    label: 'Водитель на месте',
   },
   [OrderStatus.ON_TRIP]: {
     Icon: Route,
