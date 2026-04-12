@@ -23,7 +23,11 @@ export class PassengerStore {
   async update(id: number, patch: Partial<PassengerRecord>): Promise<PassengerRecord> {
     const record = this.passengerStore.get(id);
     if (!record) throw Error(`PassengerStore: Record not found ${id}`);
-    Object.assign(record, patch, { id });
+    for (const [key, value] of Object.entries(patch)) {
+      if (value === undefined) continue;
+      (record as Record<string, unknown>)[key] = value;
+    }
+    record.id = id;
     return record;
   }
 }

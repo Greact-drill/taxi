@@ -23,7 +23,11 @@ export class DriverStore {
   async update(id: number, patch: Partial<DriverRecord>): Promise<DriverRecord> {
     const record = this.driverStore.get(id);
     if (!record) throw Error(`DriverStore: Record not found ${id}`);
-    Object.assign(record, patch, { id });
+    for (const [key, value] of Object.entries(patch)) {
+      if (value === undefined) continue;
+      (record as Record<string, unknown>)[key] = value;
+    }
+    record.id = id;
     return record;
   }
 }

@@ -114,8 +114,8 @@ export class OrderService {
       to: updates.to,
       status: updates.status,
     };
-    if ('driver' in updates) {
-      patch.driverId = updates.driver ? updates.driver.id : undefined;
+    if ('driver' in updates && updates.driver) {
+      patch.driverId = updates.driver.id;
     }
     if (updates.status === OrderStatus.DRIVER_ASSIGNED) {
       patch.assignedAt = new Date().toISOString();

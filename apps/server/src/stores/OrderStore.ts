@@ -28,7 +28,11 @@ export class OrderStore {
   async update(id: number, patch: Partial<OrderRecord>): Promise<OrderRecord> {
     const record = this.orderStore.get(id);
     if (!record || record.deleted) throw Error(`OrderStore: Record not found ${id}`);
-    Object.assign(record, patch, { id });
+    for (const [key, value] of Object.entries(patch)) {
+      if (value === undefined) continue;
+      (record as Record<string, unknown>)[key] = value;
+    }
+    record.id = id;
     return record;
   }
 
