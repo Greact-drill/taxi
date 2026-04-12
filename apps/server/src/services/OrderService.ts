@@ -1,14 +1,21 @@
 import {
   OrderStatus,
+  type DriverOrder,
   type Order,
+  type OrderRecord,
   type Passenger,
   type PassengerOrder,
-  type DriverOrder,
 } from '@packages/shared';
 import { OrderStore } from '../stores/OrderStore.js';
+import { PassengerService } from './PassengerService.js';
+import { DriverService } from './DriverService.js';
 
 export class OrderService {
-  constructor(private readonly store: OrderStore) {}
+  constructor(
+    private readonly store: OrderStore,
+    private readonly passengerService: PassengerService,
+    private readonly driverService: DriverService,
+  ) { }
 
   async create(input: Partial<PassengerOrder>, passenger: Passenger): Promise<Order> {
     const from = (input.from ?? '').trim();
@@ -18,36 +25,133 @@ export class OrderService {
       throw new Error(`Некорректные данные заказа: ${from} ${to}`);
     }
 
-    return await this.store.create({
-      passenger,
+    const record = await this.store.create({
+      passengerId: passenger.id,
       from,
       to,
       status: input.status ?? OrderStatus.AWAITING_DRIVER,
       createdAt: new Date().toISOString(),
     });
+
+    return {
+      id: record.id,
+      passenger: passenger,
+      from: record.from,
+      to: record.to,
+      status: record.status,
+      createdAt: record.createdAt,
+    };
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
-    return (await this.store.listWhere((order) => order.passenger.id === passengerId)) as PassengerOrder[];
+    const rows = await this.store.listWhere((order) => order.passengerId === passengerId);
+    const out: PassengerOrder[] = [];
+    for (const r of rows) {
+      out.push({
+        id: r.id,
+        createdAt: r.createdAt,
+        from: r.from,
+        to: r.to,
+        driver: r.driverId ? await this.driverService.getById(r.driverId) : undefined,
+        status: r.status,
+        cancelReason: r.cancelReason,
+      });
+    }
+    return out;
   }
 
   async listOfDriver(driverId: number): Promise<DriverOrder[]> {
-    return (await this.store.listWhere((order) => order.driver?.id === driverId)) as DriverOrder[];
+    const rows = await this.store.listWhere((order) => order.driverId === driverId);
+    const out: DriverOrder[] = [];
+    for (const record of rows) {
+      out.push({
+        id: record.id,
+        createdAt: record.createdAt,
+        passenger: (await this.passengerService.getById(record.passengerId))!,
+        from: record.from,
+        to: record.to,
+        status: record.status,
+        cancelReason: record.cancelReason,
+      });
+    }
+    return out;
   }
 
   async listOfActive(): Promise<DriverOrder[]> {
-    return (await this.store.listWhere((order) => order.status === OrderStatus.AWAITING_DRIVER)) as DriverOrder[];
+    const rows = await this.store.listWhere((order) => order.status === OrderStatus.AWAITING_DRIVER);
+    const out: DriverOrder[] = [];
+    for (const record of rows) {
+      out.push({
+        id: record.id,
+        createdAt: record.createdAt,
+        passenger: (await this.passengerService.getById(record.passengerId))!,
+        from: record.from,
+        to: record.to,
+        status: record.status,
+      });
+    }
+    return out;
   }
 
   async findById(id: number): Promise<Order | undefined> {
-    return await this.store.findById(id);
+    const record = await this.store.findById(id);
+    if (!record) throw new Error(`Заказ не найден: ${id}`);
+    return {
+      id: record.id,
+      createdAt: record.createdAt,
+      passenger: (await this.passengerService.getById(record.passengerId))!,
+      from: record.from,
+      to: record.to,
+      driver: record.driverId ? await this.driverService.getById(record.driverId) : undefined,
+      status: record.status,
+      cancelReason: record.cancelReason,
+    };
   }
 
-  async update(id: number, patch: Partial<Order>): Promise<Order> {
-    return await this.store.update(id, patch);
+  async update(id: number, updates: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
+    const patch: Partial<OrderRecord> = {
+      from: updates.from,
+      to: updates.to,
+      status: updates.status,
+    };
+    if ('driver' in updates) {
+      patch.driverId = updates.driver ? updates.driver.id : undefined;
+    }
+    if (updates.status === OrderStatus.DRIVER_ASSIGNED) {
+      patch.assignedAt = new Date().toISOString();
+    }
+    if (updates.status === OrderStatus.COMPLETED) {
+      patch.completedAt = new Date().toISOString();
+    }
+    if (updates.status === OrderStatus.CANCELLED) {
+      patch.cancelReason = updates.cancelReason;
+      patch.completedAt = new Date().toISOString();
+    }
+    const record = await this.store.update(id, patch);
+
+    return {
+      id: record.id,
+      createdAt: record.createdAt,
+      passenger: (await this.passengerService.getById(record.passengerId))!,
+      from: record.from,
+      to: record.to,
+      driver: record.driverId ? await this.driverService.getById(record.driverId) : undefined,
+      status: record.status,
+      cancelReason: record.cancelReason,
+    };
   }
 
   async delete(id: number): Promise<Order> {
-    return await this.store.delete(id);
+    const record = await this.store.delete(id);
+    return {
+      id: record.id,
+      createdAt: record.createdAt,
+      passenger: (await this.passengerService.getById(record.passengerId))!,
+      from: record.from,
+      to: record.to,
+      driver: record.driverId ? await this.driverService.getById(record.driverId) : undefined,
+      status: record.status,
+      cancelReason: record.cancelReason,
+    };
   }
 }

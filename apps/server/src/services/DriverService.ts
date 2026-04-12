@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Driver, DriverLogin } from '@packages/shared';
+import type { Driver, DriverLogin, DriverRecord } from '@packages/shared';
 import { makePasswordHash, verifyPassword } from '../password.js';
 import { DriverStore } from '../stores/DriverStore.js';
 
@@ -26,34 +26,46 @@ export class DriverService {
       throw new Error('Водитель с таким логином уже существует');
     }
 
-    return await this.store.create({
+    const record = await this.store.create({
       name,
       car,
       login,
       hash: await makePasswordHash(password),
       token: randomUUID(),
     });
+    return { id: record.id, name: record.name, car: record.car };
   }
 
-  async login(data: DriverLogin): Promise<Driver> {
+  async getById(id: number): Promise<Driver | undefined> {
+    const record = await this.store.getById(id);
+    if (!record) return;
+    return { id: record.id, name: record.name, car: record.car };
+  }
+
+  async login(data: DriverLogin): Promise<string> {
     const login = data.login.trim();
-    const driver = await this.findByLogin(login);
-    if (!driver || !(await verifyPassword(data.password, driver.hash))) {
+    const record = await this.store.findWhere((d) => d.login === login);
+    if (!record || !(await verifyPassword(data.password, record.hash))) {
       throw new Error('Неверный логин или пароль');
     }
-    return driver;
+    return record.token;
   }
 
   async findByToken(token: string): Promise<Driver | undefined> {
-    return await this.store.findWhere((driver) => driver.token === token);
+    const record = await this.store.findWhere((d) => d.token === token);
+    if (!record) return;
+    return { id: record.id, name: record.name, car: record.car };
   }
 
   async findByLogin(login: string): Promise<Driver | undefined> {
-    return await this.store.findWhere((driver) => driver.login === login);
+    const record = await this.store.findWhere((d) => d.login === login);
+    if (!record) return;
+    return { id: record.id, name: record.name, car: record.car };
   }
 
   async update(id: number, updates: Partial<Driver>): Promise<Driver> {
-    return await this.store.update(id, updates);
+    const record = await this.store.update(id, { name: updates.name, car: updates.car });
+    return { id: record.id, name: record.name, car: record.car };
   }
 
   async bootstrap(): Promise<void> {

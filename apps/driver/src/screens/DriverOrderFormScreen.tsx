@@ -42,11 +42,6 @@ function DriverOrderFormScreen() {
     socket.emit('driver:orders:next', order, nextStatus);
   }
 
-  function complete(): void {
-    store.clearError();
-    socket.emit('driver:orders:complete', order);
-  }
-
   function cancel(): void {
     store.clearError();
     socket.emit('driver:orders:cancel', order, cancelReason);
@@ -97,7 +92,7 @@ function DriverOrderFormScreen() {
               </Button>
             )}
             {order.status === OrderStatus.ON_TRIP && (
-              <Button size="lg" flex="1" onClick={complete}>
+              <Button size="lg" flex="1" onClick={() => next(OrderStatus.COMPLETED)}>
                 Приехали
               </Button>
             )}

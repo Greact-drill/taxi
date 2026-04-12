@@ -4,7 +4,6 @@ export type Passenger = {
   id: number;
   name: string;
   phone: string;
-  token: string;
 };
 
 export type PassengerRegister = {
@@ -16,9 +15,6 @@ export type Driver = {
   id: number;
   name: string;
   car: string;
-  login: string;
-  hash: string;
-  token: string;
 };
 
 export type DriverLogin = {
@@ -42,18 +38,13 @@ export const DELETABLE_ORDER_STATUSES: OrderStatus[] = [
 
 export type Order = {
   id: number;
-  /** UTC instant, ISO 8601 with `Z` (e.g. from `Date.prototype.toISOString()`). */
   createdAt: string;
-  assignedAt?: string;
-  completedAt?: string;
-
   passenger: Passenger;
   from: string;
   to: string;
   driver?: Driver;
   status: OrderStatus;
   cancelReason?: string;
-
 };
 
 export type PassengerOrder = Omit<Order, 'passenger'>;

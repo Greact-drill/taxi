@@ -32,7 +32,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
   const orderStore = new OrderStore();
   const passengerService = new PassengerService(passengerStore);
   const driverService = new DriverService(driverStore);
-  const orderService = new OrderService(orderStore);
+  const orderService = new OrderService(orderStore, passengerService, driverService);
 
   async function getConnections(): Promise<DispatcherConnectionsItem[]> {
     const sockets = await io.fetchSockets();
@@ -128,8 +128,8 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     // auth events
     on('passenger:auth:register', async (userData: PassengerRegister) => {
-      const passenger = await passengerService.register(userData);
-      socket.emit('auth:token', passenger.token);
+      const { token } = await passengerService.register(userData);
+      socket.emit('auth:token', token);
     });
 
     on('driver:auth:register', async () => {
@@ -141,8 +141,8 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
     });
 
     on('driver:auth:login', async (credentials: DriverLogin) => {
-      const driver = await driverService.login(credentials);
-      socket.emit('auth:token', driver.token);
+      const token = await driverService.login(credentials);
+      socket.emit('auth:token', token);
     });
 
     on('passenger:auth:request', async () => {
@@ -257,7 +257,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     on('driver:orders:take', async (order: DriverOrder) => {
       const driver = requireDriver();
-      await orderService.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED, assignedAt: new Date().toISOString() });
+      await orderService.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED });
 
       io.to(`passenger:${order.passenger.id}`).emit(
         'passenger:orders',
@@ -276,25 +276,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     on('driver:orders:next', async (order: DriverOrder, status: OrderStatus) => {
       const driver = requireDriver();
-      const patch: Partial<Order> = { status };
-      await orderService.update(order.id, patch);
-
-      io.to(`passenger:${order.passenger.id}`).emit(
-        'passenger:orders',
-        await orderService.listOfPassenger(order.passenger.id),
-      );
-      io.to(`driver:${driver.id}`).emit(
-        'driver:orders',
-        await orderService.listOfDriver(driver.id),
-      );
-    });
-
-    on('driver:orders:complete', async (order: DriverOrder) => {
-      const driver = requireDriver();
-      await orderService.update(order.id, {
-        status: OrderStatus.COMPLETED,
-        completedAt: new Date().toISOString()
-      });
+      await orderService.update(order.id, { status });
 
       io.to(`passenger:${order.passenger.id}`).emit(
         'passenger:orders',
@@ -311,7 +293,6 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       await orderService.update(order.id, {
         status: OrderStatus.CANCELLED,
         cancelReason: reason,
-        completedAt: new Date().toISOString(),
       });
 
       io.to(`passenger:${order.passenger.id}`).emit(
