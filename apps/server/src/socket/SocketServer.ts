@@ -20,6 +20,8 @@ import {
   type PassengerRegister,
 } from '@packages/shared';
 
+const CLEAN_TIMEOUT = 30_000;
+
 export async function createSocketServer(httpServer: HttpServer): Promise<Server> {
   const io = new Server(httpServer, {
     path: '/ws',
@@ -274,6 +276,22 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     });
 
+    function deleteAfterTimeout(order: DriverOrder): void {
+      setTimeout(async () => {
+        if (await orderService.findById(order.id)) {
+          await orderService.delete(order.id);
+          io.to(`passenger:${order.passenger.id}`).emit(
+            'passenger:orders',
+            await orderService.listOfPassenger(order.passenger.id),
+          );
+          io.to(`driver:${driver.id}`).emit(
+            'driver:orders',
+            await orderService.listOfDriver(driver.id),
+          );
+        }
+      }, CLEAN_TIMEOUT);
+    }
+
     on('driver:orders:next', async (order: DriverOrder, status: OrderStatus) => {
       const driver = requireDriver();
       await orderService.update(order.id, { status });
@@ -286,6 +304,9 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
         'driver:orders',
         await orderService.listOfDriver(driver.id),
       );
+      if (status === OrderStatus.COMPLETED) {
+        deleteAfterTimeout(order);
+      }
     });
 
     on('driver:orders:cancel', async (order: DriverOrder, reason: string) => {
@@ -303,6 +324,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
         'driver:orders',
         await orderService.listOfDriver(driver.id),
       );
+      deleteAfterTimeout(order);
     });
 
     on('driver:orders:delete', async (order: DriverOrder) => {
