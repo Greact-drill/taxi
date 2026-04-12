@@ -1,71 +1,38 @@
-import { DriverOrder, OrderStatus, type Order, type PassengerOrder } from '@packages/shared';
+import type { Order } from '@packages/shared';
 
 export class OrderStore {
   private orderStore = new Map<number, Order>();
   private nextId = 1;
 
-  create(input: Partial<Order>): Order {
-    const passenger = input.passenger;
-    const from = (input.from ?? '').trim();
-    const to = (input.to ?? '').trim();
-    const canSubmit = passenger && from.length > 0 && to.length > 0;
-    // TODO validation messages
-    if (!canSubmit) {
-      throw Error(`Некорректные данные заказа: ${from} ${to}`);
-    }
-
-    const order: Order = {
-      id: this.nextId++,
-      passenger,
-      from,
-      to,
-      status: input.status ?? OrderStatus.AWAITING_DRIVER,
-      createdAt: new Date().toISOString(),
-    };
+  async create(data: Omit<Order, 'id'>): Promise<Order> {
+    const order: Order = { ...data, id: this.nextId++ };
     this.orderStore.set(order.id, order);
     return order;
   }
 
-  listOfPassenger(passengerId: number): PassengerOrder[] {
+  async listWhere(match: (order: Order) => boolean): Promise<Order[]> {
     const items: Order[] = [];
     for (const order of this.orderStore.values()) {
-      if (order.passenger.id === passengerId) items.push(order);
+      if (match(order)) items.push(order);
     }
     return items;
   }
 
-  listOfDriver(driverId: number): DriverOrder[] {
-    const items: DriverOrder[] = [];
-    for (const order of this.orderStore.values()) {
-      if (order.driver?.id === driverId) items.push(order);
-    }
-    return items;
-  }
-
-  listOfActive(): DriverOrder[] {
-    const items: DriverOrder[] = [];
-    for (const order of this.orderStore.values()) {
-      if (order.status === OrderStatus.AWAITING_DRIVER) items.push(order);
-    }
-    return items;
-  }
-
-  findById(id: number): Order | undefined {
+  async findById(id: number): Promise<Order | undefined> {
     return this.orderStore.get(id);
   }
 
-  update(id: number, patch: Partial<Order>): Order {
+  async update(id: number, patch: Partial<Order>): Promise<Order> {
     const record = this.orderStore.get(id);
-    if (!record) throw Error(`Заказ не найден: ${id}`);
+    if (!record) throw Error(`OrderStore: Record not found ${id}`);
     Object.assign(record, patch, { id });
     return record;
   }
 
-  delete(id: number): Order {
+  async delete(id: number): Promise<Order> {
     const record = this.orderStore.get(id);
-    if (!record) throw Error(`Заказ не найден: ${id}`);
+    if (!record) throw Error(`OrderStore: Record not found ${id}`);
     this.orderStore.delete(id);
     return record;
   }
 }
-

@@ -1,9 +1,12 @@
 import type { Server as HttpServer } from 'node:http';
 import { inspect } from 'node:util';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { PassengerStore } from '../stores/PassengerStore.js';
 import { DriverStore } from '../stores/DriverStore.js';
 import { OrderStore } from '../stores/OrderStore.js';
+import { PassengerService } from '../services/PassengerService.js';
+import { DriverService } from '../services/DriverService.js';
+import { OrderService } from '../services/OrderService.js';
 import {
   DELETABLE_ORDER_STATUSES,
   OrderStatus,
@@ -27,6 +30,9 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
   const passengerStore = new PassengerStore();
   const driverStore = new DriverStore();
   const orderStore = new OrderStore();
+  const passengerService = new PassengerService(passengerStore);
+  const driverService = new DriverService(driverStore);
+  const orderService = new OrderService(orderStore);
 
   async function getConnections(): Promise<DispatcherConnectionsItem[]> {
     const sockets = await io.fetchSockets();
@@ -41,19 +47,23 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
     return items;
   }
 
-  io.use((socket, next) => {
-    const role = socket.handshake.auth?.role;
-    const token = socket.handshake.auth?.token;
-    if (token) {
-      if (role === 'passenger') {
-        const passenger = passengerStore.findByToken(token);
-        if (passenger) socket.data.passenger = passenger;
-      } else if (role === 'driver') {
-        const driver = driverStore.findByToken(token);
-        if (driver) socket.data.driver = driver;
+  io.use(async (socket, next) => {
+    try {
+      const role = socket.handshake.auth?.role;
+      const token = socket.handshake.auth?.token;
+      if (token) {
+        if (role === 'passenger') {
+          const passenger = await passengerService.findByToken(token);
+          if (passenger) socket.data.passenger = passenger;
+        } else if (role === 'driver') {
+          const driver = await driverService.findByToken(token);
+          if (driver) socket.data.driver = driver;
+        }
       }
+      next();
+    } catch (err) {
+      next(err as Error);
     }
-    next();
   });
 
   io.on('connection', (socket) => {
@@ -118,7 +128,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     // auth events
     on('passenger:auth:register', async (userData: PassengerRegister) => {
-      const passenger = passengerStore.create(userData);
+      const passenger = await passengerService.register(userData);
       socket.emit('auth:token', passenger.token);
     });
 
@@ -131,7 +141,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
     });
 
     on('driver:auth:login', async (credentials: DriverLogin) => {
-      const driver = await driverStore.login(credentials);
+      const driver = await driverService.login(credentials);
       socket.emit('auth:token', driver.token);
     });
 
@@ -147,13 +157,13 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     on('passenger:profile:update', async (profile: Partial<Passenger>) => {
       const passenger = requirePassenger();
-      const result = passengerStore.update(passenger.id, profile);
+      const result = await passengerService.update(passenger.id, profile);
       io.to(`passenger:${passenger.id}`).emit('passenger:profile', result);
     });
 
     on('driver:profile:update', async (profile: Partial<Driver>) => {
       const driver = requireDriver();
-      const result = driverStore.update(driver.id, profile);
+      const result = await driverService.update(driver.id, profile);
       io.to(`driver:${driver.id}`).emit('driver:profile', result);
     });
 
@@ -162,43 +172,43 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       const passenger = requirePassenger();
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(passenger.id),
+        await orderService.listOfPassenger(passenger.id),
       );
     });
 
     on('passenger:orders:create', async (input: Partial<PassengerOrder>) => {
       const passenger = requirePassenger();
-      const result = orderStore.create({ ...input, passenger });
+      await orderService.create(input, passenger);
 
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(passenger.id),
+        await orderService.listOfPassenger(passenger.id),
       );
       io.to('driver').emit(
         'driver:orders:active',
-        orderStore.listOfActive(),
+        await orderService.listOfActive(),
       );
     });
 
     on('passenger:orders:update', async (input: Partial<PassengerOrder>) => {
       const passenger = requirePassenger();
       if (!input.id) throw Error('Номер заказа должен быть указан');
-      const result = orderStore.update(input.id, { ...input });
+      const result = await orderService.update(input.id, { ...input });
 
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(passenger.id),
+        await orderService.listOfPassenger(passenger.id),
       );
       if (result.driver) {
         const driver = result.driver!
         io.to(`driver:${driver.id}`).emit(
           'driver:orders',
-          orderStore.listOfDriver(driver.id),
+          await orderService.listOfDriver(driver.id),
         );
       } else {
         io.to('driver').emit(
           'driver:orders:active',
-          orderStore.listOfActive(),
+          await orderService.listOfActive(),
         );
       }
     });
@@ -210,21 +220,21 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       if (input.status && !deletable.includes(input.status)) {
         throw Error(`Заказ можно удалить только в статусах ${DELETABLE_ORDER_STATUSES}`);
       }
-      orderStore.delete(input.id);
+      await orderService.delete(input.id);
 
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(passenger.id),
+        await orderService.listOfPassenger(passenger.id),
       );
       if (input.driver) {
         io.to(`driver:${input.driver.id}`).emit(
           'driver:orders',
-          orderStore.listOfDriver(input.driver.id),
+          await orderService.listOfDriver(input.driver.id),
         );
       }
       io.to('driver').emit(
         'driver:orders:active',
-        orderStore.listOfActive(),
+        await orderService.listOfActive(),
       );
     });
 
@@ -233,7 +243,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       const driver = requireDriver();
       io.to(`driver:${driver.id}`).emit(
         'driver:orders:active',
-        orderStore.listOfActive(),
+        await orderService.listOfActive(),
       );
     });
 
@@ -241,25 +251,25 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       const driver = requireDriver();
       io.to(`driver:${driver.id}`).emit(
         'driver:orders',
-        orderStore.listOfDriver(driver.id),
+        await orderService.listOfDriver(driver.id),
       );
     });
 
     on('driver:orders:take', async (order: DriverOrder) => {
       const driver = requireDriver();
-      orderStore.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED, assignedAt: new Date().toISOString() });
+      await orderService.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED, assignedAt: new Date().toISOString() });
 
       io.to(`passenger:${order.passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(order.passenger.id),
+        await orderService.listOfPassenger(order.passenger.id),
       );
       io.to(`driver:${driver.id}`).emit(
         'driver:orders',
-        orderStore.listOfDriver(driver.id),
+        await orderService.listOfDriver(driver.id),
       );
       io.to('driver').emit(
         'driver:orders:active',
-        orderStore.listOfActive(),
+        await orderService.listOfActive(),
       );
 
     });
@@ -267,38 +277,38 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
     on('driver:orders:next', async (order: DriverOrder, status: OrderStatus) => {
       const driver = requireDriver();
       const patch: Partial<Order> = { status };
-      orderStore.update(order.id, patch);
+      await orderService.update(order.id, patch);
 
       io.to(`passenger:${order.passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(order.passenger.id),
+        await orderService.listOfPassenger(order.passenger.id),
       );
       io.to(`driver:${driver.id}`).emit(
         'driver:orders',
-        orderStore.listOfDriver(driver.id),
+        await orderService.listOfDriver(driver.id),
       );
     });
 
     on('driver:orders:complete', async (order: DriverOrder) => {
       const driver = requireDriver();
-      orderStore.update(order.id, {
+      await orderService.update(order.id, {
         status: OrderStatus.COMPLETED,
         completedAt: new Date().toISOString()
       });
 
       io.to(`passenger:${order.passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(order.passenger.id),
+        await orderService.listOfPassenger(order.passenger.id),
       );
       io.to(`driver:${driver.id}`).emit(
         'driver:orders',
-        orderStore.listOfDriver(driver.id),
+        await orderService.listOfDriver(driver.id),
       );
     });
 
     on('driver:orders:cancel', async (order: DriverOrder, reason: string) => {
       const driver = requireDriver();
-      orderStore.update(order.id, {
+      await orderService.update(order.id, {
         status: OrderStatus.CANCELLED,
         cancelReason: reason,
         completedAt: new Date().toISOString(),
@@ -306,11 +316,11 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
       io.to(`passenger:${order.passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(order.passenger.id),
+        await orderService.listOfPassenger(order.passenger.id),
       );
       io.to(`driver:${driver.id}`).emit(
         'driver:orders',
-        orderStore.listOfDriver(driver.id),
+        await orderService.listOfDriver(driver.id),
       );
     });
 
@@ -319,23 +329,22 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       if (order.status && !DELETABLE_ORDER_STATUSES.includes(order.status)) {
         throw Error(`Заказ можно удалить только в статусах ${DELETABLE_ORDER_STATUSES}`);
       }
-      orderStore.delete(order.id);
+      await orderService.delete(order.id);
 
       io.to(`passenger:${order.passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(order.passenger.id),
+        await orderService.listOfPassenger(order.passenger.id),
       );
       io.to(`driver:${driver.id}`).emit(
         'driver:orders',
-        orderStore.listOfDriver(driver.id),
+        await orderService.listOfDriver(driver.id),
       );
     });
 
   });
 
   /** Тестовые водители для локальной разработки (логин = пароль). */
-  await driverStore.bootstrap();
+  await driverService.bootstrap();
 
   return io;
 }
-
