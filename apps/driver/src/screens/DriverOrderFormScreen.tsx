@@ -1,9 +1,13 @@
-import { Box, Button, Text, VStack } from '@chakra-ui/react';
+import { Box, Button, VStack } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
-import { DriverOrderStatusBadge } from '../components/DriverOrderStatusBadge';
+import {
+  OrderCardHeader,
+  OrderPassengerRow,
+  OrderRouteRow,
+} from '@packages/order-ui';
+import { OrderStatus } from '@packages/shared';
 import { useStore } from '../store';
 import { socket } from '../socket';
-import { OrderStatus } from '@packages/shared';
 
 function DriverOrderFormScreen() {
   const store = useStore();
@@ -14,7 +18,7 @@ function DriverOrderFormScreen() {
       <Button variant="outline" onClick={() => store.openOrdersList()}>
         Назад
       </Button>
-    )
+    );
   }
 
   function onSubmit(): void {
@@ -22,42 +26,22 @@ function DriverOrderFormScreen() {
     socket.emit('driver:orders:take', order);
   }
 
-  const created = new Date(order.createdAt);
-
   return (
-    <Box borderWidth="1px" borderColor="blackAlpha.200" borderRadius="lg" p="4" bg="white">
-      <VStack gap="3" align="stretch">
-        <Box>
-          <Text fontSize="lg" fontWeight="semibold">
-            Заявка #{order.id}
-          </Text>
-          <Text fontSize="xs" color="gray.600" mt="1">
-            {created.toLocaleString()}
-          </Text>
-        </Box>
-        <Box>
-          <DriverOrderStatusBadge status={order.status} />
-        </Box>
-        <Box>
-          <Text fontSize="xs" color="gray.600">
-            Пассажир
-          </Text>
-          <Text fontSize="sm" fontWeight="medium">
-            {order.passenger.name} · {order.passenger.phone}
-          </Text>
-        </Box>
-        <Box>
-          <Text fontSize="xs" color="gray.600">
-            Откуда
-          </Text>
-          <Text fontSize="sm">{order.from}</Text>
-        </Box>
-        <Box>
-          <Text fontSize="xs" color="gray.600">
-            Куда
-          </Text>
-          <Text fontSize="sm">{order.to}</Text>
-        </Box>
+    <Box
+      borderRadius="lg"
+      p="4"
+      bg="white"
+      boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)'
+      overflow="hidden"
+    >
+      <OrderCardHeader orderId={order.id} status={order.status} placementAt={order.createdAt} />
+      <OrderRouteRow from={order.from} to={order.to} />
+      <OrderPassengerRow
+        name={order.passenger.name}
+        phone={order.passenger.phone}
+        attachToCardBottom={false}
+      />
+      <VStack gap="3" align="stretch" mt="4">
         {order.status === OrderStatus.AWAITING_DRIVER && (
           <Button size="lg" onClick={onSubmit}>
             Взять заказ

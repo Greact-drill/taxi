@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { Box, Center, VStack } from '@chakra-ui/react';
+import { Box, Center } from '@chakra-ui/react';
 
 import PassengerAppHeader from './components/PassengerAppHeader';
 import PassengerAppContentScreen from './screens/PassengerAppContentScreen';
@@ -15,16 +15,11 @@ function App() {
         mx="auto"
         display="flex"
         flexDirection="column"
-        borderLeftWidth="1px"
-        borderRightWidth="1px"
-        borderColor="blackAlpha.200"
       >
         <PassengerAppHeader />
 
-        <Box as="main" position="relative" flex="1" px="4" py="6">
-          <VStack gap="3" align="stretch">
-            <PassengerAppContentScreen />
-          </VStack>
+        <Box as="main" position="relative" flex="1">
+          <PassengerAppContentScreen />
 
           {!store.online && (
             <Center

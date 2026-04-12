@@ -1,28 +1,27 @@
 import { Box } from '@chakra-ui/react';
 import type { DriverOrder } from '@packages/shared';
-import {
-  OrderCardHeader,
-  OrderPassengerRow,
-  OrderRouteRow,
-} from '@packages/order-ui';
+import { OrderCardHeader, OrderPassengerRow, OrderRouteRow } from '@packages/order-ui';
 
-export type DriverOrderPreviewProps = {
+export type DriverActiveOrderPreviewProps = {
   order: DriverOrder;
   onClick: () => void;
 };
 
-export function DriverOrderPreview({ order, onClick }: DriverOrderPreviewProps) {
+export function DriverActiveOrderPreview({ order, onClick }: DriverActiveOrderPreviewProps) {
   const { passenger } = order;
 
   return (
     <Box
-      borderRadius="lg"
-      p="4"
+      borderRadius="md"
       bg="white"
-      boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)'
+      borderWidth="1px"
+      borderColor="blackAlpha.100"
+      p="4"
       overflow="hidden"
       cursor="pointer"
       onClick={onClick}
+      transition="background-color 0.15s ease"
+      _hover={{ bg: 'gray.50' }}
     >
       <OrderCardHeader orderId={order.id} status={order.status} placementAt={order.createdAt} />
       <OrderRouteRow from={order.from} to={order.to} />

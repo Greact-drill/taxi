@@ -54,6 +54,9 @@ importers:
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.14)(react@19.2.4)
+      '@packages/order-ui':
+        specifier: workspace:*
+        version: link:../../packages/order-ui
       '@packages/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -100,6 +103,9 @@ importers:
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.14)(react@19.2.4)
+      '@packages/order-ui':
+        specifier: workspace:*
+        version: link:../../packages/order-ui
       '@packages/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -156,6 +162,31 @@ importers:
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+
+  packages/order-ui:
+    dependencies:
+      '@chakra-ui/react':
+        specifier: ^3.27.0
+        version: 3.34.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@emotion/react':
+        specifier: ^11.0.0
+        version: 11.14.0(@types/react@19.2.14)(react@19.2.4)
+      '@packages/shared':
+        specifier: workspace:*
+        version: link:../shared
+      lucide-react:
+        specifier: ^1.0.0
+        version: 1.8.0(react@19.2.4)
+      react:
+        specifier: ^18.0.0 || ^19.0.0
+        version: 19.2.4
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
       typescript:
         specifier: ^5.7.0
         version: 5.9.3

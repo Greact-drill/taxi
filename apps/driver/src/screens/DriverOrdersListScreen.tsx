@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { VStack, Text } from '@chakra-ui/react';
+import { Box, Flex, VStack } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 import { DriverOrderPreview } from '../components/DriverOrderPreview';
+import DriverActiveOrdersListScreen from './DriverActiveOrdersListScreen';
 import { useStore } from '../store';
 import { socket } from '../socket';
 
@@ -13,34 +14,26 @@ function DriverOrdersListScreen() {
     socket.emit('driver:orders:request');
   }, []);
 
-  return (
-    <>
-      <VStack gap="3" align="stretch">
-        <Text fontSize="lg" fontWeight="semibold">
-          Назначенные заказы
-        </Text>
-        {store.assignedOrders.map((order) => (
-          <DriverOrderPreview
-            key={order.id}
-            order={order}
-            onClick={() => store.openOrderForm(order)}
-          />
-        ))}
-      </VStack>
+  const hasAssigned = store.assignedOrders.length > 0;
 
-      <VStack gap="3" align="stretch">
-        <Text fontSize="lg" fontWeight="semibold">
-          Активные заказы
-        </Text>
-        {store.activeOrders.map((order) => (
-          <DriverOrderPreview
-            key={order.id}
-            order={order}
-            onClick={() => store.openOrderForm(order)}
-          />
-        ))}
-      </VStack>
-    </>
+  return (
+    <Flex direction="column" flex="1" minH="0" align="stretch" gap="4">
+      {hasAssigned ? (
+        <VStack gap="3" align="stretch" flexShrink={0}>
+          {store.assignedOrders.map((order) => (
+            <DriverOrderPreview
+              key={order.id}
+              order={order}
+              onClick={() => store.openOrderForm(order)}
+            />
+          ))}
+        </VStack>
+      ) : null}
+
+      <Box flex="1" minH="0" display="flex" flexDirection="column">
+        <DriverActiveOrdersListScreen />
+      </Box>
+    </Flex>
   );
 }
 

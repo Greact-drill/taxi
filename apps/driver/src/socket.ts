@@ -53,17 +53,5 @@ socket.on('driver:orders:active', (orders: DriverOrder[]) => {
 
 socket.on('driver:orders', (orders: DriverOrder[]) => {
   store.setAssignedOrders(orders);
+  store.openOrdersList();
 });
-
-
-// socket.on('driver:orderCreated', (order: Order) => {
-//   store.insertOrder(orderToDriverOrder(order));
-// });
-
-// socket.on('driver:orderUpdated', (order: Order) => {
-//   store.updateOrder(orderToDriverOrder(order));
-// });
-
-// socket.on('driver:orderDeleted', (payload: Order) => {
-//   store.removeOrder(payload.id);
-// });

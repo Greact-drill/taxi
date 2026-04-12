@@ -3,36 +3,29 @@ import type { LucideIcon } from 'lucide-react';
 import { Car, CircleCheck, CircleX, MapPin, Route, Search } from 'lucide-react';
 import { OrderStatus } from '@packages/shared';
 
-/** Chakra `Badge` / `colorPalette` values used for order status. */
-type OrderStatusColorPalette =
-  | 'gray'
-  | 'blue'
-  | 'orange'
-  | 'teal'
-  | 'green'
-  | 'red';
+type StatusColorPalette = 'gray' | 'blue' | 'orange' | 'teal' | 'green' | 'red' | 'yellow';
 
-type OrderStatusVisual = {
+type StatusVisual = {
   Icon: LucideIcon;
-  colorPalette: OrderStatusColorPalette;
+  colorPalette: StatusColorPalette;
   label: string;
 };
 
-const ORDER_STATUS_VISUAL: Record<OrderStatus, OrderStatusVisual> = {
+const ORDER_STATUS_VISUAL: Record<OrderStatus, StatusVisual> = {
   [OrderStatus.AWAITING_DRIVER]: {
     Icon: Search,
-    colorPalette: 'gray',
-    label: 'Ищем водителя',
+    colorPalette: 'yellow',
+    label: 'Ожидание водителя',
   },
   [OrderStatus.DRIVER_ASSIGNED]: {
     Icon: Car,
-    colorPalette: 'blue',
-    label: 'Водитель назначен',
+    colorPalette: 'green',
+    label: 'Назначен',
   },
   [OrderStatus.DRIVER_ARRIVED]: {
     Icon: MapPin,
-    colorPalette: 'orange',
-    label: 'Водитель на месте',
+    colorPalette: 'blue',
+    label: 'На месте',
   },
   [OrderStatus.ON_TRIP]: {
     Icon: Route,
@@ -41,7 +34,7 @@ const ORDER_STATUS_VISUAL: Record<OrderStatus, OrderStatusVisual> = {
   },
   [OrderStatus.COMPLETED]: {
     Icon: CircleCheck,
-    colorPalette: 'green',
+    colorPalette: 'gray',
     label: 'Завершён',
   },
   [OrderStatus.CANCELLED]: {
@@ -51,11 +44,11 @@ const ORDER_STATUS_VISUAL: Record<OrderStatus, OrderStatusVisual> = {
   },
 };
 
-export type PassengerOrderStatusBadgeProps = {
+export type OrderStatusBadgeProps = {
   status: OrderStatus;
 };
 
-export function PassengerOrderStatusBadge({ status }: PassengerOrderStatusBadgeProps) {
+export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
   const visual = ORDER_STATUS_VISUAL[status];
   const StatusIcon = visual.Icon;
 

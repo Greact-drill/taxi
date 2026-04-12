@@ -50,19 +50,22 @@ export class OrderStore {
     return items;
   }
 
-  findById(id: number): Order | null {
-    return this.orderStore.get(id) ?? null;
+  findById(id: number): Order | undefined {
+    return this.orderStore.get(id);
   }
 
-  update(id: number, patch: Partial<Order>): Order | undefined {
+  update(id: number, patch: Partial<Order>): Order {
     const record = this.orderStore.get(id);
-    if (!record) return undefined;
+    if (!record) throw Error(`Заказ не найден: ${id}`);
     Object.assign(record, patch, { id });
     return record;
   }
 
-  delete(id: number): void {
+  delete(id: number): Order {
+    const record = this.orderStore.get(id);
+    if (!record) throw Error(`Заказ не найден: ${id}`);
     this.orderStore.delete(id);
+    return record;
   }
 }
 

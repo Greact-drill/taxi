@@ -155,42 +155,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       io.to(`driver:${driver.id}`).emit('driver:profile', result);
     });
 
-    // orders events
-    on('passenger:orders:create', async (input: Partial<PassengerOrder>) => {
-      const passenger = requirePassenger();
-      const result = orderStore.create({ ...input, passenger });
-
-      io.to('driver').emit('driver:orders:created', result);
-      io.to(`passenger:${passenger.id}`).emit(
-        'passenger:orders',
-        orderStore.listOfPassenger(passenger.id),
-      );
-    });
-
-    on('passenger:orders:update', async (input: Partial<PassengerOrder>) => {
-      const passenger = requirePassenger();
-      if (!input.id) throw Error('Номер заказа должен быть указан');
-      const result = orderStore.update(input.id, { ...input });
-
-      io.to('driver').emit('driver:orders:updated', result);
-      io.to(`passenger:${passenger.id}`).emit(
-        'passenger:orders',
-        orderStore.listOfPassenger(passenger.id),
-      );
-    });
-
-    on('passenger:orders:delete', async (input: Partial<PassengerOrder>) => {
-      const passenger = requirePassenger();
-      if (!input.id) throw Error('Номер заказа должен быть указан');
-      const result = orderStore.delete(input.id);
-
-      io.to('driver').emit('driver:orders:deleted', result);
-      io.to(`passenger:${passenger.id}`).emit(
-        'passenger:orders',
-        orderStore.listOfPassenger(passenger.id),
-      );
-    });
-
+    // passenger orders events
     on('passenger:orders:request', async () => {
       const passenger = requirePassenger();
       io.to(`passenger:${passenger.id}`).emit(
@@ -199,18 +164,62 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       );
     });
 
-    on('driver:orders:take', async (order: DriverOrder) => {
-      const driver = requireDriver();
-      if (!order.id) throw Error('Номер заказа должен быть указан');
-      const result = orderStore.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED, assignedAt: new Date().toISOString() });
+    on('passenger:orders:create', async (input: Partial<PassengerOrder>) => {
+      const passenger = requirePassenger();
+      const result = orderStore.create({ ...input, passenger });
 
-      io.to('driver').emit('driver:orders:taken', result);
-      io.to(`passenger:${order.passenger.id}`).emit(
+      io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
-        orderStore.listOfPassenger(order.passenger.id),
+        orderStore.listOfPassenger(passenger.id),
+      );
+      io.to('driver').emit(
+        'driver:orders:active',
+        orderStore.listOfActive(),
       );
     });
 
+    on('passenger:orders:update', async (input: Partial<PassengerOrder>) => {
+      const passenger = requirePassenger();
+      if (!input.id) throw Error('Номер заказа должен быть указан');
+      const result = orderStore.update(input.id, { ...input });
+
+      io.to(`passenger:${passenger.id}`).emit(
+        'passenger:orders',
+        orderStore.listOfPassenger(passenger.id),
+      );
+      if (result.driver) {
+        const driver = result.driver!
+        io.to(`driver:${driver.id}`).emit(
+          'driver:orders',
+          orderStore.listOfDriver(driver.id),
+        );
+      } else {
+        io.to('driver').emit(
+          'driver:orders:active',
+          orderStore.listOfActive(),
+        );
+      }
+    });
+
+    on('passenger:orders:delete', async (input: Partial<PassengerOrder>) => {
+      const passenger = requirePassenger();
+      if (!input.id) throw Error('Номер заказа должен быть указан');
+      if (input.status !== OrderStatus.AWAITING_DRIVER) {
+        throw Error('Заказ не может быть удалён, так как он не находится в статусе ожидания водителя');
+      }
+      const result = orderStore.delete(input.id);
+
+      io.to(`passenger:${passenger.id}`).emit(
+        'passenger:orders',
+        orderStore.listOfPassenger(passenger.id),
+      );
+      io.to('driver').emit(
+        'driver:orders:active',
+        orderStore.listOfActive(),
+      );
+    });
+
+    // driver orders events
     on('driver:orders:active:request', async () => {
       const driver = requireDriver();
       io.to(`driver:${driver.id}`).emit(
@@ -225,6 +234,26 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
         'driver:orders',
         orderStore.listOfDriver(driver.id),
       );
+    });
+
+    on('driver:orders:take', async (order: DriverOrder) => {
+      const driver = requireDriver();
+      if (!order.id) throw Error('Номер заказа должен быть указан');
+      const result = orderStore.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED, assignedAt: new Date().toISOString() });
+
+      io.to(`passenger:${order.passenger.id}`).emit(
+        'passenger:orders',
+        orderStore.listOfPassenger(order.passenger.id),
+      );
+      io.to(`driver:${driver.id}`).emit(
+        'driver:orders',
+        orderStore.listOfDriver(driver.id),
+      );
+      io.to('driver').emit(
+        'driver:orders:active',
+        orderStore.listOfActive(),
+      );
+
     });
 
   });

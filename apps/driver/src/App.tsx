@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { Box, Center, VStack } from '@chakra-ui/react';
+import { Box, Center } from '@chakra-ui/react';
 
 import DriverAppHeader from './components/DriverAppHeader';
 import DriverAppContentScreen from './screens/DriverAppContentScreen';
@@ -15,16 +15,18 @@ function App() {
         mx="auto"
         display="flex"
         flexDirection="column"
-        borderLeftWidth="1px"
-        borderRightWidth="1px"
-        borderColor="blackAlpha.200"
       >
         <DriverAppHeader />
 
-        <Box as="main" position="relative" flex="1" px="4" py="6">
-          <VStack gap="3" align="stretch">
-            <DriverAppContentScreen />
-          </VStack>
+        <Box
+          as="main"
+          position="relative"
+          flex="1"
+          minH="0"
+          display="flex"
+          flexDirection="column"
+        >
+          <DriverAppContentScreen />
 
           {!store.online && (
             <Center

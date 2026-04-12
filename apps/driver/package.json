@@ -10,6 +10,7 @@
   "dependencies": {
     "@chakra-ui/react": "^3.27.0",
     "@emotion/react": "^11.14.0",
+    "@packages/order-ui": "workspace:*",
     "@packages/shared": "workspace:*",
     "lucide-react": "^1.8.0",
     "mobx": "^6.15.0",

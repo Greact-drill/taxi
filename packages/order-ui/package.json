@@ -1,0 +1,22 @@
+{
+  "name": "@packages/order-ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@packages/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "@chakra-ui/react": "^3.27.0",
+    "@emotion/react": "^11.0.0",
+    "lucide-react": "^1.0.0",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

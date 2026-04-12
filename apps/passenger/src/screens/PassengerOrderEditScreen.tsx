@@ -23,7 +23,12 @@ function PassengerOrderEditScreen() {
   }
 
   return (
-    <Box borderWidth="1px" borderColor="blackAlpha.200" borderRadius="lg" p="4" bg="white">
+    <Box
+      borderRadius="lg"
+      p="4"
+      bg="white"
+      boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)"
+    >
       <Text fontSize="lg" fontWeight="semibold">
         Заказ #{store.screenFormData.id ?? '-'}
       </Text>
