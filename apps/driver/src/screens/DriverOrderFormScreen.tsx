@@ -17,6 +17,7 @@ function DriverOrderFormScreen() {
   const hasAssigned = store.assignedOrders.length;
   const [cancelMode, setCancelMode] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const canCancel = cancelReason.length > 0;
 
   useEffect(() => {
     setCancelMode(false);
@@ -119,7 +120,7 @@ function DriverOrderFormScreen() {
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
             />
-            <Button size="lg" colorPalette="red" onClick={cancel}>
+            <Button size="lg" colorPalette="red" onClick={cancel} disabled={!canCancel}>
               Отменить заказ
             </Button>
             <Button variant="outline" onClick={() => setCancelMode(false)}>
@@ -128,7 +129,7 @@ function DriverOrderFormScreen() {
           </VStack>
         )}
         {order.status && DELETABLE_ORDER_STATUSES.includes(order.status) && (
-          <Button colorPalette="red" variant="outline" onClick={onDelete}>
+          <Button colorPalette="red" variant="outline" onClick={onDelete} >
             Удалить
           </Button>
         )}

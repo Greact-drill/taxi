@@ -1,20 +1,24 @@
-import { Text } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 
 export type OrderCancelReasonRowProps = {
   cancelReason?: string;
 };
 
-/** One line when a cancelled order has a non-empty reason. */
+/** Cancel reason text in a light red bordered box when non-empty. */
 export function OrderCancelReasonRow({ cancelReason }: OrderCancelReasonRowProps) {
-  const t = cancelReason?.trim();
-  if (!t) return null;
 
   return (
-    <Text mt="3" fontSize="sm" color="gray.600">
-      <Text as="span" color="gray.500">
-        Причина отмены:{' '}
+    <Box
+      mt="3"
+      px="3"
+      py="2.5"
+      borderRadius="md"
+      borderWidth="1px"
+      borderColor="red.400"
+    >
+      <Text fontSize="sm" color="gray.700">
+        {cancelReason}
       </Text>
-      {t}
-    </Text>
+    </Box>
   );
 }
