@@ -19,7 +19,8 @@ import {
   type PassengerRegister,
 } from '@packages/shared';
 
-const CLEAN_TIMEOUT = 15_000;
+const COMPLETED_CLEAN_TIMEOUT = 15_000; // 15 секунд после завершения заказа
+const CANCELLED_CLEAN_TIMEOUT = 30_000; // 30 секунд после отмены заказа
 
 export async function createSocketServer(httpServer: HttpServer): Promise<Server> {
   const io = new Server(httpServer, {
@@ -27,7 +28,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
     pingInterval: 25_000,  // сервер шлёт PING раз в 25 с
     pingTimeout: 20_000,   // ждёт PONG до 20 с
     // соединение упадёт лишь если клиент молчит 45 с суммарно
-    
+
     connectionStateRecovery: {
       maxDisconnectionDuration: 3 * 60 * 1000, // хранить состояние 3 минуты
       skipMiddlewares: true,
@@ -290,8 +291,8 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     });
 
-    function deleteAfterTimeout(order: DriverOrder): void {
-      timeout(CLEAN_TIMEOUT, async () => {
+    function deleteAfterTimeout(order: DriverOrder, timeoutMs: number): void {
+      timeout(timeoutMs, async () => {
         if (await orderService.findById(order.id)) {
           await orderService.delete(order.id);
           io.to(`passenger:${order.passenger.id}`).emit(
@@ -319,7 +320,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
         await orderService.listOfDriver(driver.id),
       );
       if (status === OrderStatus.COMPLETED) {
-        deleteAfterTimeout(order);
+        deleteAfterTimeout(order, COMPLETED_CLEAN_TIMEOUT);
       }
     });
 
@@ -338,7 +339,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
         'driver:orders',
         await orderService.listOfDriver(driver.id),
       );
-      deleteAfterTimeout(order);
+      deleteAfterTimeout(order, CANCELLED_CLEAN_TIMEOUT);
     });
 
     on('driver:orders:delete', async (order: DriverOrder) => {
