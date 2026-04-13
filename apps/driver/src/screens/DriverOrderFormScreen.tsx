@@ -10,6 +10,7 @@ import {
 import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
 import { useStore } from '../store';
 import { socket } from '../socket';
+import { DriverOrderChat } from '../components/DriverOrderChat';
 
 function DriverOrderFormScreen() {
   const store = useStore();
@@ -131,6 +132,9 @@ function DriverOrderFormScreen() {
         <Button variant="outline" onClick={() => store.openOrdersList()}>
           Назад
         </Button>
+        {order.status !== OrderStatus.AWAITING_DRIVER && (
+          <DriverOrderChat />
+        )}
       </VStack>
     </Box>
   );

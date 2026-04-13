@@ -7,6 +7,8 @@ import { OrderStore } from '../stores/OrderStore.js';
 import { PassengerService } from '../services/PassengerService.js';
 import { DriverService } from '../services/DriverService.js';
 import { OrderService } from '../services/OrderService.js';
+import { OrderChatService } from '../services/OrderChatService.js';
+import { OrderChatMessageStore } from '../stores/OrderChatMessageStore.js';
 import {
   DELETABLE_ORDER_STATUSES,
   OrderStatus,
@@ -14,6 +16,7 @@ import {
   type Driver,
   type DriverLogin,
   type DriverOrder,
+  type Order,
   type Passenger,
   type PassengerOrder,
   type PassengerRegister,
@@ -39,9 +42,11 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
   const passengerStore = new PassengerStore();
   const driverStore = new DriverStore();
   const orderStore = new OrderStore();
+  const orderChatMessageStore = new OrderChatMessageStore();
   const passengerService = new PassengerService(passengerStore);
   const driverService = new DriverService(driverStore);
-  const orderService = new OrderService(orderStore, passengerService, driverService);
+  const orderChatService = new OrderChatService(orderChatMessageStore);
+  const orderService = new OrderService(orderStore, passengerService, driverService, orderChatService);
 
   async function getConnections(): Promise<DispatcherConnectionsItem[]> {
     const sockets = await io.fetchSockets();
@@ -232,11 +237,13 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     on('passenger:orders:delete', async (input: Partial<PassengerOrder>) => {
       const passenger = requirePassenger();
-      if (!input.id) throw Error('Номер заказа должен быть указан');
+      
       const deletable = [OrderStatus.AWAITING_DRIVER, ...DELETABLE_ORDER_STATUSES]
       if (input.status && !deletable.includes(input.status)) {
         throw Error(`Заказ можно удалить только в статусах ${DELETABLE_ORDER_STATUSES}`);
       }
+
+      if (!input.id) throw Error('Номер заказа должен быть указан');
       await orderService.delete(input.id);
 
       io.to(`passenger:${passenger.id}`).emit(
@@ -253,6 +260,20 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
         'driver:orders:active',
         await orderService.listOfActive(),
       );
+    });
+
+    on('passenger:order:messages:request', async (passengerOrder: PassengerOrder) => {
+      const passenger = requirePassenger();
+      const messages = await orderChatService.messages(passengerOrder);
+      io.to(`passenger:${passenger.id}`).emit('passenger:order:messages', passengerOrder.id, messages);
+    });
+
+    on('passenger:order:messages:send', async (passengerOrder: PassengerOrder, text: string) => {
+      const passenger = requirePassenger();
+      await orderChatService.sendMessage(passengerOrder, { text, authorRole: 'passenger' });
+      const messages = await orderChatService.messages(passengerOrder);
+      io.to(`passenger:${passenger.id}`).emit('passenger:order:messages', passengerOrder.id, messages);
+      if (passengerOrder.driver) io.to(`driver:${passengerOrder.driver.id}`).emit('passenger:order:messages', passengerOrder.id, messages);
     });
 
     // driver orders events
@@ -357,6 +378,20 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
         'driver:orders',
         await orderService.listOfDriver(driver.id),
       );
+    });
+
+    on('driver:order:messages:request', async (driverOrder: DriverOrder) => {
+      const driver = requireDriver();
+      const messages = await orderChatService.messages(driverOrder);
+      io.to(`driver:${driver.id}`).emit('driver:order:messages', driverOrder.id, messages); 
+    });
+
+    on('driver:order:messages:send', async (driverOrder: DriverOrder, text: string) => {
+      const driver = requireDriver();
+      await orderChatService.sendMessage(driverOrder, { text, authorRole: 'driver' });
+      const messages = await orderChatService.messages(driverOrder);
+      io.to(`driver:${driver.id}`).emit('driver:order:messages', driverOrder.id, messages); 
+      io.to(`passenger:${driverOrder.passenger.id}`).emit('driver:order:messages', driverOrder.id, messages);      
     });
 
   });

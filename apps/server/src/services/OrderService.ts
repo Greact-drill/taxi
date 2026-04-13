@@ -9,13 +9,32 @@ import {
 import { OrderStore } from '../stores/OrderStore.js';
 import { PassengerService } from './PassengerService.js';
 import { DriverService } from './DriverService.js';
+import { OrderChatService } from './OrderChatService.js';
 
 export class OrderService {
   constructor(
     private readonly store: OrderStore,
     private readonly passengerService: PassengerService,
     private readonly driverService: DriverService,
+    private readonly orderChatService: OrderChatService,
   ) { }
+
+  private async toOrder(record: OrderRecord): Promise<Order> {
+    const passenger = (await this.passengerService.getById(record.passengerId))!;
+    const driver = record.driverId ? await this.driverService.getById(record.driverId) : undefined;
+    const order: Order = {
+      id: record.id,
+      createdAt: record.createdAt,
+      passenger,
+      from: record.from,
+      to: record.to,
+      driver,
+      status: record.status,
+      cancelReason: record.cancelReason,
+    };
+    //const messages = await this.orderChatService.messages(orderShell);
+    return order;
+  }
 
   async create(input: Partial<PassengerOrder>, passenger: Passenger): Promise<Order> {
     const from = (input.from ?? '').trim();
@@ -33,29 +52,16 @@ export class OrderService {
       createdAt: new Date().toISOString(),
     });
 
-    return {
-      id: record.id,
-      passenger: passenger,
-      from: record.from,
-      to: record.to,
-      status: record.status,
-      createdAt: record.createdAt,
-    };
+    return this.toOrder(record);
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
     const rows = await this.store.listWhere((order) => order.passengerId === passengerId);
     const out: PassengerOrder[] = [];
     for (const r of rows) {
-      out.push({
-        id: r.id,
-        createdAt: r.createdAt,
-        from: r.from,
-        to: r.to,
-        driver: r.driverId ? await this.driverService.getById(r.driverId) : undefined,
-        status: r.status,
-        cancelReason: r.cancelReason,
-      });
+      const order = await this.toOrder(r);
+      const { passenger: _omit, ...passengerOrder } = order;
+      out.push(passengerOrder);
     }
     return out;
   }
@@ -64,15 +70,9 @@ export class OrderService {
     const rows = await this.store.listWhere((order) => order.driverId === driverId);
     const out: DriverOrder[] = [];
     for (const record of rows) {
-      out.push({
-        id: record.id,
-        createdAt: record.createdAt,
-        passenger: (await this.passengerService.getById(record.passengerId))!,
-        from: record.from,
-        to: record.to,
-        status: record.status,
-        cancelReason: record.cancelReason,
-      });
+      const order = await this.toOrder(record);
+      const { driver: _omit, ...driverOrder } = order;
+      out.push(driverOrder);
     }
     return out;
   }
@@ -81,14 +81,9 @@ export class OrderService {
     const rows = await this.store.listWhere((order) => order.status === OrderStatus.AWAITING_DRIVER);
     const out: DriverOrder[] = [];
     for (const record of rows) {
-      out.push({
-        id: record.id,
-        createdAt: record.createdAt,
-        passenger: (await this.passengerService.getById(record.passengerId))!,
-        from: record.from,
-        to: record.to,
-        status: record.status,
-      });
+      const order = await this.toOrder(record);
+      const { driver: _omit, ...driverOrder } = order;
+      out.push(driverOrder);
     }
     return out;
   }
@@ -96,16 +91,7 @@ export class OrderService {
   async findById(id: number): Promise<Order | undefined> {
     const record = await this.store.findById(id);
     if (!record) return;
-    return {
-      id: record.id,
-      createdAt: record.createdAt,
-      passenger: (await this.passengerService.getById(record.passengerId))!,
-      from: record.from,
-      to: record.to,
-      driver: record.driverId ? await this.driverService.getById(record.driverId) : undefined,
-      status: record.status,
-      cancelReason: record.cancelReason,
-    };
+    return this.toOrder(record);
   }
 
   async update(id: number, updates: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
@@ -128,30 +114,11 @@ export class OrderService {
       patch.completedAt = new Date().toISOString();
     }
     const record = await this.store.update(id, patch);
-
-    return {
-      id: record.id,
-      createdAt: record.createdAt,
-      passenger: (await this.passengerService.getById(record.passengerId))!,
-      from: record.from,
-      to: record.to,
-      driver: record.driverId ? await this.driverService.getById(record.driverId) : undefined,
-      status: record.status,
-      cancelReason: record.cancelReason,
-    };
+    return this.toOrder(record);
   }
 
   async delete(id: number): Promise<Order> {
     const record = await this.store.delete(id);
-    return {
-      id: record.id,
-      createdAt: record.createdAt,
-      passenger: (await this.passengerService.getById(record.passengerId))!,
-      from: record.from,
-      to: record.to,
-      driver: record.driverId ? await this.driverService.getById(record.driverId) : undefined,
-      status: record.status,
-      cancelReason: record.cancelReason,
-    };
+    return this.toOrder(record);
   }
 }

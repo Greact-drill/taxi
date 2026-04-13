@@ -1,4 +1,4 @@
-import type { Driver, DriverOrder, Order } from '@packages/shared';
+import type { Driver, DriverOrder, Order, OrderChatMessage } from '@packages/shared';
 import { makeAutoObservable } from 'mobx';
 
 const TOKEN_STORAGE_KEY = 'taxi_driver_token';
@@ -61,6 +61,7 @@ class Store {
 
   screen: 'list' | 'form';
   screenFormData?: DriverOrder;
+  screenFormMessages: OrderChatMessage[];
 
   openOrdersList() {
     this.screen = 'list';
@@ -71,8 +72,13 @@ class Store {
     this.screen = 'form';
   }
 
+  setOrderMessages(messages: OrderChatMessage[]) {
+    this.screenFormMessages = [...messages];
+  }
+
   constructor() {
     this.screen = 'list';
+    this.screenFormMessages = [];
     makeAutoObservable(this);
   }
 }

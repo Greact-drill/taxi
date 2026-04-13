@@ -1,4 +1,5 @@
 import type { OrderStatus } from './domain.js';
+import type { ChatAuthorRole } from './domain.js';
 
 export type PassengerRecord = {
   id: number;
@@ -31,4 +32,12 @@ export type OrderRecord = {
   assignedAt?: string;
   completedAt?: string;
   deletedAt?: string;
+};
+
+export type OrderChatMessageRecord = {
+  id: number;
+  orderId: number;
+  authorRole: ChatAuthorRole;
+  text: string;
+  createdAt: string;
 };

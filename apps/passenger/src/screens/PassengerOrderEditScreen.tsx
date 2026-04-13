@@ -1,8 +1,9 @@
 import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
+import { observer } from 'mobx-react-lite';
+import { DELETABLE_ORDER_STATUSES, OrderStatus, type PassengerOrder } from '@packages/shared';
+import { PassengerOrderChat } from '../components/PassengerOrderChat';
 import { socket } from '../socket';
 import { useStore } from '../store';
-import { observer } from 'mobx-react-lite';
-import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
 
 const deletable = [OrderStatus.AWAITING_DRIVER, ...DELETABLE_ORDER_STATUSES];
 
@@ -14,6 +15,8 @@ function PassengerOrderEditScreen() {
   const status = store.screenFormData?.status;
   const canSubmit = from.length > 0 && to.length > 0;
   // TODO validation messages
+  const driver = store.screenFormData?.driver;
+  console.log('PassengerOrderEditScreen', driver);
 
   function onSubmit(): void {
     store.clearError();
@@ -57,10 +60,11 @@ function PassengerOrderEditScreen() {
           <Button colorPalette="red" variant="outline" onClick={onDelete}>
             Удалить
           </Button>
-        )}
+        )}    
         <Button variant="outline" onClick={() => store.openOrdersList()}>
           Назад
         </Button>
+        { driver && <PassengerOrderChat /> }
       </VStack>
     </Box>
   );

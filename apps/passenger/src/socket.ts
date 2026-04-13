@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import { store } from './store';
-import type { Passenger, PassengerOrder } from '@packages/shared';
+import type { DriverOrder, OrderChatMessage, Passenger, PassengerOrder } from '@packages/shared';
 
 export const socket = io({
   path: '/ws',
@@ -62,4 +62,21 @@ socket.on('passenger:profile', (user: Passenger) => {
 socket.on('passenger:orders', (orders: PassengerOrder[]) => {
   store.setOrders(orders);
   store.openOrdersList();
+});
+
+socket.on('passenger:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
+  // мои сообщения
+  console.log('passenger:order:messages', orderId, messages);
+  if (store.screenFormData?.id === orderId) {
+    store.setOrderMessages(messages);
+  }
+});
+
+socket.on('driver:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
+  // сообщения водителя
+  const order = store.orders.find((o) => o.id === orderId);
+  if (order) {
+    store.openEditOrderForm(order);
+    store.setOrderMessages(messages);
+  }
 });

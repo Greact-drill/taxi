@@ -1,4 +1,4 @@
-import { PassengerOrder, Passenger } from "@packages/shared";
+import { OrderChatMessage, PassengerOrder, Passenger } from "@packages/shared";
 import { makeAutoObservable } from "mobx";
 
 const TOKEN_STORAGE_KEY = 'taxi_token';
@@ -56,6 +56,7 @@ class Store {
   screen: 'list' | 'form';
   screenForm: 'new' | 'edit';
   screenFormData: Partial<PassengerOrder>;
+  screenFormMessages: OrderChatMessage[];
 
   openOrdersList() {
     this.screen = 'list';
@@ -77,11 +78,16 @@ class Store {
     this.screenFormData = updater(this.screenFormData);
   }
 
+  setOrderMessages(messages: OrderChatMessage[]) {
+    this.screenFormMessages = [...messages];
+  }
+
   // constructor
   constructor() {
     this.screen = 'list';
     this.screenForm = 'new';
     this.screenFormData = {};
+    this.screenFormMessages = [];
     makeAutoObservable(this);
   }
 }
