@@ -27,6 +27,12 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
     pingInterval: 25_000,  // сервер шлёт PING раз в 25 с
     pingTimeout: 20_000,   // ждёт PONG до 20 с
     // соединение упадёт лишь если клиент молчит 45 с суммарно
+    
+    connectionStateRecovery: {
+      maxDisconnectionDuration: 3 * 60 * 1000, // хранить состояние 3 минуты
+      skipMiddlewares: true,
+    },
+
   });
 
   const passengerStore = new PassengerStore();
