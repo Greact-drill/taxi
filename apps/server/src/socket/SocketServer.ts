@@ -14,13 +14,12 @@ import {
   type Driver,
   type DriverLogin,
   type DriverOrder,
-  type Order,
   type Passenger,
   type PassengerOrder,
   type PassengerRegister,
 } from '@packages/shared';
 
-const CLEAN_TIMEOUT = 30_000;
+const CLEAN_TIMEOUT = 15_000;
 
 export async function createSocketServer(httpServer: HttpServer): Promise<Server> {
   const io = new Server(httpServer, {
@@ -114,14 +113,14 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       event: string,
       handler: (...args: P) => Promise<void>,
     ): void {
-      socket.on(event, (...args: P) => {
-        void handler(...args).catch(handleAsyncError);
+      socket.on(event, async (...args: P) => {
+        await handler(...args).catch(handleAsyncError);
       });
     }
 
     function timeout(delayMs: number, handler: () => Promise<void>): ReturnType<typeof setTimeout> {
-      return setTimeout(() => {
-        void handler().catch(handleAsyncError);
+      return setTimeout(async () => {
+        await handler().catch(handleAsyncError);
       }, delayMs);
     }
 
@@ -286,7 +285,8 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     function deleteAfterTimeout(order: DriverOrder): void {
       timeout(CLEAN_TIMEOUT, async () => {
-        if (await orderService.findById(order.id)) {
+        const record = await orderService.findById(order.id);
+        if (record) {
           await orderService.delete(order.id);
           io.to(`passenger:${order.passenger.id}`).emit(
             'passenger:orders',
