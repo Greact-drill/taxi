@@ -5,6 +5,14 @@ import type { Passenger, PassengerOrder } from '@packages/shared';
 export const socket = io({
   path: '/ws',
   autoConnect: true,
+
+  // Reconnection: быстрый и настойчивый
+  reconnection: true,
+  reconnectionAttempts: Infinity,     // никогда не сдаваться
+  reconnectionDelay: 1000,            // 1 с на первую попытку
+  reconnectionDelayMax: 3000,         // не более 3 с между попытками
+  randomizationFactor: 0.2,           // минимальный разброс
+    
   auth: (callback) => {
     callback({
       role: 'passenger',

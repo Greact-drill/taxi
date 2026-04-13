@@ -12,7 +12,7 @@ function DriverOrdersListScreen() {
   useEffect(() => {
     socket.emit('driver:orders:active:request');
     socket.emit('driver:orders:request');
-  }, []);
+  }, [socket.id]);
 
   const hasAssigned = store.assignedOrders.length > 0;
 

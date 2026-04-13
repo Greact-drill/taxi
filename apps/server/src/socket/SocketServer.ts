@@ -24,8 +24,9 @@ const CLEAN_TIMEOUT = 15_000;
 export async function createSocketServer(httpServer: HttpServer): Promise<Server> {
   const io = new Server(httpServer, {
     path: '/ws',
-    pingInterval: 1000,
-    pingTimeout: 1000,
+    pingInterval: 25_000,  // сервер шлёт PING раз в 25 с
+    pingTimeout: 20_000,   // ждёт PONG до 20 с
+    // соединение упадёт лишь если клиент молчит 45 с суммарно
   });
 
   const passengerStore = new PassengerStore();
@@ -113,14 +114,14 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
       event: string,
       handler: (...args: P) => Promise<void>,
     ): void {
-      socket.on(event, async (...args: P) => {
-        await handler(...args).catch(handleAsyncError);
+      socket.on(event, (...args: P) => {
+        handler(...args).catch(handleAsyncError);
       });
     }
 
     function timeout(delayMs: number, handler: () => Promise<void>): ReturnType<typeof setTimeout> {
-      return setTimeout(async () => {
-        await handler().catch(handleAsyncError);
+      return setTimeout(() => {
+        handler().catch(handleAsyncError);
       }, delayMs);
     }
 
@@ -285,8 +286,7 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
     function deleteAfterTimeout(order: DriverOrder): void {
       timeout(CLEAN_TIMEOUT, async () => {
-        const record = await orderService.findById(order.id);
-        if (record) {
+        if (await orderService.findById(order.id)) {
           await orderService.delete(order.id);
           io.to(`passenger:${order.passenger.id}`).emit(
             'passenger:orders',

@@ -11,7 +11,7 @@ function PassengerOrdersListScreen() {
 
   useEffect(() => {
     socket.emit('passenger:orders:request');
-  }, []);
+  }, [socket.id]);
 
   const canAdd = store.orders.length < 1;
 

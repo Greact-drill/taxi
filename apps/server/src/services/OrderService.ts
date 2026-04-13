@@ -95,7 +95,7 @@ export class OrderService {
 
   async findById(id: number): Promise<Order | undefined> {
     const record = await this.store.findById(id);
-    if (!record) throw new Error(`Заказ не найден: ${id}`);
+    if (!record) return;
     return {
       id: record.id,
       createdAt: record.createdAt,
