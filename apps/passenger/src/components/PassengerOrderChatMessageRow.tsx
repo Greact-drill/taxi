@@ -19,7 +19,7 @@ export function PassengerOrderChatMessageRow({ message }: PassengerOrderChatMess
         px="3"
         py="2"
         borderRadius="xl"
-        bg={isPassenger ? 'blue.50' : 'white'}
+        bg={isPassenger ? 'colorPalette.subtle' : 'white'}
         //color={isPassenger ? 'white' : 'gray.900'}
         alignSelf={isPassenger ? 'end' : 'start'}
       >

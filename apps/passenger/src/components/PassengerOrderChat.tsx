@@ -44,7 +44,7 @@ function PassengerOrderChat() {
         borderWidth="1px"
         borderRadius="md"
         p="3"
-        bg="blue.100"
+        bg="colorPalette.muted"
         boxShadow="inset 0 3px 14px rgba(0, 0, 0, 0.1), inset 0 1px 4px rgba(0, 0, 0, 0.06)"
         flex="1"
         minH="0"

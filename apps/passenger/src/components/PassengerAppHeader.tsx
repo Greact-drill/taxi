@@ -38,7 +38,7 @@ function PassengerAppHeader() {
     >
       <HStack gap="3" minW="0" align="center">
         {currentUser && (
-          <Text fontSize="sm" fontWeight="bold" color="blue.600" flex="none" whiteSpace="nowrap">
+          <Text fontSize="sm" fontWeight="bold" color="colorPalette.fg" flex="none" whiteSpace="nowrap">
             #{currentUser.id}
           </Text>
         )}

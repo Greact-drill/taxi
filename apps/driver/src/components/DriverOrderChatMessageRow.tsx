@@ -19,7 +19,7 @@ export function DriverOrderChatMessageRow({ message }: DriverOrderChatMessageRow
         px="3"
         py="2"
         borderRadius="xl"
-        bg={isDriver ? 'purple.50' : 'white'}
+        bg={isDriver ? 'colorPalette.subtle' : 'white'}
         color="gray.900"
         alignSelf={isDriver ? 'end' : 'start'}
       >

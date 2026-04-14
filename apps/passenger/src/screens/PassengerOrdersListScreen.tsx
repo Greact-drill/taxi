@@ -41,7 +41,7 @@ function PassengerOrdersListScreen() {
           onClick={() => store.openCreateOrderForm()}
         >
           <VStack gap="1" align="center">
-            <Box color="gray.600" lineHeight="0">
+            <Box color="colorPalette.fg" lineHeight="0">
               <Plus size={32} strokeWidth={2} aria-hidden />
             </Box>
             <Text fontSize="sm" fontWeight="semibold" color="gray.700" textAlign="center">

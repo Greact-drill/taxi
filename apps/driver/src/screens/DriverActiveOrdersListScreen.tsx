@@ -9,7 +9,7 @@ function DriverActiveOrdersListScreen() {
   return (
     <Box
       borderRadius="xl"
-      bg="purple.100"
+      bg="colorPalette.muted"
       boxShadow='inset 0 3px 14px rgba(0, 0, 0, 0.1), inset 0 1px 4px rgba(0, 0, 0, 0.06)'
       p="3"
       flex="1"
@@ -18,7 +18,7 @@ function DriverActiveOrdersListScreen() {
       flexDirection="column"
       overflowY="auto"
     >
-      <Text fontSize="sm" fontWeight="semibold" color="blue.900" opacity={0.85} px="1" mb="2" flexShrink={0}>
+      <Text fontSize="sm" fontWeight="semibold" color="colorPalette.fg" opacity={0.85} px="1" mb="2" flexShrink={0}>
         Открытые заказы
       </Text>
       <VStack gap="2" align="stretch" flex="1" minH="0">
