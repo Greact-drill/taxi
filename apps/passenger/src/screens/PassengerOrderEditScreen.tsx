@@ -1,4 +1,5 @@
-import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
+import { Box, Button, HStack, Input, Text, VStack } from '@chakra-ui/react';
+import { ArrowLeft } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { DELETABLE_ORDER_STATUSES, OrderStatus, type PassengerOrder } from '@packages/shared';
 import { PassengerOrderChat } from '../components/PassengerOrderChat';
@@ -16,7 +17,6 @@ function PassengerOrderEditScreen() {
   const canSubmit = from.length > 0 && to.length > 0;
   // TODO validation messages
   const driver = store.screenFormData?.driver;
-  console.log('PassengerOrderEditScreen', driver);
 
   function onSubmit(): void {
     store.clearError();
@@ -35,9 +35,22 @@ function PassengerOrderEditScreen() {
       bg="white"
       boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)"
     >
-      <Text fontSize="lg" fontWeight="semibold">
-        Заказ #{store.screenFormData.id ?? '-'}
-      </Text>
+      <HStack gap="2" align="center">
+        <Button
+          variant="outline"
+          onClick={() => store.openOrdersList()}
+          w="10"
+          h="10"
+          minW="10"
+          p="0"
+          aria-label="Назад"
+        >
+          <ArrowLeft size={18} aria-hidden />
+        </Button>
+        <Text fontSize="lg" fontWeight="semibold">
+          Заказ #{store.screenFormData.id}
+        </Text>
+      </HStack>
       <VStack gap="3" align="stretch" mt="3">
         <Input
           placeholder="Откуда"
@@ -61,9 +74,6 @@ function PassengerOrderEditScreen() {
             Удалить
           </Button>
         )}    
-        <Button variant="outline" onClick={() => store.openOrdersList()}>
-          Назад
-        </Button>
         { driver && <PassengerOrderChat /> }
       </VStack>
     </Box>

@@ -1,4 +1,5 @@
-import { Box, Button, Input, Text, VStack } from '@chakra-ui/react';
+import { Box, Button, HStack, Input, Text, VStack } from '@chakra-ui/react';
+import { ArrowLeft } from 'lucide-react';
 import { socket } from '../socket';
 import { useStore } from '../store';
 import { observer } from 'mobx-react-lite';
@@ -23,9 +24,22 @@ function PassengerOrderCreateScreen() {
       bg="white"
       boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)"
     >
-      <Text fontSize="lg" fontWeight="semibold">
-        Новый заказ
-      </Text>
+      <HStack gap="2" align="center">
+        <Button
+          variant="outline"
+          onClick={() => store.openOrdersList()}
+          w="10"
+          h="10"
+          minW="10"
+          p="0"
+          aria-label="Назад"
+        >
+          <ArrowLeft size={18} aria-hidden />
+        </Button>
+        <Text fontSize="lg" fontWeight="semibold">
+          Новый заказ
+        </Text>
+      </HStack>
       <VStack gap="3" align="stretch" mt="3">
         <Input
           placeholder="Откуда"
@@ -43,9 +57,6 @@ function PassengerOrderCreateScreen() {
         />
         <Button size="lg" onClick={onSubmit} disabled={!canSubmit}>
           Создать
-        </Button>
-        <Button variant="ghost" onClick={() => store.openOrdersList()}>
-          Отмена
         </Button>
       </VStack>
     </Box>

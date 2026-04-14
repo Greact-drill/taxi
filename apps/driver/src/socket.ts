@@ -72,7 +72,6 @@ socket.on('driver:orders', (orders: DriverOrder[]) => {
 });
 
 socket.on('driver:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
-  console.log('driver:order:messages', orderId, messages);
   // свои сообщения
   if (store.screenFormData?.id === orderId) {
     store.setOrderMessages(messages);
@@ -81,7 +80,6 @@ socket.on('driver:order:messages', (orderId: number, messages: OrderChatMessage[
 
 socket.on('passenger:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
   // сообщения от пассажира
-  console.log('passenger:order:messages', orderId, messages);
   const order = store.assignedOrders.find((o) => o.id === orderId);
   if (order) {
     store.openOrderForm(order);

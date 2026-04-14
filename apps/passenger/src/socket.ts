@@ -66,7 +66,6 @@ socket.on('passenger:orders', (orders: PassengerOrder[]) => {
 
 socket.on('passenger:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
   // мои сообщения
-  console.log('passenger:order:messages', orderId, messages);
   if (store.screenFormData?.id === orderId) {
     store.setOrderMessages(messages);
   }

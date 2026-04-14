@@ -1,16 +1,24 @@
-import { Box, Button, HStack, Input, VStack } from '@chakra-ui/react';
-import { CircleX } from 'lucide-react';
+import { Box, Button, HStack, Input, Text, VStack } from '@chakra-ui/react';
+import { ArrowLeft, CircleX } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import {
-  OrderCardHeader,
   OrderPassengerRow,
   OrderRouteRow,
+  OrderStatusBadge,
 } from '@packages/order-ui';
 import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
 import { useStore } from '../store';
 import { socket } from '../socket';
 import { DriverOrderChat } from '../components/DriverOrderChat';
+
+function formatOrderPlacement(placementAt: string): string {
+  const d = new Date(placementAt);
+  if (Number.isNaN(d.getTime())) return '';
+  const date = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return `${date} ${time}`;
+}
 
 function DriverOrderFormScreen() {
   const store = useStore();
@@ -27,8 +35,16 @@ function DriverOrderFormScreen() {
 
   if (!order) {
     return (
-      <Button variant="outline" onClick={() => store.openOrdersList()}>
-        Назад
+      <Button
+        variant="outline"
+        onClick={() => store.openOrdersList()}
+        w="10"
+        h="10"
+        minW="10"
+        p="0"
+        aria-label="Назад"
+      >
+        <ArrowLeft size={18} aria-hidden />
       </Button>
     );
   }
@@ -51,13 +67,7 @@ function DriverOrderFormScreen() {
   function onDelete(): void {
     store.clearError();
     socket.emit('driver:orders:delete', order);
-  }
-
-  const showProgressRow =
-    !cancelMode &&
-    (order.status === OrderStatus.DRIVER_ASSIGNED ||
-      order.status === OrderStatus.DRIVER_ARRIVED ||
-      order.status === OrderStatus.ON_TRIP);
+  }  
 
   return (
     <Box
@@ -67,7 +77,39 @@ function DriverOrderFormScreen() {
       boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)'
       overflow="hidden"
     >
-      <OrderCardHeader orderId={order.id} status={order.status} placementAt={order.createdAt} />
+      <HStack justify="space-between" align="flex-start" gap="3">
+        <Button
+          variant="outline"
+          onClick={() => store.openOrdersList()}
+          w="10"
+          h="10"
+          minW="10"
+          p="0"
+          aria-label="Назад"
+          flexShrink={0}
+        >
+          <ArrowLeft size={18} aria-hidden />
+        </Button>
+        <VStack align="start" gap="1.5" flex="1" minW={0}>
+          <Text fontWeight="semibold" fontSize="md" color="gray.900" lineHeight="1.2">
+            Заказ #{order.id}
+          </Text>
+          <Text
+            as="span"
+            fontSize="xs"
+            color="gray.500"
+            fontWeight="normal"
+            lineHeight="1.2"
+            mt="-0.5"
+            title={new Date(order.createdAt).toLocaleString()}
+          >
+            {formatOrderPlacement(order.createdAt)}
+          </Text>
+        </VStack>
+        <Box flexShrink={0}>
+          <OrderStatusBadge status={order.status} />
+        </Box>
+      </HStack>
       <OrderRouteRow from={order.from} to={order.to} />
       <OrderPassengerRow
         name={order.passenger.name}
@@ -80,35 +122,33 @@ function DriverOrderFormScreen() {
             Взять заказ
           </Button>
         )}
-        {showProgressRow && (
-          <HStack gap="2" align="stretch">
-            {order.status === OrderStatus.DRIVER_ASSIGNED && (
-              <Button size="lg" flex="1" onClick={() => next(OrderStatus.DRIVER_ARRIVED)}>
-                На месте
-              </Button>
-            )}
-            {order.status === OrderStatus.DRIVER_ARRIVED && (
-              <Button size="lg" flex="1" onClick={() => next(OrderStatus.ON_TRIP)}>
-                Поехали!
-              </Button>
-            )}
-            {order.status === OrderStatus.ON_TRIP && (
-              <Button size="lg" flex="1" onClick={() => next(OrderStatus.COMPLETED)}>
-                Приехали
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="lg"
-              px="2"
-              colorPalette="red"
-              onClick={() => setCancelMode(true)}
-              aria-label="Отменить заказ"
-            >
-              <CircleX size={22} strokeWidth={2} aria-hidden />
+        <HStack gap="2" align="stretch">
+          {order.status === OrderStatus.DRIVER_ASSIGNED && (
+            <Button size="lg" flex="1" onClick={() => next(OrderStatus.DRIVER_ARRIVED)}>
+              На месте
             </Button>
-          </HStack>
-        )}
+          )}
+          {order.status === OrderStatus.DRIVER_ARRIVED && (
+            <Button size="lg" flex="1" onClick={() => next(OrderStatus.ON_TRIP)}>
+              Поехали!
+            </Button>
+          )}
+          {order.status === OrderStatus.ON_TRIP && (
+            <Button size="lg" flex="1" onClick={() => next(OrderStatus.COMPLETED)}>
+              Приехали
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="lg"
+            px="2"
+            colorPalette="red"
+            onClick={() => setCancelMode(true)}
+            aria-label="Отменить заказ"
+          >
+            <CircleX size={22} strokeWidth={2} aria-hidden />
+          </Button>
+        </HStack>
         {cancelMode && (
           <VStack gap="3" align="stretch">
             <Input
@@ -129,9 +169,6 @@ function DriverOrderFormScreen() {
             Удалить
           </Button>
         )}
-        <Button variant="outline" onClick={() => store.openOrdersList()}>
-          Назад
-        </Button>
         {order.status !== OrderStatus.AWAITING_DRIVER && (
           <DriverOrderChat />
         )}
