@@ -1,10 +1,11 @@
 import { Box, Button, HStack, Input, Text, VStack } from '@chakra-ui/react';
 import { ArrowLeft } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-import { DELETABLE_ORDER_STATUSES, OrderStatus, type PassengerOrder } from '@packages/shared';
-import { PassengerOrderChat } from '../components/PassengerOrderChat';
 import { socket } from '../socket';
 import { useStore } from '../store';
+import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
+
+import PassengerOrderChat from '../components/PassengerOrderChat';
 
 const deletable = [OrderStatus.AWAITING_DRIVER, ...DELETABLE_ORDER_STATUSES];
 
@@ -34,6 +35,10 @@ function PassengerOrderEditScreen() {
       p="4"
       bg="white"
       boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)"
+      h="100%"
+      display="flex"
+      flexDirection="column"
+      minH="0"
     >
       <HStack gap="2" align="center">
         <Button
@@ -51,7 +56,7 @@ function PassengerOrderEditScreen() {
           Заказ #{store.screenFormData.id}
         </Text>
       </HStack>
-      <VStack gap="3" align="stretch" mt="3">
+      <VStack gap="3" align="stretch" mt="3" flex="1" minH="0">
         <Input
           placeholder="Откуда"
           value={store.screenFormData.from ?? ''}
@@ -74,7 +79,7 @@ function PassengerOrderEditScreen() {
             Удалить
           </Button>
         )}    
-        { driver && <PassengerOrderChat /> }
+        {driver && <PassengerOrderChat />}
       </VStack>
     </Box>
   );

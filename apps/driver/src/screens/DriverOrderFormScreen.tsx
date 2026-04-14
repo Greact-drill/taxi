@@ -76,6 +76,10 @@ function DriverOrderFormScreen() {
       bg="white"
       boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)'
       overflow="hidden"
+      h="100%"
+      display="flex"
+      flexDirection="column"
+      minH="0"
     >
       <HStack justify="space-between" align="flex-start" gap="3">
         <Button
@@ -116,7 +120,7 @@ function DriverOrderFormScreen() {
         phone={order.passenger.phone}
         attachToCardBottom={false}
       />
-      <VStack gap="3" align="stretch" mt="4">
+      <VStack gap="3" align="stretch" mt="4" flex="1" minH="0">
         {order.status === OrderStatus.AWAITING_DRIVER && hasAssigned < 2 && (
           <Button size="lg" onClick={take}>
             Взять заказ
@@ -138,16 +142,18 @@ function DriverOrderFormScreen() {
               Приехали
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="lg"
-            px="2"
-            colorPalette="red"
-            onClick={() => setCancelMode(true)}
-            aria-label="Отменить заказ"
-          >
-            <CircleX size={22} strokeWidth={2} aria-hidden />
-          </Button>
+          {order.status !== OrderStatus.AWAITING_DRIVER && (
+            <Button
+              variant="ghost"
+              size="lg"
+              px="2"
+              colorPalette="red"
+              onClick={() => setCancelMode(true)}
+              aria-label="Отменить заказ"
+            >
+              <CircleX size={22} strokeWidth={2} aria-hidden />
+            </Button>
+          )}
         </HStack>
         {cancelMode && (
           <VStack gap="3" align="stretch">
@@ -169,9 +175,7 @@ function DriverOrderFormScreen() {
             Удалить
           </Button>
         )}
-        {order.status !== OrderStatus.AWAITING_DRIVER && (
-          <DriverOrderChat />
-        )}
+        {order.status !== OrderStatus.AWAITING_DRIVER && <DriverOrderChat />}
       </VStack>
     </Box>
   );

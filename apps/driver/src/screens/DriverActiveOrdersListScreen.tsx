@@ -9,7 +9,7 @@ function DriverActiveOrdersListScreen() {
   return (
     <Box
       borderRadius="xl"
-      bg="blue.200"
+      bg="purple.50"
       boxShadow='inset 0 3px 14px rgba(0, 0, 0, 0.1), inset 0 1px 4px rgba(0, 0, 0, 0.06)'
       p="3"
       flex="1"

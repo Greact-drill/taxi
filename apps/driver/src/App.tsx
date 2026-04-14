@@ -7,38 +7,36 @@ import { store } from './store';
 
 function App() {
   return (
-    <Box bg="gray.50" minH="100dvh">
+    <Box
+      bg="white"
+      h="100dvh"
+      maxW="420px"
+      mx="auto"
+      display="flex"
+      flexDirection="column"
+    >
+      <DriverAppHeader />
+
       <Box
-        bg="white"
-        minH="100dvh"
-        maxW="420px"
-        mx="auto"
+        as="main"
+        position="relative"
+        flex="1"
+        minH="0"
         display="flex"
         flexDirection="column"
       >
-        <DriverAppHeader />
+        <DriverAppContentScreen />
 
-        <Box
-          as="main"
-          position="relative"
-          flex="1"
-          minH="0"
-          display="flex"
-          flexDirection="column"
-        >
-          <DriverAppContentScreen />
-
-          {!store.online && (
-            <Center
-              position="absolute"
-              inset="0"
-              bg="blackAlpha.400"
-              color="white"
-              textAlign="center"
-              px="6"
-            />
-          )}
-        </Box>
+        {!store.online && (
+          <Center
+            position="absolute"
+            inset="0"
+            bg="blackAlpha.400"
+            color="white"
+            textAlign="center"
+            px="6"
+          />
+        )}
       </Box>
     </Box>
   );

@@ -16,18 +16,23 @@ function PassengerAppContentScreen() {
       </Box>
     ) :
     (
-      <Box overflow="hidden" w="100%">
+      <Box overflow="hidden" w="100%" flex="1" minH="0">
         <Box
           display="flex"
+          h="100%"
           w="200%"
           transform={store.screen === 'form' ? 'translateX(-50%)' : 'translateX(0)'}
           transition="transform 0.3s ease"
         >
-          <Box w="50%" flexShrink={0} px="5" py="5">
-            <PassengerOrdersListScreen />
+          <Box w="50%" flexShrink={0} px="5" py="5" h="100%" minH="0" display="flex" flexDirection="column">
+            <Box flex="1" minH="0">
+              <PassengerOrdersListScreen />
+            </Box>
           </Box>
-          <Box w="50%" flexShrink={0} px="5" py="5">
-            {store.screenForm === 'new' ? <PassengerOrderCreateScreen /> : <PassengerOrderEditScreen />}
+          <Box w="50%" flexShrink={0} px="5" py="5" h="100%" minH="0" display="flex" flexDirection="column">
+            <Box flex="1" minH="0">
+              {store.screenForm === 'new' ? <PassengerOrderCreateScreen /> : <PassengerOrderEditScreen />}
+            </Box>
           </Box>
         </Box>
       </Box>
@@ -70,7 +75,7 @@ function PassengerAppContentScreen() {
       null;
 
   return (
-    <VStack gap="3" align="stretch" w="100%">
+    <VStack gap="3" align="stretch" w="100%" h="100%" minH="0" flex="1">
       {alertStack}
       {content}
     </VStack>

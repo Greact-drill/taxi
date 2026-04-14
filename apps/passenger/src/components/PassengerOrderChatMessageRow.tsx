@@ -1,4 +1,4 @@
-import { Text } from '@chakra-ui/react';
+import { Box, Text, VStack } from '@chakra-ui/react';
 import type { OrderChatMessage } from '@packages/shared';
 
 export type PassengerOrderChatMessageRowProps = {
@@ -6,9 +6,30 @@ export type PassengerOrderChatMessageRowProps = {
 };
 
 export function PassengerOrderChatMessageRow({ message }: PassengerOrderChatMessageRowProps) {
+  const isPassenger = message.authorRole === 'passenger';
+  const messageTime = new Date(message.createdAt).toLocaleTimeString('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   return (
-    <Text fontSize="sm">
-      {message.authorRole}: {message.text}
-    </Text>
+    <VStack align={isPassenger ? 'end' : 'start'} gap="0.5">
+      <Box
+        maxW="85%"
+        px="3"
+        py="2"
+        borderRadius="xl"
+        bg={isPassenger ? 'blue.50' : 'white'}
+        //color={isPassenger ? 'white' : 'gray.900'}
+        alignSelf={isPassenger ? 'end' : 'start'}
+      >
+        <Text fontSize="sm" lineHeight="1.35">
+          {message.text}
+        </Text>
+        <Text fontSize="2xs" opacity={0.75} mt="1" textAlign="right">
+          {messageTime}
+        </Text>
+      </Box>
+    </VStack>
   );
 }
