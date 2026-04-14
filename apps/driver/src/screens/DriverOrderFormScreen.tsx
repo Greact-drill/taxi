@@ -135,7 +135,9 @@ function DriverOrderFormScreen() {
               Приехали
             </Button>
           )}
-          {order.status !== OrderStatus.AWAITING_DRIVER && (
+          {order.status !== OrderStatus.AWAITING_DRIVER && 
+            order.status !== OrderStatus.COMPLETED && 
+            order.status !== OrderStatus.CANCELLED && (
             <Button
               variant="ghost"
               size="lg"
@@ -146,6 +148,11 @@ function DriverOrderFormScreen() {
             >
               <CircleX size={22} strokeWidth={2} aria-hidden />
             </Button>
+          )}
+          {(order.status === OrderStatus.COMPLETED || order.status === OrderStatus.CANCELLED) && (
+            <Text fontSize="sm" color="gray.500" >
+              Через несколько секунд заказ будет удален из системы автоматически
+            </Text>
           )}
         </HStack>
         {cancelMode && (

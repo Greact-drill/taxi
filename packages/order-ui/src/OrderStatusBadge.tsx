@@ -24,17 +24,17 @@ const ORDER_STATUS_VISUAL: Record<OrderStatus, StatusVisual> = {
   },
   [OrderStatus.DRIVER_ARRIVED]: {
     Icon: MapPin,
-    colorPalette: 'blue',
+    colorPalette: 'orange',
     label: 'Водитель на месте',
   },
   [OrderStatus.ON_TRIP]: {
     Icon: Route,
-    colorPalette: 'teal',
+    colorPalette: 'gray',
     label: 'В пути',
   },
   [OrderStatus.COMPLETED]: {
     Icon: CircleCheck,
-    colorPalette: 'gray',
+    colorPalette: 'green',
     label: 'Завершён',
   },
   [OrderStatus.CANCELLED]: {
