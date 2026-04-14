@@ -6,3 +6,4 @@ export { OrderPassengerRow, type OrderPassengerRowProps } from './OrderPassenger
 export { OrderDriverRow, type OrderDriverRowProps } from './OrderDriverRow';
 export { OrderCancelReasonRow, type OrderCancelReasonRowProps } from './OrderCancelReasonRow';
 export { formatEvent } from './formatEvent';
+export { ScreenResolutionInfo } from './ScreenResolutionInfo';

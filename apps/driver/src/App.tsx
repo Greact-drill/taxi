@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { Box, Center } from '@chakra-ui/react';
+// import { ScreenResolutionInfo } from '@packages/order-ui';
 
 import DriverAppHeader from './components/DriverAppHeader';
 import DriverAppContentScreen from './screens/DriverAppContentScreen';
@@ -38,6 +39,7 @@ function App() {
           />
         )}
       </Box>
+      {/* <ScreenResolutionInfo /> */}
     </Box>
   );
 }

@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { Box, Center } from '@chakra-ui/react';
+import { ScreenResolutionInfo } from '@packages/order-ui';
 
 import PassengerAppHeader from './components/PassengerAppHeader';
 import PassengerAppContentScreen from './screens/PassengerAppContentScreen';
@@ -31,6 +32,7 @@ function App() {
           />
         )}
       </Box>
+      <ScreenResolutionInfo />
     </Box>
   );
 }
