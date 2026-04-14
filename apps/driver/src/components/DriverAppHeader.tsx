@@ -1,13 +1,32 @@
 import { observer } from 'mobx-react-lite';
-import { Badge, HStack, Text, VStack } from '@chakra-ui/react';
+import { Box, HStack, Text } from '@chakra-ui/react';
+import { OrderNetworkStatusBadge } from '@packages/order-ui';
 
 import DriverAppMenu from './DriverAppMenu';
 import { useStore } from '../store';
 
+function DriverInlineSeparatorDot() {
+  return (
+    <Box
+      as="span"
+      display="inline-flex"
+      alignItems="center"
+      justifyContent="center"
+      flexShrink={0}
+      color="gray.400"
+      lineHeight="0"
+      aria-hidden
+    >
+      <svg width="6" height="6" viewBox="0 0 5 5">
+        <circle cx="2.5" cy="2.5" r="2" fill="currentColor" />
+      </svg>
+    </Box>
+  );
+}
+
 function DriverAppHeader() {
   const store = useStore();
   const currentUser = store.currentUser;
-  const statusLabel = store.online ? 'В сети' : 'Нет сети';
 
   return (
     <HStack
@@ -20,33 +39,24 @@ function DriverAppHeader() {
     >
       <HStack gap="3" minW="0" align="center">
         {currentUser && (
-          <Text fontSize="xs" color="gray.600" flex="none" whiteSpace="nowrap">
+          <Text fontSize="sm" fontWeight="bold" color="purple.600" flex="none" whiteSpace="nowrap">
             #{currentUser.id}
           </Text>
         )}
-        <Badge
-          px="2"
-          py="1"
-          borderRadius="full"
-          colorPalette={store.online ? 'green' : 'red'}
-          variant="subtle"
-          fontSize="xs"
-          flex="none"
-        >
-          {statusLabel}
-        </Badge>
         {currentUser && (
-          <VStack gap="0" align="start" minW="0" lineHeight="shorter" flex="1">
-            <Text fontSize="sm" fontWeight="semibold" truncate>
+          <HStack gap="1.5" align="center" minW="0" flex="1" title={`${currentUser.name} · ${currentUser.car}`}>
+            <Text as="span" fontSize="sm" fontWeight="semibold" color="gray.800" truncate>
               {currentUser.name}
             </Text>
-            <Text fontSize="xs" color="gray.600" truncate>
+            <DriverInlineSeparatorDot />
+            <Text as="span" fontSize="sm" color="gray.600" flex="1" minW={0} truncate>
               {currentUser.car}
             </Text>
-          </VStack>
+          </HStack>
         )}
       </HStack>
-      <HStack gap="3">
+      <HStack gap="3" align="center">
+        <OrderNetworkStatusBadge online={store.online} />
         <DriverAppMenu />
       </HStack>
     </HStack>
