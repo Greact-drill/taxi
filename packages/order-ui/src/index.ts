@@ -5,3 +5,4 @@ export { OrderRouteRow, type OrderRouteRowProps } from './OrderRouteRow';
 export { OrderPassengerRow, type OrderPassengerRowProps } from './OrderPassengerRow';
 export { OrderDriverRow, type OrderDriverRowProps } from './OrderDriverRow';
 export { OrderCancelReasonRow, type OrderCancelReasonRowProps } from './OrderCancelReasonRow';
+export { formatEvent } from './formatEvent';

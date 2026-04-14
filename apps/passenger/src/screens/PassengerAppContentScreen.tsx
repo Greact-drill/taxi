@@ -16,7 +16,7 @@ function PassengerAppContentScreen() {
       </Box>
     ) :
     (
-      <Box overflow="hidden" w="100%" flex="1" minH="0">
+      <Box overflowX="hidden" overflowY="auto" w="100%" flex="1" minH="0">
         <Box
           display="flex"
           h="100%"

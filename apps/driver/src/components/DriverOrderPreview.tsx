@@ -26,7 +26,7 @@ export function DriverOrderPreview({ order, onClick }: DriverOrderPreviewProps) 
       cursor="pointer"
       onClick={onClick}
     >
-      <OrderCardHeader orderId={order.id} status={order.status} placementAt={order.createdAt} />
+      <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
       <OrderRouteRow from={order.from} to={order.to} />
       {order.status === OrderStatus.CANCELLED && (
         <OrderCancelReasonRow cancelReason={order.cancelReason} />

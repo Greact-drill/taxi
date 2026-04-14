@@ -37,7 +37,7 @@ function PassengerOrderChat() {
 
   return (
     <VStack gap="2" align="stretch" flex="1" minH="0">
-      <Text fontWeight="semibold">Чат с водителем</Text>
+      <Text>Чат с водителем</Text>
       <VStack
         gap="2"
         align="stretch"

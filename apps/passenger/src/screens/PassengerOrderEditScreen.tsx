@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { socket } from '../socket';
 import { useStore } from '../store';
 import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
+import { formatEvent, OrderStatusBadge } from '@packages/order-ui';
 
 import PassengerOrderChat from '../components/PassengerOrderChat';
 
@@ -15,6 +16,7 @@ function PassengerOrderEditScreen() {
   const from = (store.screenFormData?.from ?? '').trim();
   const to = (store.screenFormData?.to ?? '').trim();
   const status = store.screenFormData?.status;
+  const createdAt = store.screenFormData?.createdAt;
   const canSubmit = from.length > 0 && to.length > 0;
   // TODO validation messages
   const driver = store.screenFormData?.driver;
@@ -40,7 +42,7 @@ function PassengerOrderEditScreen() {
       flexDirection="column"
       minH="0"
     >
-      <HStack gap="2" align="center">
+      <HStack justify="space-between" align="flex-start" gap="3">
         <Button
           variant="outline"
           onClick={() => store.openOrdersList()}
@@ -49,12 +51,33 @@ function PassengerOrderEditScreen() {
           minW="10"
           p="0"
           aria-label="Назад"
+          flexShrink={0}
         >
           <ArrowLeft size={18} aria-hidden />
         </Button>
-        <Text fontSize="lg" fontWeight="semibold">
-          Заказ #{store.screenFormData.id}
-        </Text>
+        <VStack align="start" gap="1.5" flex="1" minW={0}>
+          <Text fontWeight="semibold" fontSize="md" color="gray.900" lineHeight="1.2">
+            Заказ #{store.screenFormData.id}
+          </Text>
+          {createdAt && (
+            <Text
+              as="span"
+              fontSize="xs"
+              color="gray.500"
+              fontWeight="normal"
+              lineHeight="1.2"
+              mt="-0.5"
+              title={new Date(createdAt).toLocaleString()}
+            >
+              {formatEvent(createdAt)}
+            </Text>
+          )}
+        </VStack>
+        {status && (
+          <Box flexShrink={0}>
+            <OrderStatusBadge status={status} />
+          </Box>
+        )}
       </HStack>
       <VStack gap="3" align="stretch" mt="3" flex="1" minH="0">
         <Input

@@ -3,6 +3,7 @@ import { ArrowLeft, CircleX } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import {
+  formatEvent,
   OrderPassengerRow,
   OrderRouteRow,
   OrderStatusBadge,
@@ -11,14 +12,6 @@ import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
 import { useStore } from '../store';
 import { socket } from '../socket';
 import { DriverOrderChat } from '../components/DriverOrderChat';
-
-function formatOrderPlacement(placementAt: string): string {
-  const d = new Date(placementAt);
-  if (Number.isNaN(d.getTime())) return '';
-  const date = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-  const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  return `${date} ${time}`;
-}
 
 function DriverOrderFormScreen() {
   const store = useStore();
@@ -107,7 +100,7 @@ function DriverOrderFormScreen() {
             mt="-0.5"
             title={new Date(order.createdAt).toLocaleString()}
           >
-            {formatOrderPlacement(order.createdAt)}
+            {formatEvent(order.createdAt)}
           </Text>
         </VStack>
         <Box flexShrink={0}>

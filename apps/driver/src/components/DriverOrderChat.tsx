@@ -36,7 +36,7 @@ function DriverOrderChatComponent() {
 
   return (
     <VStack gap="2" align="stretch" flex="1" minH="0">
-      <Text fontWeight="semibold">Чат с пассажиром</Text>
+      <Text>Чат с пассажиром</Text>
       <VStack
         gap="2"
         align="stretch"
