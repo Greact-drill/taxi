@@ -12,6 +12,7 @@ const deletable = [OrderStatus.AWAITING_DRIVER, ...DELETABLE_ORDER_STATUSES];
 
 function PassengerOrderEditScreen() {
   const store = useStore();
+  const order = store.screenFormData;
 
   const from = (store.screenFormData?.from ?? '').trim();
   const to = (store.screenFormData?.to ?? '').trim();
@@ -82,16 +83,16 @@ function PassengerOrderEditScreen() {
       <VStack gap="3" align="stretch" mt="3" flex="1" minH="0">
         <Input
           placeholder="Откуда"
-          value={store.screenFormData.from ?? ''}
+          value={order.from ?? ''}
           onChange={(e) => {
-            store.setScreenFormData((prev) => ({ ...prev, from: e.target.value }));
+            store.setScreenFormData({ ...order, from: e.target.value });
           }}
         />
         <Input
           placeholder="Куда"
-          value={store.screenFormData.to ?? ''}
+          value={order.to ?? ''}
           onChange={(e) => {
-            store.setScreenFormData((prev) => ({ ...prev, to: e.target.value }));
+            store.setScreenFormData({ ...order, to: e.target.value });
           }}
         />
         <Button size="lg" onClick={onSubmit} disabled={!canSubmit}>

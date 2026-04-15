@@ -64,8 +64,8 @@ socket.on('passenger:orders', (orders: PassengerOrder[]) => {
 
   if (store.screen === 'form') {
     const order = orders.find((o) => o.id === store.screenFormData?.id);
-    if (order) store.setScreenFormData((prev) => ({ ...prev, ...order }));
-    else store.openOrdersList(); // 'new' или удален
+    if (order) store.setScreenFormData(order);
+    else store.openOrdersList(); // screenForm 'new' или удален
   }
 });
 

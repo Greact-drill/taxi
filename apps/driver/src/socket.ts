@@ -57,18 +57,22 @@ socket.on('auth:profile', (user: Driver) => {
 
 socket.on('driver:orders:active', (orders: DriverOrder[]) => {
   store.setActiveOrders(orders);
-  if (store.screen === 'form' &&
-    store.screenFormData &&
-    store.screenFormData.status === OrderStatus.AWAITING_DRIVER) {
-    const data = store.activeOrders.find((order) => order.id === store.screenFormData!.id);
-    if (data) store.openOrderForm(data);
+
+  if (store.screen === 'form') {
+    const order = store.activeOrders.find((o) => o.id === store.screenFormData?.id);
+    if (order) store.setScreenFormData(order);
     else store.openOrdersList();
   }
 });
 
 socket.on('driver:orders', (orders: DriverOrder[]) => {
   store.setAssignedOrders(orders);
-  store.openOrdersList();
+
+  if (store.screen === 'form') {
+    const order = store.assignedOrders.find((o) => o.id === store.screenFormData?.id);
+    if (order) store.setScreenFormData(order);
+    else store.openOrdersList();
+  }
 });
 
 socket.on('driver:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
@@ -82,7 +86,8 @@ socket.on('passenger:order:messages', (orderId: number, messages: OrderChatMessa
   // сообщения от пассажира
   const order = store.assignedOrders.find((o) => o.id === orderId);
   if (order) {
-    store.openOrderForm(order);
-    store.setOrderMessages(messages);
+    const isCurrentOrderOpen = store.screen === 'form' && store.screenFormData?.id === orderId;
+    if (isCurrentOrderOpen) store.setOrderMessages(messages);
+    else store.openOrderForm(order);
   }
 });

@@ -10,14 +10,6 @@ import { observer } from 'mobx-react-lite';
 function PassengerAppContentScreen() {
   const store = useStore();
 
-  function onContentTransitionEnd(event: TransitionEvent<HTMLDivElement>) {
-    if (event.propertyName !== 'transform') {
-      return;
-    }
-
-    store.onScreenTransitionEnd();
-  }
-
   const content = !store.currentUser ?
     (
       <Box px="5" py="5">
@@ -32,7 +24,7 @@ function PassengerAppContentScreen() {
           w="200%"
           transform={store.screen === 'form' ? 'translateX(-50%)' : 'translateX(0)'}
           transition="transform 0.3s ease"
-          onTransitionEnd={onContentTransitionEnd}
+          onTransitionEnd={() => store.onScreenTransitionEnd()}
         >
           <Box w="50%" flexShrink={0} px="5" py="5" h="100%" minH="0" display="flex" flexDirection="column">
             <Box flex="1" minH="0">

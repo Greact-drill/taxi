@@ -59,17 +59,59 @@ class Store {
     this.assignedOrders = [...orders];
   }
 
+  // driver main UI: list vs form carousel
   screen: 'list' | 'form';
   screenFormData?: DriverOrder;
   screenFormMessages: OrderChatMessage[];
 
+   // screen transition
+   isTransitioning: boolean;
+   pendingScreen?: 'list' | 'form';
+
+  requestScreen(target: 'list' | 'form') {
+    if (this.isTransitioning) {
+      this.pendingScreen = target;
+      return;
+    }
+
+    if (this.screen === target) {
+      return;
+    }
+
+    this.screen = target;
+    this.isTransitioning = true;
+  }
+
+  onScreenTransitionEnd() {
+    if (!this.isTransitioning) {
+      return;
+    }
+
+    this.isTransitioning = false;
+    if (!this.pendingScreen) {
+      return;
+    }
+
+    if (this.pendingScreen === this.screen) {
+      this.pendingScreen = undefined;
+      return;
+    }
+
+    this.requestScreen(this.pendingScreen);
+    this.pendingScreen = undefined;
+  }
+
   openOrdersList() {
-    this.screen = 'list';
+    this.requestScreen('list');
   }
 
   openOrderForm(order: DriverOrder) {
-    this.screenFormData = order;
-    this.screen = 'form';
+    this.requestScreen('form');
+    this.screenFormData = {...order};
+  }
+
+  setScreenFormData(order: DriverOrder) {
+    this.screenFormData = {...order};
   }
 
   setOrderMessages(messages: OrderChatMessage[]) {
@@ -79,6 +121,9 @@ class Store {
   constructor() {
     this.screen = 'list';
     this.screenFormMessages = [];
+
+    this.isTransitioning = false;
+
     makeAutoObservable(this);
   }
 }

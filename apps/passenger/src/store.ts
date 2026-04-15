@@ -54,11 +54,13 @@ class Store {
 
   // passenger main UI: list vs form carousel
   screen: 'list' | 'form';
-  isTransitioning: boolean;
-  pendingScreen?: 'list' | 'form';
   screenForm: 'new' | 'edit';
   screenFormData: Partial<PassengerOrder>;
   screenFormMessages: OrderChatMessage[];
+
+  // screen transition
+  isTransitioning: boolean;
+  pendingScreen?: 'list' | 'form';
 
   requestScreen(target: 'list' | 'form') {
     if (this.isTransitioning) {
@@ -92,7 +94,8 @@ class Store {
     this.requestScreen(this.pendingScreen);
     this.pendingScreen = undefined;
   }
-
+  
+  // screen navigation
   openOrdersList() {
     this.requestScreen('list');
   }
@@ -109,8 +112,8 @@ class Store {
     this.screenFormData = { ...order };
   }
 
-  setScreenFormData(updater: (prev: Partial<PassengerOrder>) => Partial<PassengerOrder>) {
-    this.screenFormData = updater(this.screenFormData);
+  setScreenFormData(order: Partial<PassengerOrder>) {
+    this.screenFormData = {...order};
   }
 
   setOrderMessages(messages: OrderChatMessage[]) {
@@ -120,10 +123,12 @@ class Store {
   // constructor
   constructor() {
     this.screen = 'list';
-    this.isTransitioning = false;
     this.screenForm = 'new';
     this.screenFormData = {};
     this.screenFormMessages = [];
+
+    this.isTransitioning = false;
+
     makeAutoObservable(this);
   }
 }

@@ -64,6 +64,7 @@ function DriverAppContentScreen() {
             alignItems="stretch"
             transform={store.screen === 'form' ? 'translateX(-50%)' : 'translateX(0)'}
             transition="transform 0.3s ease"
+            onTransitionEnd={() => store.onScreenTransitionEnd()}
           >
             <Box
               w="50%"
