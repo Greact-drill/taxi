@@ -5,6 +5,13 @@ import { observer } from 'mobx-react-lite';
 import { PassengerOrderPreview } from '../components/PassengerOrderPreview';
 import { useStore } from '../store';
 import { socket } from '../socket';
+import { OrderStatus } from '@packages/shared';
+
+const CREATABLE_STATUSES: OrderStatus[] = [
+  OrderStatus.ON_TRIP,
+  OrderStatus.COMPLETED,
+  OrderStatus.CANCELLED,
+];
 
 function PassengerOrdersListScreen() {
   const store = useStore();
@@ -13,7 +20,9 @@ function PassengerOrdersListScreen() {
     socket.emit('passenger:orders:request');
   }, [socket.id]);
 
-  const canAdd = store.orders.length < 1;
+  const canAdd = store.orders.every((storeOrder) =>
+    CREATABLE_STATUSES.includes(storeOrder.status),
+  );
 
   return (
     <VStack gap="3" align="stretch">

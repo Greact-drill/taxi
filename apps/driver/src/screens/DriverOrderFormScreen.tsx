@@ -11,12 +11,21 @@ import {
 import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
 import { useStore } from '../store';
 import { socket } from '../socket';
-import { DriverOrderChat } from '../components/DriverOrderChat';
+import DriverOrderChat from '../components/DriverOrderChat';
+
+const TAKEABLE_STATUSES: OrderStatus[] = [
+  OrderStatus.ON_TRIP,
+  OrderStatus.COMPLETED,
+  OrderStatus.CANCELLED,
+];
 
 function DriverOrderFormScreen() {
   const store = useStore();
   const order = store.screenFormData;
-  const hasAssigned = store.assignedOrders.length;
+  const canTake = store.assignedOrders.every((assignedOrder) =>
+    TAKEABLE_STATUSES.includes(assignedOrder.status),
+  );
+    
   const [cancelMode, setCancelMode] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const canCancel = cancelReason.length > 0;
@@ -114,7 +123,7 @@ function DriverOrderFormScreen() {
         attachToCardBottom={false}
       />
       <VStack gap="3" align="stretch" mt="4" flex="1" minH="0">
-        {order.status === OrderStatus.AWAITING_DRIVER && hasAssigned < 2 && (
+        {order.status === OrderStatus.AWAITING_DRIVER && canTake && (
           <Button size="lg" onClick={take}>
             Взять заказ
           </Button>
@@ -135,9 +144,9 @@ function DriverOrderFormScreen() {
               Приехали
             </Button>
           )}
-          {order.status !== OrderStatus.AWAITING_DRIVER && 
-            order.status !== OrderStatus.COMPLETED && 
-            order.status !== OrderStatus.CANCELLED && (
+          {(order.status === OrderStatus.DRIVER_ASSIGNED || 
+            order.status === OrderStatus.DRIVER_ARRIVED || 
+            order.status === OrderStatus.ON_TRIP) && (
             <Button
               variant="ghost"
               size="lg"

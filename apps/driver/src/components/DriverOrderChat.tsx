@@ -6,7 +6,7 @@ import { socket } from '../socket';
 import { useStore } from '../store';
 import { DriverOrderChatMessageRow } from './DriverOrderChatMessageRow';
 
-function DriverOrderChatComponent() {
+function DriverOrderChat() {
   const store = useStore();
   const order = store.screenFormData;
   const [chatDraft, setChatDraft] = useState('');
@@ -73,4 +73,4 @@ function DriverOrderChatComponent() {
   );
 }
 
-export const DriverOrderChat = observer(DriverOrderChatComponent);
+export default observer(DriverOrderChat);
