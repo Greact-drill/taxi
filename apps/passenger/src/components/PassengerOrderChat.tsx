@@ -20,7 +20,6 @@ function PassengerOrderChat() {
   }, [socket.id, order]);
 
   useEffect(() => {
-    setChatDraft('');
     const messagesContainer = messagesScrollRef.current;
     if (!messagesContainer) return;
     messagesContainer.scrollTop = messagesContainer.scrollHeight;

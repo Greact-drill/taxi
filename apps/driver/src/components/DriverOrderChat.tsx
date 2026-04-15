@@ -19,7 +19,6 @@ function DriverOrderChatComponent() {
   const messages = store.screenFormMessages;
 
   useEffect(() => {
-    setChatDraft('');
     const messagesContainer = messagesScrollRef.current;
     if (!messagesContainer) return;
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
