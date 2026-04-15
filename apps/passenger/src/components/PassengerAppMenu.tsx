@@ -29,7 +29,7 @@ function PassengerAppMenu() {
         <Portal>
           <MenuPositioner>
             <MenuContent>
-              {store.currentUser ? (
+              {store.currentUser && (
                 <>
                   <MenuItem
                     value="profile"
@@ -37,9 +37,9 @@ function PassengerAppMenu() {
                   >
                     Изменить свои данные
                   </MenuItem>
-                  <MenuItem value="order-history">История заказов</MenuItem>
+                  {/* <MenuItem value="order-history">История заказов</MenuItem> */}
                 </>
-              ) : null}
+              )}
               <MenuItem value="logout" onClick={() => void clearTokenReconnect()}>
                 Выход
               </MenuItem>
