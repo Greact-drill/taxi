@@ -54,22 +54,57 @@ class Store {
 
   // passenger main UI: list vs form carousel
   screen: 'list' | 'form';
+  isTransitioning: boolean;
+  pendingScreen?: 'list' | 'form';
   screenForm: 'new' | 'edit';
   screenFormData: Partial<PassengerOrder>;
   screenFormMessages: OrderChatMessage[];
 
+  requestScreen(target: 'list' | 'form') {
+    if (this.isTransitioning) {
+      this.pendingScreen = target;
+      return;
+    }
+
+    if (this.screen === target) {
+      return;
+    }
+
+    this.screen = target;
+    this.isTransitioning = true;
+  }
+
+  onScreenTransitionEnd() {
+    if (!this.isTransitioning) {
+      return;
+    }
+
+    this.isTransitioning = false;
+    if (!this.pendingScreen) {
+      return;
+    }
+
+    if (this.pendingScreen === this.screen) {
+      this.pendingScreen = undefined;
+      return;
+    }
+
+    this.requestScreen(this.pendingScreen);
+    this.pendingScreen = undefined;
+  }
+
   openOrdersList() {
-    this.screen = 'list';
+    this.requestScreen('list');
   }
 
   openCreateOrderForm() {
-    this.screen = 'form';
+    this.requestScreen('form');
     this.screenForm = 'new';
     this.screenFormData = {};
   }
 
   openEditOrderForm(order: PassengerOrder) {
-    this.screen = 'form';
+    this.requestScreen('form');
     this.screenForm = 'edit';
     this.screenFormData = { ...order };
   }
@@ -85,6 +120,7 @@ class Store {
   // constructor
   constructor() {
     this.screen = 'list';
+    this.isTransitioning = false;
     this.screenForm = 'new';
     this.screenFormData = {};
     this.screenFormMessages = [];

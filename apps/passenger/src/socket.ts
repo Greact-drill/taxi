@@ -61,7 +61,12 @@ socket.on('passenger:profile', (user: Passenger) => {
 
 socket.on('passenger:orders', (orders: PassengerOrder[]) => {
   store.setOrders(orders);
-  store.openOrdersList();
+
+  if (store.screen === 'form') {
+    const order = orders.find((o) => o.id === store.screenFormData?.id);
+    if (order) store.setScreenFormData((prev) => ({ ...prev, ...order }));
+    else store.openOrdersList(); // 'new' или удален
+  }
 });
 
 socket.on('passenger:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
@@ -75,7 +80,8 @@ socket.on('driver:order:messages', (orderId: number, messages: OrderChatMessage[
   // сообщения водителя
   const order = store.orders.find((o) => o.id === orderId);
   if (order) {
-    store.openEditOrderForm(order);
-    store.setOrderMessages(messages);
+    const isCurrentOrderOpen = store.screen === 'form' && store.screenForm === 'edit' && store.screenFormData?.id === orderId;
+    if (isCurrentOrderOpen) store.setOrderMessages(messages);
+    else store.openEditOrderForm(order);
   }
 });
