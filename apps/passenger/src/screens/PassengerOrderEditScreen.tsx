@@ -8,8 +8,6 @@ import { formatEvent, OrderStatusBadge } from '@packages/order-ui';
 
 import PassengerOrderChat from '../components/PassengerOrderChat';
 
-const deletable = [OrderStatus.AWAITING_DRIVER, ...DELETABLE_ORDER_STATUSES];
-
 function PassengerOrderEditScreen() {
   const store = useStore();
   const order = store.screenFormData;
@@ -98,7 +96,12 @@ function PassengerOrderEditScreen() {
         <Button size="lg" onClick={onSubmit} disabled={!canSubmit}>
           Сохранить
         </Button>
-        {status && deletable.includes(status) && (
+        {status && status === OrderStatus.AWAITING_DRIVER && (
+          <Button colorPalette="red" variant="outline" onClick={onDelete}>
+            Отменить заказ
+          </Button>
+        )}    
+        {status && DELETABLE_ORDER_STATUSES.includes(status) && (
           <Button colorPalette="red" variant="outline" onClick={onDelete}>
             Удалить
           </Button>
