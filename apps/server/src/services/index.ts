@@ -8,24 +8,24 @@ import { OrderChatService } from '../services/OrderChatService';
 import { OrderChatMessageStore } from '../stores/OrderChatMessageStore';
 
 export type Services = {
-    passengerService: PassengerService;
-    driverService: DriverService;
-    orderService: OrderService;
-    orderChatService: OrderChatService;
+  passengerService: PassengerService;
+  driverService: DriverService;
+  orderService: OrderService;
+  orderChatService: OrderChatService;
 };
 
 export async function createServices(): Promise<Services> {
-    const passengerStore = new PassengerStore();
-    const driverStore = new DriverStore();
-    const orderStore = new OrderStore();
-    const orderChatMessageStore = new OrderChatMessageStore();
-    const passengerService = new PassengerService(passengerStore);
-    const driverService = new DriverService(driverStore);
-    const orderChatService = new OrderChatService(orderChatMessageStore);
-    const orderService = new OrderService(orderStore, passengerService, driverService, orderChatService);
-  
-    /** Тестовые водители для локальной разработки (логин = пароль). */
-    await driverService.bootstrap();
+  const passengerStore = new PassengerStore();
+  const driverStore = new DriverStore();
+  const orderStore = new OrderStore();
+  const orderChatMessageStore = new OrderChatMessageStore();
+  const passengerService = new PassengerService(passengerStore);
+  const driverService = new DriverService(driverStore);
+  const orderChatService = new OrderChatService(orderChatMessageStore);
+  const orderService = new OrderService(orderStore, passengerService, driverService);
 
-    return { passengerService, driverService, orderService, orderChatService };
+  /** Тестовые водители для локальной разработки (логин = пароль). */
+  await driverService.bootstrap();
+
+  return { passengerService, driverService, orderService, orderChatService };
 }

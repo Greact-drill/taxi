@@ -28,7 +28,7 @@ export function OrderDriverRow({ name, car, attachToCardBottom = true }: OrderDr
       mb={attachToCardBottom ? '-4' : undefined}
       borderBottomRadius={attachToCardBottom ? 'lg' : 'md'}
     >
-      <Box color="purple.600" lineHeight="0" flexShrink={0} aria-hidden>
+      <Box color="purple.600" lineHeight="0" flexShrink={0}>
         <Car size={18} strokeWidth={2} />
       </Box>
       <HStack gap="1.5" align="center" flex="1" minW={0} title={full}>

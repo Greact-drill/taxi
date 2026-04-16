@@ -6,7 +6,7 @@ import { CANCELLED_CLEAN_TIMEOUT } from '../SocketRuntime';
 export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
   // auth events (passenger*)
   ctx.on('passenger:auth:register', async (userData: PassengerRegister) => {
-    const { token } = await ctx.passengerService.register(userData);
+    const token = await ctx.passengerService.register(userData);
     ctx.socket.emit('auth:token', token);
   });
 

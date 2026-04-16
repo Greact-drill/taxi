@@ -8,10 +8,14 @@
     "preview": "vite preview --port 5174"
   },
   "dependencies": {
+    "@chakra-ui/react": "^3.27.0",
+    "@emotion/react": "^11.14.0",
+    "@packages/order-ui": "workspace:*",
+    "@packages/shared": "workspace:*",
+    "lucide-react": "^1.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "socket.io-client": "^4.8.1",
-    "@packages/shared": "workspace:*"
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

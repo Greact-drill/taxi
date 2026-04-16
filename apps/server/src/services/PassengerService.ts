@@ -5,7 +5,7 @@ import { PassengerStore } from '../stores/PassengerStore';
 export class PassengerService {
   constructor(private readonly store: PassengerStore) { }
 
-  async register(input: PassengerRegister): Promise<{ passenger: Passenger; token: string }> {
+  async register(input: PassengerRegister): Promise<string> {
     const name = (input.name ?? '').trim();
     const phone = (input.phone ?? '').trim();
     const isPhoneValid = /^\+?\d+$/.test(phone);
@@ -14,10 +14,7 @@ export class PassengerService {
       throw new Error(`Некорректные данные регистрации: ${name} ${phone}`);
     }
     const record = await this.store.create({ name, phone, token: randomUUID() });
-    return {
-      passenger: { id: record.id, name: record.name, phone: record.phone },
-      token: record.token,
-    };
+    return record.token;
   }
 
   async getById(id: number): Promise<Passenger | undefined> {

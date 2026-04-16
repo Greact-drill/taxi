@@ -9,32 +9,13 @@ import {
 import { OrderStore } from '../stores/OrderStore';
 import { PassengerService } from './PassengerService';
 import { DriverService } from './DriverService';
-import { OrderChatService } from './OrderChatService';
 
 export class OrderService {
   constructor(
     private readonly store: OrderStore,
     private readonly passengerService: PassengerService,
     private readonly driverService: DriverService,
-    private readonly orderChatService: OrderChatService,
   ) { }
-
-  private async toOrder(record: OrderRecord): Promise<Order> {
-    const passenger = (await this.passengerService.getById(record.passengerId))!;
-    const driver = record.driverId ? await this.driverService.getById(record.driverId) : undefined;
-    const order: Order = {
-      id: record.id,
-      createdAt: record.createdAt,
-      passenger,
-      from: record.from,
-      to: record.to,
-      driver,
-      status: record.status,
-      cancelReason: record.cancelReason,
-    };
-    //const messages = await this.orderChatService.messages(orderShell);
-    return order;
-  }
 
   async create(input: Partial<PassengerOrder>, passenger: Passenger): Promise<Order> {
     const from = (input.from ?? '').trim();
@@ -52,37 +33,109 @@ export class OrderService {
       createdAt: new Date().toISOString(),
     });
 
-    return this.toOrder(record);
+    const { id, createdAt, status } = record;
+
+    return {
+      id,
+      createdAt,
+      passenger,
+      from,
+      to,
+      status
+    };
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
-    const rows = await this.store.listWhere((order) => order.passengerId === passengerId);
+    const records = await this.store.listWhere((order) => order.passengerId === passengerId);
     const out: PassengerOrder[] = [];
-    for (const r of rows) {
-      const order = await this.toOrder(r);
-      const { passenger: _omit, ...passengerOrder } = order;
-      out.push(passengerOrder);
+    for (const record of records) {
+      const {
+        id,
+        from,
+        to,
+        driverId,
+        status,
+        cancelReason,
+        createdAt,
+        assignedAt,
+        completedAt,
+      } = record;
+      const driver = driverId ? await this.driverService.getById(driverId) : undefined;
+      const order: PassengerOrder = {
+        id,
+        createdAt,
+        from,
+        to,
+        driver,
+        status,
+        cancelReason,
+        assignedAt,
+        completedAt,
+      };
+      out.push(order);
     }
     return out;
   }
 
   async listOfDriver(driverId: number): Promise<DriverOrder[]> {
-    const rows = await this.store.listWhere((order) => order.driverId === driverId);
+    const records = await this.store.listWhere((order) => order.driverId === driverId);
     const out: DriverOrder[] = [];
-    for (const record of rows) {
-      const order = await this.toOrder(record);
-      const { driver: _omit, ...driverOrder } = order;
+    for (const record of records) {
+      const {
+        id,
+        from,
+        to,
+        passengerId,
+        status,
+        cancelReason,
+        createdAt,
+        assignedAt,
+        completedAt,
+      } = record;
+      const passenger = (await this.passengerService.getById(passengerId))!;
+      const driverOrder: DriverOrder = {
+        id,
+        createdAt,
+        from,
+        to,
+        passenger,
+        status,
+        cancelReason,
+        assignedAt,
+        completedAt,
+      };
       out.push(driverOrder);
     }
     return out;
   }
 
   async listOfActive(): Promise<DriverOrder[]> {
-    const rows = await this.store.listWhere((order) => order.status === OrderStatus.AWAITING_DRIVER);
+    const records = await this.store.listWhere((order) => order.status === OrderStatus.AWAITING_DRIVER);
     const out: DriverOrder[] = [];
-    for (const record of rows) {
-      const order = await this.toOrder(record);
-      const { driver: _omit, ...driverOrder } = order;
+    for (const record of records) {
+      const {
+        id,
+        from,
+        to,
+        passengerId,
+        status,
+        cancelReason,
+        createdAt,
+        assignedAt,
+        completedAt,
+      } = record;
+      const passenger = (await this.passengerService.getById(passengerId))!;
+      const driverOrder: DriverOrder = {
+        id,
+        createdAt,
+        from,
+        to,
+        passenger,
+        status,
+        cancelReason,
+        assignedAt,
+        completedAt,
+      };
       out.push(driverOrder);
     }
     return out;
@@ -91,7 +144,31 @@ export class OrderService {
   async findById(id: number): Promise<Order | undefined> {
     const record = await this.store.findById(id);
     if (!record) return;
-    return this.toOrder(record);
+    const {
+      from,
+      to,
+      driverId,
+      passengerId,
+      status,
+      cancelReason,
+      createdAt,
+      assignedAt,
+      completedAt,
+    } = record;
+    const passenger = (await this.passengerService.getById(passengerId))!;
+    const driver = driverId ? await this.driverService.getById(driverId) : undefined;
+    return {
+      id,
+      createdAt,
+      passenger,
+      from,
+      to,
+      driver,
+      status,
+      cancelReason,
+      assignedAt,
+      completedAt,
+    };
   }
 
   async update(id: number, updates: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
@@ -114,11 +191,34 @@ export class OrderService {
       patch.completedAt = new Date().toISOString();
     }
     const record = await this.store.update(id, patch);
-    return this.toOrder(record);
+    const {
+      from,
+      to,
+      driverId,
+      passengerId,
+      status,
+      cancelReason,
+      createdAt,
+      assignedAt,
+      completedAt,
+    } = record;
+    const passenger = (await this.passengerService.getById(passengerId))!;
+    const driver = driverId ? await this.driverService.getById(driverId) : undefined;
+    return {
+      id,
+      createdAt,
+      passenger,
+      from,
+      to,
+      driver,
+      status,
+      cancelReason,
+      assignedAt,
+      completedAt,
+    };
   }
 
-  async delete(id: number): Promise<Order> {
-    const record = await this.store.delete(id);
-    return this.toOrder(record);
+  async delete(id: number): Promise<void> {
+    await this.store.delete(id);
   }
 }
