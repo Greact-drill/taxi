@@ -31,11 +31,6 @@ export enum OrderStatus {
   CANCELLED = 'cancelled',
 }
 
-export const DELETABLE_ORDER_STATUSES: OrderStatus[] = [
-  OrderStatus.COMPLETED,
-  OrderStatus.CANCELLED,
-];
-
 export type ChatAuthorRole = 'passenger' | 'driver' | 'dispatcher';
 
 /** Сообщение чата заказа; связь с заказом только через `Order.messages`. Идентификатор заказа — в `OrderChatMessageRecord.orderId` (stores). */
