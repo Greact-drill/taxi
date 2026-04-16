@@ -1,33 +1,61 @@
 import type { PassengerRecord } from '@packages/shared';
+import { mapPassengerRow } from '../db/mappers.js';
+import { isPrismaRecordNotFound } from '../db/prisma.js';
+import type { PrismaClient } from '../generated/prisma/client.js';
+import type { PassengerStoreRepository } from './contracts.js';
 
-export class PassengerStore {
-  private passengerStore = new Map<number, PassengerRecord>();
-  private nextId = 1;
+export class PassengerStore implements PassengerStoreRepository {
+  constructor(private readonly prisma: PrismaClient) {}
 
   async create(data: Omit<PassengerRecord, 'id'>): Promise<PassengerRecord> {
-    const passenger: PassengerRecord = { ...data, id: this.nextId++ };
-    this.passengerStore.set(passenger.id, passenger);
-    return passenger;
+    const passenger = await this.prisma.passenger.create({
+      data: {
+        name: data.name,
+        phone: data.phone,
+        token: data.token,
+      },
+    });
+    return mapPassengerRow(passenger);
   }
 
-  async findWhere(match: (passenger: PassengerRecord) => boolean): Promise<PassengerRecord | undefined> {
-    for (const passenger of this.passengerStore.values()) {
-      if (match(passenger)) return passenger;
-    }
+  async findByToken(token: string): Promise<PassengerRecord | undefined> {
+    const passenger = await this.prisma.passenger.findUnique({
+      where: { token },
+    });
+    return passenger ? mapPassengerRow(passenger) : undefined;
   }
 
   async getById(id: number): Promise<PassengerRecord | undefined> {
-    return this.passengerStore.get(id);
+    const passenger = await this.prisma.passenger.findUnique({
+      where: { id },
+    });
+    return passenger ? mapPassengerRow(passenger) : undefined;
   }
 
   async update(id: number, patch: Partial<PassengerRecord>): Promise<PassengerRecord> {
-    const record = this.passengerStore.get(id);
-    if (!record) throw Error(`PassengerStore: Record not found ${id}`);
-    for (const [key, value] of Object.entries(patch)) {
-      if (value === undefined) continue;
-      (record as Record<string, unknown>)[key] = value;
+    const data = {
+      ...(patch.name !== undefined ? { name: patch.name } : {}),
+      ...(patch.phone !== undefined ? { phone: patch.phone } : {}),
+      ...(patch.token !== undefined ? { token: patch.token } : {}),
+    };
+
+    if (Object.keys(data).length === 0) {
+      const record = await this.getById(id);
+      if (!record) throw Error(`PassengerStore: Record not found ${id}`);
+      return record;
     }
-    record.id = id;
-    return record;
+
+    try {
+      const passenger = await this.prisma.passenger.update({
+        where: { id },
+        data,
+      });
+      return mapPassengerRow(passenger);
+    } catch (error) {
+      if (isPrismaRecordNotFound(error)) {
+        throw Error(`PassengerStore: Record not found ${id}`);
+      }
+      throw error;
+    }
   }
 }

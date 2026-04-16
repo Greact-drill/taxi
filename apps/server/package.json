@@ -4,15 +4,22 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
+    "@packages/shared": "workspace:*",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
     "argon2": "^0.41.0",
-    "socket.io": "^4.8.1",
-    "@packages/shared": "workspace:*"
+    "pg": "^8.20.0",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "prisma": "^7.7.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }

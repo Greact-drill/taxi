@@ -6,14 +6,14 @@ import {
   type Passenger,
   type PassengerOrder,
 } from '@packages/shared';
-import { OrderStore } from '../stores/OrderStore.js';
+import type { OrderStoreRepository } from '../stores/contracts.js';
 import { PassengerService } from './PassengerService.js';
 import { DriverService } from './DriverService.js';
 import { OrderChatService } from './OrderChatService.js';
 
 export class OrderService {
   constructor(
-    private readonly store: OrderStore,
+    private readonly store: OrderStoreRepository,
     private readonly passengerService: PassengerService,
     private readonly driverService: DriverService,
     private readonly orderChatService: OrderChatService,
@@ -56,7 +56,7 @@ export class OrderService {
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
-    const rows = await this.store.listWhere((order) => order.passengerId === passengerId);
+    const rows = await this.store.listByPassengerId(passengerId);
     const out: PassengerOrder[] = [];
     for (const r of rows) {
       const order = await this.toOrder(r);
@@ -67,7 +67,7 @@ export class OrderService {
   }
 
   async listOfDriver(driverId: number): Promise<DriverOrder[]> {
-    const rows = await this.store.listWhere((order) => order.driverId === driverId);
+    const rows = await this.store.listByDriverId(driverId);
     const out: DriverOrder[] = [];
     for (const record of rows) {
       const order = await this.toOrder(record);
@@ -78,7 +78,7 @@ export class OrderService {
   }
 
   async listOfActive(): Promise<DriverOrder[]> {
-    const rows = await this.store.listWhere((order) => order.status === OrderStatus.AWAITING_DRIVER);
+    const rows = await this.store.listActive();
     const out: DriverOrder[] = [];
     for (const record of rows) {
       const order = await this.toOrder(record);

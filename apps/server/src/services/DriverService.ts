@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Driver, DriverLogin, DriverRecord } from '@packages/shared';
 import { makePasswordHash, verifyPassword } from '../password.js';
-import { DriverStore } from '../stores/DriverStore.js';
+import type { DriverStoreRepository } from '../stores/contracts.js';
 
 export type DriverCreateInput = {
   name: string;
@@ -11,7 +11,7 @@ export type DriverCreateInput = {
 };
 
 export class DriverService {
-  constructor(private readonly store: DriverStore) { }
+  constructor(private readonly store: DriverStoreRepository) { }
 
   async create(input: DriverCreateInput): Promise<Driver> {
     const name = input.name.trim();
@@ -44,7 +44,7 @@ export class DriverService {
 
   async login(data: DriverLogin): Promise<string> {
     const login = data.login.trim();
-    const record = await this.store.findWhere((d) => d.login === login);
+    const record = await this.store.findByLogin(login);
     if (!record || !(await verifyPassword(data.password, record.hash))) {
       throw new Error('Неверный логин или пароль');
     }
@@ -52,13 +52,13 @@ export class DriverService {
   }
 
   async findByToken(token: string): Promise<Driver | undefined> {
-    const record = await this.store.findWhere((d) => d.token === token);
+    const record = await this.store.findByToken(token);
     if (!record) return;
     return { id: record.id, name: record.name, car: record.car };
   }
 
   async findByLogin(login: string): Promise<Driver | undefined> {
-    const record = await this.store.findWhere((d) => d.login === login);
+    const record = await this.store.findByLogin(login);
     if (!record) return;
     return { id: record.id, name: record.name, car: record.car };
   }

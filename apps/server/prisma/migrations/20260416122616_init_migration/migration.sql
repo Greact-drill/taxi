@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "order_chat_messages" ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "orders" ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMP(3),
+ALTER COLUMN "assigned_at" SET DATA TYPE TIMESTAMP(3),
+ALTER COLUMN "completed_at" SET DATA TYPE TIMESTAMP(3),
+ALTER COLUMN "deleted_at" SET DATA TYPE TIMESTAMP(3);

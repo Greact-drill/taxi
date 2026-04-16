@@ -18,7 +18,9 @@ RUN pnpm install --frozen-lockfile --filter server...
 COPY apps/server ./apps/server
 COPY packages/shared ./packages/shared
 
+RUN pnpm --filter server prisma:generate
+
 ENV NODE_ENV=production
 EXPOSE 3001
 
-CMD ["pnpm", "--filter", "server", "exec", "tsx", "src/index.ts"]
+CMD ["sh", "-c", "pnpm --filter server prisma:migrate:deploy && pnpm --filter server exec tsx src/index.ts"]

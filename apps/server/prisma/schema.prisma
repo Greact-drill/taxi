@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrderStatus {
+  AWAITING_DRIVER @map("awaiting_driver")
+  DRIVER_ASSIGNED @map("driver_assigned")
+  DRIVER_ARRIVED  @map("driver_arrived")
+  ON_TRIP         @map("on_trip")
+  COMPLETED       @map("completed")
+  CANCELLED       @map("cancelled")
+}
+
+enum ChatAuthorRole {
+  PASSENGER  @map("passenger")
+  DRIVER     @map("driver")
+  DISPATCHER @map("dispatcher")
+}
+
+model Passenger {
+  id     Int     @id @default(autoincrement())
+  name   String
+  phone  String
+  token  String  @unique
+  orders Order[]
+
+  @@map("passengers")
+}
+
+model Driver {
+  id     Int     @id @default(autoincrement())
+  name   String
+  car    String
+  login  String  @unique
+  hash   String
+  token  String  @unique
+  orders Order[]
+
+  @@map("drivers")
+}
+
+model Order {
+  id           Int                @id @default(autoincrement())
+  passengerId  Int                @map("passenger_id")
+  from         String             @map("from_address")
+  to           String             @map("to_address")
+  driverId     Int?               @map("driver_id")
+  status       OrderStatus
+  cancelReason String?            @map("cancel_reason")
+  deleted      Boolean            @default(false)
+  createdAt    DateTime           @map("created_at")
+  assignedAt   DateTime?          @map("assigned_at")
+  completedAt  DateTime?          @map("completed_at")
+  deletedAt    DateTime?          @map("deleted_at")
+  passenger    Passenger          @relation(fields: [passengerId], references: [id], onDelete: Restrict)
+  driver       Driver?            @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  messages     OrderChatMessage[]
+
+  @@index([passengerId])
+  @@index([driverId])
+  @@index([status, deleted])
+  @@map("orders")
+}
+
+model OrderChatMessage {
+  id         Int            @id @default(autoincrement())
+  orderId    Int            @map("order_id")
+  authorRole ChatAuthorRole @map("author_role")
+  text       String
+  createdAt  DateTime       @map("created_at")
+  order      Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_chat_messages")
+}

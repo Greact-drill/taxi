@@ -9,5 +9,8 @@
   "devDependencies": {
     "concurrently": "^9.0.0",
     "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "pnpm": "^10.33.0"
   }
 }

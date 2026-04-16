@@ -1,5 +1,6 @@
 import type { Server as HttpServer } from 'node:http';
 import { inspect } from 'node:util';
+import type { PrismaClient } from '../generated/prisma/client.js';
 import { Server } from 'socket.io';
 import { PassengerStore } from '../stores/PassengerStore.js';
 import { DriverStore } from '../stores/DriverStore.js';
@@ -25,7 +26,7 @@ import {
 const COMPLETED_CLEAN_TIMEOUT = 15_000; // 15 секунд после завершения заказа
 const CANCELLED_CLEAN_TIMEOUT = 30_000; // 30 секунд после отмены заказа
 
-export async function createSocketServer(httpServer: HttpServer): Promise<Server> {
+export async function createSocketServer(httpServer: HttpServer, prisma: PrismaClient): Promise<Server> {
   const io = new Server(httpServer, {
     path: '/ws',
     pingInterval: 25_000,  // сервер шлёт PING раз в 25 с
@@ -39,10 +40,10 @@ export async function createSocketServer(httpServer: HttpServer): Promise<Server
 
   });
 
-  const passengerStore = new PassengerStore();
-  const driverStore = new DriverStore();
-  const orderStore = new OrderStore();
-  const orderChatMessageStore = new OrderChatMessageStore();
+  const passengerStore = new PassengerStore(prisma);
+  const driverStore = new DriverStore(prisma);
+  const orderStore = new OrderStore(prisma);
+  const orderChatMessageStore = new OrderChatMessageStore(prisma);
   const passengerService = new PassengerService(passengerStore);
   const driverService = new DriverService(driverStore);
   const orderChatService = new OrderChatService(orderChatMessageStore);

@@ -1,8 +1,8 @@
 import type { DriverOrder, Order, OrderChatMessage, PassengerOrder } from '@packages/shared';
-import { OrderChatMessageStore } from '../stores/OrderChatMessageStore.js';
+import type { OrderChatMessageStoreRepository } from '../stores/contracts.js';
 
 export class OrderChatService {
-  constructor(private readonly store: OrderChatMessageStore) {}
+  constructor(private readonly store: OrderChatMessageStoreRepository) {}
 
   async messages(order: PassengerOrder | DriverOrder): Promise<OrderChatMessage[]> {
     const rows = await this.store.listByOrderId(order.id);

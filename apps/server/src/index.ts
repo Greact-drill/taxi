@@ -1,7 +1,9 @@
 import { createServer } from 'node:http';
+import { getServerPort } from './db/config.js';
+import { prisma } from './db/prisma.js';
 import { createSocketServer } from './socket/SocketServer.js';
 
-const PORT = 3001;
+const PORT = getServerPort();
 
 const httpServer = createServer((req, res) => {
   if (req.url === '/health') {
@@ -12,7 +14,8 @@ const httpServer = createServer((req, res) => {
 });
 
 async function main(): Promise<void> {
-  await createSocketServer(httpServer);
+  await prisma.$connect();
+  await createSocketServer(httpServer, prisma);
   httpServer.listen(PORT, () => {
     console.log(`Socket.IO server on :${PORT}`);
   });
