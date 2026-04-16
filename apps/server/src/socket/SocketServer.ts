@@ -11,7 +11,6 @@ import { OrderService } from '../services/OrderService.js';
 import { OrderChatService } from '../services/OrderChatService.js';
 import { OrderChatMessageStore } from '../stores/OrderChatMessageStore.js';
 import {
-  DELETABLE_ORDER_STATUSES,
   OrderStatus,
   type DispatcherConnectionsItem,
   type Driver,
@@ -23,8 +22,8 @@ import {
   type PassengerRegister,
 } from '@packages/shared';
 
-const COMPLETED_CLEAN_TIMEOUT = 15_000; // 15 секунд после завершения заказа
-const CANCELLED_CLEAN_TIMEOUT = 30_000; // 30 секунд после отмены заказа
+const COMPLETED_CLEAN_TIMEOUT = 30_000; // 30 секунд после завершения заказа
+const CANCELLED_CLEAN_TIMEOUT = 60_000; // 60 секунд после отмены заказа
 
 export async function createSocketServer(httpServer: HttpServer, prisma: PrismaClient): Promise<Server> {
   const io = new Server(httpServer, {
@@ -138,6 +137,24 @@ export async function createSocketServer(httpServer: HttpServer, prisma: PrismaC
       }, delayMs);
     }
 
+    function deleteAfterTimeout(order: Order, timeoutMs: number): void {
+      timeout(timeoutMs, async () => {
+        if (await orderService.findById(order.id)) {
+          await orderService.delete(order.id);
+          io.to(`passenger:${order.passenger.id}`).emit(
+            'passenger:orders',
+            await orderService.listOfPassenger(order.passenger.id),
+          );
+          if (order.driver) {
+            io.to(`driver:${order.driver.id}`).emit(
+              'driver:orders',
+              await orderService.listOfDriver(order.driver.id),
+            );
+          }
+        }
+      });
+    }
+
     // connect and disconnect events
     (async () => {
       const items = await getConnections()
@@ -236,25 +253,44 @@ export async function createSocketServer(httpServer: HttpServer, prisma: PrismaC
       }
     });
 
-    on('passenger:orders:delete', async (input: Partial<PassengerOrder>) => {
+    on('passenger:orders:cancel', async (input: PassengerOrder, reason: string) => {
       const passenger = requirePassenger();
-      
-      const deletable = [OrderStatus.AWAITING_DRIVER, ...DELETABLE_ORDER_STATUSES]
-      if (input.status && !deletable.includes(input.status)) {
-        throw Error(`Заказ можно удалить только в статусах ${DELETABLE_ORDER_STATUSES}`);
-      }
 
-      if (!input.id) throw Error('Номер заказа должен быть указан');
-      await orderService.delete(input.id);
+      const order = await orderService.update(input.id, {
+        status: OrderStatus.CANCELLED,
+        cancelReason: reason,
+      });
 
       io.to(`passenger:${passenger.id}`).emit(
         'passenger:orders',
         await orderService.listOfPassenger(passenger.id),
       );
-      if (input.driver) {
-        io.to(`driver:${input.driver.id}`).emit(
+      if (order.driver) {
+        io.to(`driver:${order.driver.id}`).emit(
           'driver:orders',
-          await orderService.listOfDriver(input.driver.id),
+          await orderService.listOfDriver(order.driver.id),
+        );
+      }
+      if (input.status === OrderStatus.AWAITING_DRIVER) {
+        io.to('driver').emit(
+          'driver:orders:active',
+          await orderService.listOfActive(),
+        );
+      }
+      deleteAfterTimeout(order, CANCELLED_CLEAN_TIMEOUT);
+    });
+
+    on('passenger:orders:delete', async (order: PassengerOrder) => {
+      const passenger = requirePassenger();
+      
+      io.to(`passenger:${passenger.id}`).emit(
+        'passenger:orders',
+        await orderService.listOfPassenger(passenger.id),
+      );
+      if (order.driver) {
+        io.to(`driver:${order.driver.id}`).emit(
+          'driver:orders',
+          await orderService.listOfDriver(order.driver.id),
         );
       }
       io.to('driver').emit(
@@ -313,22 +349,6 @@ export async function createSocketServer(httpServer: HttpServer, prisma: PrismaC
 
     });
 
-    function deleteAfterTimeout(order: DriverOrder, timeoutMs: number): void {
-      timeout(timeoutMs, async () => {
-        if (await orderService.findById(order.id)) {
-          await orderService.delete(order.id);
-          io.to(`passenger:${order.passenger.id}`).emit(
-            'passenger:orders',
-            await orderService.listOfPassenger(order.passenger.id),
-          );
-          io.to(`driver:${driver.id}`).emit(
-            'driver:orders',
-            await orderService.listOfDriver(driver.id),
-          );
-        }
-      });
-    }
-
     on('driver:orders:next', async (order: DriverOrder, status: OrderStatus) => {
       const driver = requireDriver();
       await orderService.update(order.id, { status });
@@ -366,9 +386,6 @@ export async function createSocketServer(httpServer: HttpServer, prisma: PrismaC
 
     on('driver:orders:delete', async (order: DriverOrder) => {
       const driver = requireDriver();
-      if (order.status && !DELETABLE_ORDER_STATUSES.includes(order.status)) {
-        throw Error(`Заказ можно удалить только в статусах ${DELETABLE_ORDER_STATUSES}`);
-      }
       await orderService.delete(order.id);
 
       io.to(`passenger:${order.passenger.id}`).emit(

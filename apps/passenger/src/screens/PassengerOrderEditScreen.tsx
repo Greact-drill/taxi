@@ -1,9 +1,10 @@
 import { Box, Button, HStack, Input, Text, VStack } from '@chakra-ui/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CircleX } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
+import { useEffect, useState } from 'react';
 import { socket } from '../socket';
 import { useStore } from '../store';
-import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
+import { OrderStatus } from '@packages/shared';
 import { formatEvent, OrderStatusBadge } from '@packages/order-ui';
 
 import PassengerOrderChat from '../components/PassengerOrderChat';
@@ -11,18 +12,32 @@ import PassengerOrderChat from '../components/PassengerOrderChat';
 function PassengerOrderEditScreen() {
   const store = useStore();
   const order = store.screenFormData;
+  const [cancelMode, setCancelMode] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
 
   const from = (store.screenFormData?.from ?? '').trim();
   const to = (store.screenFormData?.to ?? '').trim();
   const status = store.screenFormData?.status;
   const createdAt = store.screenFormData?.createdAt;
   const canSubmit = from.length > 0 && to.length > 0;
+  const canCancel = cancelReason.length > 0;
   // TODO validation messages
+
   const driver = store.screenFormData?.driver;
+
+  useEffect(() => {
+    setCancelMode(false);
+    setCancelReason('');
+  }, [order]);
 
   function onSubmit(): void {
     store.clearError();
     socket.emit('passenger:orders:update', store.screenFormData);
+  }
+
+  function onCancel(): void {
+    store.clearError();
+    socket.emit('passenger:orders:cancel', order, cancelReason);
   }
 
   function onDelete(): void {
@@ -94,14 +109,34 @@ function PassengerOrderEditScreen() {
           }}
         />
         <Button size="lg" onClick={onSubmit} disabled={!canSubmit}>
-          Сохранить
+          Сохранить изменения
         </Button>
-        {status && status === OrderStatus.AWAITING_DRIVER && (
-          <Button colorPalette="red" variant="outline" onClick={onDelete}>
+        {!cancelMode && (order.status === OrderStatus.AWAITING_DRIVER ||
+          order.status === OrderStatus.DRIVER_ASSIGNED ||
+          order.status === OrderStatus.DRIVER_ARRIVED) && (
+          <Button
+            colorPalette="red" variant="outline"
+            onClick={() => setCancelMode(true)}
+          >
             Отменить заказ
           </Button>
-        )}    
-        {status && DELETABLE_ORDER_STATUSES.includes(status) && (
+        )}
+        {cancelMode && (
+          <VStack gap="3" align="stretch">
+            <Input
+              placeholder="Что случилось?"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+            />
+            <Button size="lg" colorPalette="red" onClick={onCancel} disabled={!canCancel}>
+              Отменить заказ
+            </Button>
+            <Button variant="outline" onClick={() => setCancelMode(false)}>
+              Не отменять заказ
+            </Button>
+          </VStack>
+        )}
+        {status === OrderStatus.COMPLETED && (
           <Button colorPalette="red" variant="outline" onClick={onDelete}>
             Удалить
           </Button>

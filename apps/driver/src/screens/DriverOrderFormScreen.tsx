@@ -8,7 +8,7 @@ import {
   OrderRouteRow,
   OrderStatusBadge,
 } from '@packages/order-ui';
-import { DELETABLE_ORDER_STATUSES, OrderStatus } from '@packages/shared';
+import { OrderStatus } from '@packages/shared';
 import { useStore } from '../store';
 import { socket } from '../socket';
 import DriverOrderChat from '../components/DriverOrderChat';
@@ -179,7 +179,7 @@ function DriverOrderFormScreen() {
             </Button>
           </VStack>
         )}
-        {order.status && DELETABLE_ORDER_STATUSES.includes(order.status) && (
+        {order.status === OrderStatus.COMPLETED && (
           <Button colorPalette="red" variant="outline" onClick={onDelete} >
             Удалить
           </Button>
