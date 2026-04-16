@@ -6,10 +6,10 @@ import {
   type Passenger,
   type PassengerOrder,
 } from '@packages/shared';
-import { OrderStore } from '../stores/OrderStore.js';
-import { PassengerService } from './PassengerService.js';
-import { DriverService } from './DriverService.js';
-import { OrderChatService } from './OrderChatService.js';
+import { OrderStore } from '../stores/OrderStore';
+import { PassengerService } from './PassengerService';
+import { DriverService } from './DriverService';
+import { OrderChatService } from './OrderChatService';
 
 export class OrderService {
   constructor(

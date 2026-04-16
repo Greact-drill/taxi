@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
-import { createSocketServer } from './socket/SocketServer.js';
+import { createServices } from './services/index';
+import { createSocketServer } from './socket/SocketServer';
 
 const PORT = 3001;
 
@@ -12,7 +13,8 @@ const httpServer = createServer((req, res) => {
 });
 
 async function main(): Promise<void> {
-  await createSocketServer(httpServer);
+  const services = await createServices(); 
+  await createSocketServer(httpServer, services);
   httpServer.listen(PORT, () => {
     console.log(`Socket.IO server on :${PORT}`);
   });

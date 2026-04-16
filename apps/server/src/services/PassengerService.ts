@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Passenger, PassengerRecord, PassengerRegister } from '@packages/shared';
-import { PassengerStore } from '../stores/PassengerStore.js';
+import { PassengerStore } from '../stores/PassengerStore';
 
 export class PassengerService {
   constructor(private readonly store: PassengerStore) { }

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Driver, DriverLogin, DriverRecord } from '@packages/shared';
-import { makePasswordHash, verifyPassword } from '../password.js';
-import { DriverStore } from '../stores/DriverStore.js';
+import { makePasswordHash, verifyPassword } from '../password';
+import { DriverStore } from '../stores/DriverStore';
 
 export type DriverCreateInput = {
   name: string;

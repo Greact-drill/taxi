@@ -1,5 +1,5 @@
 import type { DriverOrder, Order, OrderChatMessage, PassengerOrder } from '@packages/shared';
-import { OrderChatMessageStore } from '../stores/OrderChatMessageStore.js';
+import { OrderChatMessageStore } from '../stores/OrderChatMessageStore';
 
 export class OrderChatService {
   constructor(private readonly store: OrderChatMessageStore) {}
