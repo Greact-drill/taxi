@@ -7,16 +7,16 @@ export class DriverStore {
     return this.prisma.driverRecord.create({ data });
   }
 
-  async findByLogin(login: string): Promise<DriverRecord | undefined> {
-    return (await this.prisma.driverRecord.findUnique({ where: { login } })) ?? undefined;
+  async findByLogin(login: string): Promise<DriverRecord | null> {
+    return (await this.prisma.driverRecord.findUnique({ where: { login } }));
   }
 
-  async findByToken(token: string): Promise<DriverRecord | undefined> {
-    return (await this.prisma.driverRecord.findUnique({ where: { token } })) ?? undefined;
+  async findByToken(token: string): Promise<DriverRecord | null> {
+    return (await this.prisma.driverRecord.findUnique({ where: { token } }));
   }
 
-  async getById(id: number): Promise<DriverRecord | undefined> {
-    return (await this.prisma.driverRecord.findUnique({ where: { id } })) ?? undefined;
+  async getById(id: number): Promise<DriverRecord | null> {
+    return (await this.prisma.driverRecord.findUnique({ where: { id } }));
   }
 
   async update(

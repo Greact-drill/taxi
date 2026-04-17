@@ -7,12 +7,12 @@ export class PassengerStore {
     return this.prisma.passengerRecord.create({ data });
   }
 
-  async findByToken(token: string): Promise<PassengerRecord | undefined> {
-    return (await this.prisma.passengerRecord.findUnique({ where: { token } })) ?? undefined;
+  async findByToken(token: string): Promise<PassengerRecord | null> {
+    return (await this.prisma.passengerRecord.findUnique({ where: { token } }));
   }
 
-  async getById(id: number): Promise<PassengerRecord | undefined> {
-    return (await this.prisma.passengerRecord.findUnique({ where: { id } })) ?? undefined;
+  async getById(id: number): Promise<PassengerRecord | null> {
+    return (await this.prisma.passengerRecord.findUnique({ where: { id } }));
   }
 
   async update(id: number, patch: { name?: string; phone?: string; token?: string }): Promise<PassengerRecord> {

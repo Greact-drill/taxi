@@ -2,9 +2,9 @@
   "name": "poc-connection-monitor",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"corepack pnpm --filter server dev\" \"corepack pnpm --filter passenger dev\" \"corepack pnpm --filter dispatcher dev\" \"corepack pnpm --filter driver dev\"",
-    "build": "corepack pnpm --filter server build && corepack pnpm --filter passenger build && corepack pnpm --filter dispatcher build && corepack pnpm --filter driver build",
-    "start": "concurrently \"corepack pnpm --filter server start\" \"corepack pnpm --filter passenger preview\" \"corepack pnpm --filter dispatcher preview\" \"corepack pnpm --filter driver preview\""
+    "dev": "concurrently \"pnpm --filter server dev\" \"pnpm --filter passenger dev\" \"pnpm --filter dispatcher dev\" \"pnpm --filter driver dev\"",
+    "build": "pnpm --filter server build && pnpm --filter passenger build && pnpm --filter dispatcher build && pnpm --filter driver build",
+    "start": "concurrently \"pnpm --filter server start\" \"pnpm --filter passenger preview\" \"pnpm --filter dispatcher preview\" \"pnpm --filter driver preview\""
   },
   "devDependencies": {
     "concurrently": "^9.0.0",

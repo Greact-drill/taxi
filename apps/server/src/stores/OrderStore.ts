@@ -32,12 +32,12 @@ export class OrderStore {
     });
   }
 
-  async findById(id: number): Promise<OrderRecord | undefined> {
+  async findById(id: number): Promise<OrderRecord | null> {
     return (
-      await this.prisma.orderRecord.findFirst({
+      await this.prisma.orderRecord.findUnique({
         where: { id, deleted: false },
       })
-    ) ?? undefined;
+    );
   }
 
   async update(

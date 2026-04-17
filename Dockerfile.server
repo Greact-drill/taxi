@@ -1,24 +1,29 @@
 FROM node:22-alpine
 
-RUN apk add --no-cache python3 make g++ \
-    && corepack enable && corepack prepare pnpm@10 --activate
+RUN npm install -g pnpm
 
 WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/server/package.json ./apps/server/
-COPY apps/dispatcher/package.json ./apps/dispatcher/
-COPY apps/driver/package.json ./apps/driver/
-COPY apps/passenger/package.json ./apps/passenger/
 COPY packages/shared/package.json ./packages/shared/
-COPY packages/order-ui/package.json ./packages/order-ui/
 
 RUN pnpm install --frozen-lockfile --filter server...
 
 COPY apps/server ./apps/server
 COPY packages/shared ./packages/shared
 
+ARG DATABASE_URL=${DATABASE_URL}
 ENV NODE_ENV=production
+ENV DATABASE_URL=${DATABASE_URL}
+
+# сборка приложения
+RUN pnpm --filter server build
+
+# применение миграций на прод-базу
+RUN pnpm --filter server exec prisma db push
+
 EXPOSE 3001
 
-CMD ["sh", "-c", "pnpm --filter server exec prisma db push && pnpm --filter server exec tsx src/index.ts"]
+# запуск приложения
+CMD ["pnpm", "--filter", "server", "start"]
