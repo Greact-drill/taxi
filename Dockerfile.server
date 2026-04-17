@@ -18,9 +18,6 @@ ARG DATABASE_URL
 # сборка приложения
 RUN pnpm --filter server build
 
-# применение миграций на прод-базу
-RUN pnpm --filter server exec prisma db push
-
 EXPOSE 3001
 
 ENV NODE_ENV=production
