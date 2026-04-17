@@ -1,5 +1,5 @@
 import type { Server as SocketIOServer } from 'socket.io';
-import { type SocketRuntimeContext } from '../SocketRuntime';
+import { type SocketRuntimeContext } from '../SocketRuntime.js';
 import type { DispatcherConnectionsItem } from '@packages/shared';
 
 async function getConnections(io: SocketIOServer): Promise<DispatcherConnectionsItem[]> {

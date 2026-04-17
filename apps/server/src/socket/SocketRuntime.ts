@@ -1,10 +1,10 @@
 import { inspect } from 'node:util';
 import type { Server as SocketIOServer, Socket as SocketIOClient } from 'socket.io';
 import type { Driver, Order, Passenger } from '@packages/shared';
-import type { PassengerService } from '../services/PassengerService';
-import type { DriverService } from '../services/DriverService';
-import type { OrderService } from '../services/OrderService';
-import type { OrderChatService } from '../services/OrderChatService';
+import type { PassengerService } from '../services/PassengerService.js';
+import type { DriverService } from '../services/DriverService.js';
+import type { OrderService } from '../services/OrderService.js';
+import type { OrderChatService } from '../services/OrderChatService.js';
 
 const COMPLETED_CLEAN_TIMEOUT = 30_000; // 30 секунд после завершения заказа
 const CANCELLED_CLEAN_TIMEOUT = 60_000; // 60 секунд после отмены заказа

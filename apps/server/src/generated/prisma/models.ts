@@ -8,8 +8,8 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/PassengerRecord'
-export type * from './models/DriverRecord'
-export type * from './models/OrderRecord'
-export type * from './models/OrderChatMessageRecord'
-export type * from './commonInputTypes'
+export type * from './models/PassengerRecord.js'
+export type * from './models/DriverRecord.js'
+export type * from './models/OrderRecord.js'
+export type * from './models/OrderChatMessageRecord.js'
+export type * from './commonInputTypes.js'

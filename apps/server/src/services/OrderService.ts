@@ -5,10 +5,10 @@ import {
   type Passenger,
   type PassengerOrder,
 } from '@packages/shared';
-import type { OrderRecord } from '../generated/prisma/client';
-import { OrderStore } from '../stores/OrderStore';
-import { PassengerService } from './PassengerService';
-import { DriverService } from './DriverService';
+import type { OrderRecord } from '../generated/prisma/client.js';
+import { OrderStore } from '../stores/OrderStore.js';
+import { PassengerService } from './PassengerService.js';
+import { DriverService } from './DriverService.js';
 
 export class OrderService {
   constructor(

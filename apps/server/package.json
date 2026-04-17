@@ -2,12 +2,12 @@
   "name": "server",
   "type": "module",
   "scripts": {
-    "predev": "prisma generate && prisma db push",
+    "predev": "prisma generate",
     "dev": "tsx watch src/index.ts",
-    "prebuild": "prisma generate",
+    "prebuild": "pnpm --filter @packages/shared run build && prisma generate",
     "build": "tsc -p tsconfig.json",
-    "prestart": "prisma generate && prisma db push",
-    "start": "node --experimental-specifier-resolution=node dist/index.js"
+    "prestart": "prisma db push",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@packages/shared": "workspace:*",

@@ -1,12 +1,12 @@
-import { PassengerStore } from '../stores/PassengerStore';
-import { DriverStore } from '../stores/DriverStore';
-import { OrderStore } from '../stores/OrderStore';
-import { PassengerService } from '../services/PassengerService';
-import { DriverService } from '../services/DriverService';
-import { OrderService } from '../services/OrderService';
-import { OrderChatService } from '../services/OrderChatService';
-import { OrderChatMessageStore } from '../stores/OrderChatMessageStore';
-import { prisma } from '../prisma';
+import { PassengerStore } from '../stores/PassengerStore.js';
+import { DriverStore } from '../stores/DriverStore.js';
+import { OrderStore } from '../stores/OrderStore.js';
+import { PassengerService } from './PassengerService.js';
+import { DriverService } from './DriverService.js';
+import { OrderService } from './OrderService.js';
+import { OrderChatService } from './OrderChatService.js';
+import { OrderChatMessageStore } from '../stores/OrderChatMessageStore.js';
+import { prisma } from '../prisma.js';
 
 export type Services = {
   passengerService: PassengerService;

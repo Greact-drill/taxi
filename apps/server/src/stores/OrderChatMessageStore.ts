@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient, OrderChatMessageRecord } from '../generated/prisma/client';
+import type { Prisma, PrismaClient, OrderChatMessageRecord } from '../generated/prisma/client.js';
 
 export class OrderChatMessageStore {
   constructor(private readonly prisma: PrismaClient) {}

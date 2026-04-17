@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient, PassengerRecord } from '../generated/prisma/client';
+import type { Prisma, PrismaClient, PassengerRecord } from '../generated/prisma/client.js';
 
 export class PassengerStore {
   constructor(private readonly prisma: PrismaClient) {}

@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient, DriverRecord } from '../generated/prisma/client';
+import type { Prisma, PrismaClient, DriverRecord } from '../generated/prisma/client.js';
 
 export class DriverStore {
   constructor(private readonly prisma: PrismaClient) {}

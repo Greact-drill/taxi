@@ -1,5 +1,5 @@
 import { OrderStatus } from '@packages/shared';
-import type { Prisma, PrismaClient, OrderRecord } from '../generated/prisma/client';
+import type { Prisma, PrismaClient, OrderRecord } from '../generated/prisma/client.js';
 
 export class OrderStore {
   constructor(private readonly prisma: PrismaClient) {}

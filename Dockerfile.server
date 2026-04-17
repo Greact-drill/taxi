@@ -24,4 +24,4 @@ ENV NODE_ENV=production
 ENV DATABASE_URL=${DATABASE_URL}
 
 # запуск приложения
-CMD ["sh", "-c", "pnpm --filter server exec prisma db push && pnpm --filter server start"]
+CMD ["pnpm", "--filter", "server", "start"]
