@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { createServer } from 'node:http';
-import { createServices } from './services/index';
+import { createServices } from './services';
 import { createSocketServer } from './socket/SocketServer';
 
 const PORT = 3001;
