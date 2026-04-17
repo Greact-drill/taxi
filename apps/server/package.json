@@ -2,17 +2,25 @@
   "name": "server",
   "type": "module",
   "scripts": {
+    "predev": "prisma generate",
     "dev": "tsx watch src/index.ts",
+    "prebuild": "pnpm --filter @packages/shared run build && prisma generate",
     "build": "tsc -p tsconfig.json",
-    "start": "node --experimental-specifier-resolution=node dist/index.js"
+    "prestart": "prisma db push",
+    "start": "node dist/index.js"
   },
   "dependencies": {
+    "@packages/shared": "workspace:*",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
     "argon2": "^0.41.0",
-    "socket.io": "^4.8.1",
-    "@packages/shared": "workspace:*"
+    "dotenv": "^17.4.2",
+    "pg": "^8.20.0",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "prisma": "^7.7.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }

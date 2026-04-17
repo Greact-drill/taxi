@@ -2,13 +2,13 @@ import {
   OrderStatus,
   type DriverOrder,
   type Order,
-  type OrderRecord,
   type Passenger,
   type PassengerOrder,
 } from '@packages/shared';
-import { OrderStore } from '../stores/OrderStore';
-import { PassengerService } from './PassengerService';
-import { DriverService } from './DriverService';
+import type { OrderRecord } from '../generated/prisma/client.js';
+import { OrderStore } from '../stores/OrderStore.js';
+import { PassengerService } from './PassengerService.js';
+import { DriverService } from './DriverService.js';
 
 export class OrderService {
   constructor(
@@ -17,6 +17,21 @@ export class OrderService {
     private readonly driverService: DriverService,
   ) { }
 
+  private async toOrder(record: OrderRecord): Promise<Order> {
+    const passenger = (await this.passengerService.getById(record.passengerId))!;
+    const driver = record.driverId ? await this.driverService.getById(record.driverId) : undefined;
+    const order: Order = {
+      id: record.id,
+      createdAt: record.createdAt,
+      passenger,
+      from: record.from,
+      to: record.to,
+      driver,
+      status: record.status,
+      cancelReason: record.cancelReason ?? undefined,
+    };
+    return order;
+  }
   async create(input: Partial<PassengerOrder>, passenger: Passenger): Promise<Order> {
     const from = (input.from ?? '').trim();
     const to = (input.to ?? '').trim();
@@ -33,109 +48,37 @@ export class OrderService {
       createdAt: new Date().toISOString(),
     });
 
-    const { id, createdAt, status } = record;
-
-    return {
-      id,
-      createdAt,
-      passenger,
-      from,
-      to,
-      status
-    };
+    return this.toOrder(record);
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
-    const records = await this.store.listWhere((order) => order.passengerId === passengerId);
+    const records = await this.store.listByPassengerId(passengerId);
     const out: PassengerOrder[] = [];
-    for (const record of records) {
-      const {
-        id,
-        from,
-        to,
-        driverId,
-        status,
-        cancelReason,
-        createdAt,
-        assignedAt,
-        completedAt,
-      } = record;
-      const driver = driverId ? await this.driverService.getById(driverId) : undefined;
-      const order: PassengerOrder = {
-        id,
-        createdAt,
-        from,
-        to,
-        driver,
-        status,
-        cancelReason,
-        assignedAt,
-        completedAt,
-      };
-      out.push(order);
+    for (const r of records) {
+      const order = await this.toOrder(r);
+      const { passenger: _omit, ...passengerOrder } = order;
+      out.push(passengerOrder);
     }
     return out;
   }
 
   async listOfDriver(driverId: number): Promise<DriverOrder[]> {
-    const records = await this.store.listWhere((order) => order.driverId === driverId);
+    const records = await this.store.listByDriverId(driverId);
     const out: DriverOrder[] = [];
     for (const record of records) {
-      const {
-        id,
-        from,
-        to,
-        passengerId,
-        status,
-        cancelReason,
-        createdAt,
-        assignedAt,
-        completedAt,
-      } = record;
-      const passenger = (await this.passengerService.getById(passengerId))!;
-      const driverOrder: DriverOrder = {
-        id,
-        createdAt,
-        from,
-        to,
-        passenger,
-        status,
-        cancelReason,
-        assignedAt,
-        completedAt,
-      };
+      const order = await this.toOrder(record);
+      const { driver: _omit, ...driverOrder } = order;
       out.push(driverOrder);
     }
     return out;
   }
 
   async listOfActive(): Promise<DriverOrder[]> {
-    const records = await this.store.listWhere((order) => order.status === OrderStatus.AWAITING_DRIVER);
+    const records = await this.store.listActive();
     const out: DriverOrder[] = [];
     for (const record of records) {
-      const {
-        id,
-        from,
-        to,
-        passengerId,
-        status,
-        cancelReason,
-        createdAt,
-        assignedAt,
-        completedAt,
-      } = record;
-      const passenger = (await this.passengerService.getById(passengerId))!;
-      const driverOrder: DriverOrder = {
-        id,
-        createdAt,
-        from,
-        to,
-        passenger,
-        status,
-        cancelReason,
-        assignedAt,
-        completedAt,
-      };
+      const order = await this.toOrder(record);
+      const { driver: _omit, ...driverOrder } = order;
       out.push(driverOrder);
     }
     return out;
@@ -144,31 +87,7 @@ export class OrderService {
   async findById(id: number): Promise<Order | undefined> {
     const record = await this.store.findById(id);
     if (!record) return;
-    const {
-      from,
-      to,
-      driverId,
-      passengerId,
-      status,
-      cancelReason,
-      createdAt,
-      assignedAt,
-      completedAt,
-    } = record;
-    const passenger = (await this.passengerService.getById(passengerId))!;
-    const driver = driverId ? await this.driverService.getById(driverId) : undefined;
-    return {
-      id,
-      createdAt,
-      passenger,
-      from,
-      to,
-      driver,
-      status,
-      cancelReason,
-      assignedAt,
-      completedAt,
-    };
+    return this.toOrder(record);
   }
 
   async update(id: number, updates: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
@@ -191,31 +110,7 @@ export class OrderService {
       patch.completedAt = new Date().toISOString();
     }
     const record = await this.store.update(id, patch);
-    const {
-      from,
-      to,
-      driverId,
-      passengerId,
-      status,
-      cancelReason,
-      createdAt,
-      assignedAt,
-      completedAt,
-    } = record;
-    const passenger = (await this.passengerService.getById(passengerId))!;
-    const driver = driverId ? await this.driverService.getById(driverId) : undefined;
-    return {
-      id,
-      createdAt,
-      passenger,
-      from,
-      to,
-      driver,
-      status,
-      cancelReason,
-      assignedAt,
-      completedAt,
-    };
+    return this.toOrder(record);
   }
 
   async delete(id: number): Promise<void> {

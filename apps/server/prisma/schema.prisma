@@ -1,0 +1,79 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PassengerRecord {
+  id    Int    @id @default(autoincrement())
+  name  String
+  phone String
+  token String @unique
+
+  orders OrderRecord[]
+}
+
+model DriverRecord {
+  id    Int    @id @default(autoincrement())
+  name  String
+  car   String
+  login String @unique
+  hash  String
+  token String @unique
+
+  orders OrderRecord[]
+}
+
+model OrderRecord {
+  id           Int     @id @default(autoincrement())
+  passengerId  Int
+  from         String
+  to           String
+  driverId     Int?
+  status       OrderStatus
+  cancelReason String?
+  deleted      Boolean @default(false)
+  createdAt    String
+  assignedAt   String?
+  completedAt  String?
+  deletedAt    String?
+
+  passenger PassengerRecord         @relation(fields: [passengerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  driver    DriverRecord?           @relation(fields: [driverId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  messages  OrderChatMessageRecord[]
+
+  @@index([passengerId])
+  @@index([driverId])
+  @@index([status, deleted])
+}
+
+model OrderChatMessageRecord {
+  id         Int            @id @default(autoincrement())
+  orderId    Int
+  authorRole ChatAuthorRole
+  text       String
+  createdAt  String
+
+  order OrderRecord @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([orderId, createdAt])
+}
+
+enum OrderStatus {
+  awaiting_driver
+  driver_assigned
+  driver_arrived
+  on_trip
+  completed
+  cancelled
+}
+
+enum ChatAuthorRole {
+  passenger
+  driver
+  dispatcher
+}

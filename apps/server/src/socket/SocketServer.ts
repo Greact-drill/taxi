@@ -1,10 +1,10 @@
 import type { Server as HttpServer } from 'node:http';
 import { Server as SocketIOServer } from 'socket.io';
-import { createSocketRuntime, joinRoleRooms } from './SocketRuntime';
-import { registerPassengerEvents } from './events/registerPassengerEvents';
-import { registerDriverEvents } from './events/registerDriverEvents';
-import { registerDispatcherEvents } from './events/registerDispatcherEvents';
-import type { Services } from '../services';
+import { createSocketRuntime, joinRoleRooms } from './SocketRuntime.js';
+import { registerPassengerEvents } from './events/registerPassengerEvents.js';
+import { registerDriverEvents } from './events/registerDriverEvents.js';
+import { registerDispatcherEvents } from './events/registerDispatcherEvents.js';
+import type { Services } from '../services/index.js';
 
 export async function createSocketServer(httpServer: HttpServer, services: Services): Promise<SocketIOServer> {
   const io = new SocketIOServer(httpServer, {

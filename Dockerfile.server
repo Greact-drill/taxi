@@ -1,24 +1,27 @@
 FROM node:22-alpine
 
-RUN apk add --no-cache python3 make g++ \
-    && corepack enable && corepack prepare pnpm@10 --activate
+RUN npm install -g pnpm
 
 WORKDIR /app
 
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
 COPY apps/server/package.json ./apps/server/
-COPY apps/dispatcher/package.json ./apps/dispatcher/
-COPY apps/driver/package.json ./apps/driver/
-COPY apps/passenger/package.json ./apps/passenger/
 COPY packages/shared/package.json ./packages/shared/
-COPY packages/order-ui/package.json ./packages/order-ui/
 
 RUN pnpm install --frozen-lockfile --filter server...
 
 COPY apps/server ./apps/server
 COPY packages/shared ./packages/shared
 
-ENV NODE_ENV=production
+ARG DATABASE_URL
+
+# сборка приложения
+RUN pnpm --filter server build
+
 EXPOSE 3001
 
-CMD ["pnpm", "--filter", "server", "exec", "tsx", "src/index.ts"]
+ENV NODE_ENV=production
+ENV DATABASE_URL=${DATABASE_URL}
+
+# запуск приложения
+CMD ["pnpm", "--filter", "server", "start"]
