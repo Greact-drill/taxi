@@ -17,9 +17,21 @@ importers:
 
   apps/dispatcher:
     dependencies:
+      '@chakra-ui/react':
+        specifier: ^3.27.0
+        version: 3.34.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@emotion/react':
+        specifier: ^11.14.0
+        version: 11.14.0(@types/react@19.2.14)(react@19.2.4)
+      '@packages/order-ui':
+        specifier: workspace:*
+        version: link:../../packages/order-ui
       '@packages/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      lucide-react:
+        specifier: ^1.8.0
+        version: 1.8.0(react@19.2.4)
       react:
         specifier: ^19.0.0
         version: 19.2.4

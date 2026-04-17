@@ -4,7 +4,7 @@ import type { SocketRuntimeContext } from '../SocketRuntime';
 import { CANCELLED_CLEAN_TIMEOUT, COMPLETED_CLEAN_TIMEOUT } from '../SocketRuntime';
 
 export function registerDriverEvents(ctx: SocketRuntimeContext): void {
-  
+
   // driver auth events
   ctx.on('driver:auth:register', async () => {
     throw Error('Самостоятельная регистрация не доступна для водителя');
@@ -82,7 +82,7 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
     );
 
     if (status === OrderStatus.COMPLETED) {
-      ctx.deleteAfterTimeout(order, COMPLETED_CLEAN_TIMEOUT);
+      ctx.deleteAfterTimeout({ ...order, driver }, COMPLETED_CLEAN_TIMEOUT);
     }
   });
 
@@ -104,7 +104,7 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
       await ctx.orderService.listOfDriver(driver.id),
     );
 
-    ctx.deleteAfterTimeout(order, CANCELLED_CLEAN_TIMEOUT);
+    ctx.deleteAfterTimeout({ ...order, driver }, CANCELLED_CLEAN_TIMEOUT);
   });
 
   ctx.on('driver:orders:delete', async (order: DriverOrder) => {

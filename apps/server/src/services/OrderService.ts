@@ -9,14 +9,12 @@ import type { OrderRecord } from '../generated/prisma/client';
 import { OrderStore } from '../stores/OrderStore';
 import { PassengerService } from './PassengerService';
 import { DriverService } from './DriverService';
-import { OrderChatService } from './OrderChatService';
 
 export class OrderService {
   constructor(
     private readonly store: OrderStore,
     private readonly passengerService: PassengerService,
     private readonly driverService: DriverService,
-    private readonly orderChatService: OrderChatService,
   ) { }
 
   private async toOrder(record: OrderRecord): Promise<Order> {
@@ -32,10 +30,8 @@ export class OrderService {
       status: record.status,
       cancelReason: record.cancelReason ?? undefined,
     };
-    //const messages = await this.orderChatService.messages(orderShell);
     return order;
   }
-
   async create(input: Partial<PassengerOrder>, passenger: Passenger): Promise<Order> {
     const from = (input.from ?? '').trim();
     const to = (input.to ?? '').trim();
@@ -56,9 +52,9 @@ export class OrderService {
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
-    const rows = await this.store.listByPassengerId(passengerId);
+    const records = await this.store.listByPassengerId(passengerId);
     const out: PassengerOrder[] = [];
-    for (const r of rows) {
+    for (const r of records) {
       const order = await this.toOrder(r);
       const { passenger: _omit, ...passengerOrder } = order;
       out.push(passengerOrder);
@@ -67,9 +63,9 @@ export class OrderService {
   }
 
   async listOfDriver(driverId: number): Promise<DriverOrder[]> {
-    const rows = await this.store.listByDriverId(driverId);
+    const records = await this.store.listByDriverId(driverId);
     const out: DriverOrder[] = [];
-    for (const record of rows) {
+    for (const record of records) {
       const order = await this.toOrder(record);
       const { driver: _omit, ...driverOrder } = order;
       out.push(driverOrder);
@@ -78,9 +74,9 @@ export class OrderService {
   }
 
   async listOfActive(): Promise<DriverOrder[]> {
-    const rows = await this.store.listActive();
+    const records = await this.store.listActive();
     const out: DriverOrder[] = [];
-    for (const record of rows) {
+    for (const record of records) {
       const order = await this.toOrder(record);
       const { driver: _omit, ...driverOrder } = order;
       out.push(driverOrder);
@@ -117,8 +113,7 @@ export class OrderService {
     return this.toOrder(record);
   }
 
-  async delete(id: number): Promise<Order> {
-    const record = await this.store.delete(id);
-    return this.toOrder(record);
+  async delete(id: number): Promise<void> {
+    await this.store.delete(id);
   }
 }

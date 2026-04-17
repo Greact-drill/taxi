@@ -28,7 +28,7 @@ export function OrderPassengerRow({ name, phone, attachToCardBottom = true }: Or
       mb={attachToCardBottom ? '-4' : undefined}
       borderBottomRadius={attachToCardBottom ? 'lg' : 'md'}
     >
-      <Box color="blue.600" lineHeight="0" flexShrink={0} aria-hidden>
+      <Box color="blue.600" lineHeight="0" flexShrink={0}>
         <UserRound size={18} strokeWidth={2} />
       </Box>
       <HStack gap="1.5" align="center" flex="1" minW={0} title={full}>

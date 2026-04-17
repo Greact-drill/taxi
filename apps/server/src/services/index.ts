@@ -9,26 +9,26 @@ import { OrderChatMessageStore } from '../stores/OrderChatMessageStore';
 import { prisma } from '../prisma';
 
 export type Services = {
-    passengerService: PassengerService;
-    driverService: DriverService;
-    orderService: OrderService;
-    orderChatService: OrderChatService;
+  passengerService: PassengerService;
+  driverService: DriverService;
+  orderService: OrderService;
+  orderChatService: OrderChatService;
 };
 
 export async function createServices(): Promise<Services> {
-    await prisma.$connect();
+  await prisma.$connect();
 
-    const passengerStore = new PassengerStore(prisma);
-    const driverStore = new DriverStore(prisma);
-    const orderStore = new OrderStore(prisma);
-    const orderChatMessageStore = new OrderChatMessageStore(prisma);
-    const passengerService = new PassengerService(passengerStore);
-    const driverService = new DriverService(driverStore);
-    const orderChatService = new OrderChatService(orderChatMessageStore);
-    const orderService = new OrderService(orderStore, passengerService, driverService, orderChatService);
-  
-    /** Тестовые водители для локальной разработки (логин = пароль). */
-    await driverService.bootstrap();
+  const passengerStore = new PassengerStore(prisma);
+  const driverStore = new DriverStore(prisma);
+  const orderStore = new OrderStore(prisma);
+  const orderChatMessageStore = new OrderChatMessageStore(prisma);
+  const passengerService = new PassengerService(passengerStore);
+  const driverService = new DriverService(driverStore);
+  const orderChatService = new OrderChatService(orderChatMessageStore);
+  const orderService = new OrderService(orderStore, passengerService, driverService);
 
-    return { passengerService, driverService, orderService, orderChatService };
+  /** Тестовые водители для локальной разработки (логин = пароль). */
+  await driverService.bootstrap();
+
+  return { passengerService, driverService, orderService, orderChatService };
 }

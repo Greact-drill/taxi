@@ -52,6 +52,10 @@ export type Order = {
   driver?: Driver;
   status: OrderStatus;
   cancelReason?: string;
+
+  assignedAt?: string;
+  completedAt?: string;
+  deletedAt?: string;
 };
 
 export type PassengerOrder = Omit<Order, 'passenger'>;
