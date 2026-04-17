@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.server
-      args:
-        DATABASE_URL: ${DATABASE_URL} # для работы Prisma CLI при применении миграций
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
     networks:
       - proxy
 
