@@ -1,0 +1,27 @@
+import { useEffect } from 'react';
+import { Text } from '@chakra-ui/react';
+import { observer } from 'mobx-react-lite';
+
+import { DispatcherColumn } from '../components/DispatcherColumn';
+import { PassengerAppHeader } from '../components/PassengerAppHeader';
+import { socket } from '../socket';
+import { store } from '../store';
+
+export const PassengersColumn = observer(function PassengersColumn() {
+  const { online, passengers } = store;
+
+  useEffect(() => {
+    socket.emit('dispatcher:passengers:request');
+  }, [socket.id]);
+
+  return (
+    <DispatcherColumn>
+      <Text px="3" py="2" fontWeight="semibold" fontSize="sm">
+        Пассажиры
+      </Text>
+      {passengers.map((passenger) => (
+        <PassengerAppHeader key={passenger.id} passenger={passenger} online={online} />
+      ))}
+    </DispatcherColumn>
+  );
+});

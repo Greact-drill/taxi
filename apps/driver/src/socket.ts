@@ -1,6 +1,6 @@
 import { Driver, DriverOrder, OrderChatMessage, OrderStatus, PassengerOrder } from '@packages/shared';
 import { io } from 'socket.io-client';
-import { orderToDriverOrder, store } from './store';
+import { store } from './store';
 
 export const socket = io({
   path: '/ws',

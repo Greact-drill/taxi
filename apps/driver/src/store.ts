@@ -3,11 +3,6 @@ import { makeAutoObservable } from 'mobx';
 
 const TOKEN_STORAGE_KEY = 'taxi_driver_token';
 
-export function orderToDriverOrder(order: Order): DriverOrder {
-  const { driver: _omit, ...rest } = order;
-  return rest;
-}
-
 class Store {
   online: boolean = false;
 
@@ -64,9 +59,9 @@ class Store {
   screenFormData?: DriverOrder;
   screenFormMessages: OrderChatMessage[];
 
-   // screen transition
-   isTransitioning: boolean;
-   pendingScreen?: 'list' | 'form';
+  // screen transition
+  isTransitioning: boolean;
+  pendingScreen?: 'list' | 'form';
 
   requestScreen(target: 'list' | 'form') {
     if (this.isTransitioning) {
@@ -107,11 +102,11 @@ class Store {
 
   openOrderForm(order: DriverOrder) {
     this.requestScreen('form');
-    this.screenFormData = {...order};
+    this.screenFormData = { ...order };
   }
 
   setScreenFormData(order: DriverOrder) {
-    this.screenFormData = {...order};
+    this.screenFormData = { ...order };
   }
 
   setOrderMessages(messages: OrderChatMessage[]) {

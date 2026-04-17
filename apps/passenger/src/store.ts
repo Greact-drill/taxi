@@ -1,7 +1,7 @@
 import { OrderChatMessage, PassengerOrder, Passenger } from "@packages/shared";
 import { makeAutoObservable } from "mobx";
 
-const TOKEN_STORAGE_KEY = 'taxi_token';
+const TOKEN_STORAGE_KEY = 'taxi_passenger_token';
 
 class Store {
   // online/offline status
@@ -94,7 +94,7 @@ class Store {
     this.requestScreen(this.pendingScreen);
     this.pendingScreen = undefined;
   }
-  
+
   // screen navigation
   openOrdersList() {
     this.requestScreen('list');
@@ -113,7 +113,7 @@ class Store {
   }
 
   setScreenFormData(order: Partial<PassengerOrder>) {
-    this.screenFormData = {...order};
+    this.screenFormData = { ...order };
   }
 
   setOrderMessages(messages: OrderChatMessage[]) {

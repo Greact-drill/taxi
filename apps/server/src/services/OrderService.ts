@@ -17,6 +17,35 @@ export class OrderService {
     private readonly driverService: DriverService,
   ) { }
 
+  private async toOrder(record: OrderRecord): Promise<Order> {
+    const {
+      id,
+      from,
+      to,
+      driverId,
+      passengerId,
+      status,
+      cancelReason,
+      createdAt,
+      assignedAt,
+      completedAt,
+    } = record;
+    const passenger = (await this.passengerService.getById(passengerId))!;
+    const driver = driverId ? await this.driverService.getById(driverId) : undefined;
+    return {
+      id,
+      createdAt,
+      passenger,
+      from,
+      to,
+      driver,
+      status,
+      cancelReason,
+      assignedAt,
+      completedAt,
+    };
+  }
+
   async create(input: Partial<PassengerOrder>, passenger: Passenger): Promise<Order> {
     const from = (input.from ?? '').trim();
     const to = (input.to ?? '').trim();
@@ -141,34 +170,19 @@ export class OrderService {
     return out;
   }
 
+  async list(): Promise<Order[]> {
+    const records = await this.store.listWhere(() => true);
+    const out: Order[] = [];
+    for (const record of records) {
+      out.push(await this.toOrder(record));
+    }
+    return out;
+  }
+
   async findById(id: number): Promise<Order | undefined> {
     const record = await this.store.findById(id);
     if (!record) return;
-    const {
-      from,
-      to,
-      driverId,
-      passengerId,
-      status,
-      cancelReason,
-      createdAt,
-      assignedAt,
-      completedAt,
-    } = record;
-    const passenger = (await this.passengerService.getById(passengerId))!;
-    const driver = driverId ? await this.driverService.getById(driverId) : undefined;
-    return {
-      id,
-      createdAt,
-      passenger,
-      from,
-      to,
-      driver,
-      status,
-      cancelReason,
-      assignedAt,
-      completedAt,
-    };
+    return this.toOrder(record);
   }
 
   async update(id: number, updates: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
@@ -191,31 +205,7 @@ export class OrderService {
       patch.completedAt = new Date().toISOString();
     }
     const record = await this.store.update(id, patch);
-    const {
-      from,
-      to,
-      driverId,
-      passengerId,
-      status,
-      cancelReason,
-      createdAt,
-      assignedAt,
-      completedAt,
-    } = record;
-    const passenger = (await this.passengerService.getById(passengerId))!;
-    const driver = driverId ? await this.driverService.getById(driverId) : undefined;
-    return {
-      id,
-      createdAt,
-      passenger,
-      from,
-      to,
-      driver,
-      status,
-      cancelReason,
-      assignedAt,
-      completedAt,
-    };
+    return this.toOrder(record);
   }
 
   async delete(id: number): Promise<void> {

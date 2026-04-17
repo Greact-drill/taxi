@@ -27,6 +27,16 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     ctx.send('dispatcher', 'dispatcher:connections', items);
   });
 
-  // TODO: dispatcher orders events
+  ctx.on('dispatcher:drivers:request', async () => {
+    ctx.socket.emit('dispatcher:drivers', await ctx.driverService.list());
+  });
+
+  ctx.on('dispatcher:passengers:request', async () => {
+    ctx.socket.emit('dispatcher:passengers', await ctx.passengerService.list());
+  });
+
+  ctx.on('dispatcher:orders:request', async () => {
+    ctx.socket.emit('dispatcher:orders', await ctx.orderService.list());
+  });
 }
 

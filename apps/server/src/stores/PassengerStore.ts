@@ -20,6 +20,10 @@ export class PassengerStore {
     return this.passengerStore.get(id);
   }
 
+  async list(): Promise<PassengerRecord[]> {
+    return [...this.passengerStore.values()];
+  }
+
   async update(id: number, patch: Partial<PassengerRecord>): Promise<PassengerRecord> {
     const record = this.passengerStore.get(id);
     if (!record) throw Error(`PassengerStore: Record not found ${id}`);

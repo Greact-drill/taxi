@@ -42,6 +42,11 @@ export class DriverService {
     return { id: record.id, name: record.name, car: record.car };
   }
 
+  async list(): Promise<Driver[]> {
+    const records = await this.store.list();
+    return records.map((r) => ({ id: r.id, name: r.name, car: r.car }));
+  }
+
   async login(data: DriverLogin): Promise<string> {
     const login = data.login.trim();
     const record = await this.store.findWhere((d) => d.login === login);

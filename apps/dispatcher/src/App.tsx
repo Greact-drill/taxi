@@ -1,47 +1,20 @@
-import { useEffect, useState } from 'react';
-import type { DispatcherConnectionsItem } from '@packages/shared';
-import { socket } from './socket';
-import './app.css';
+import { Box, HStack } from '@chakra-ui/react';
+
+import { DriversColumn } from './columns/DriversColumn';
+import { OrdersColumn } from './columns/OrdersColumn';
+import { PassengersColumn } from './columns/PassengersColumn';
+import { SettingsColumn } from './columns/SettingsColumn';
+import './socket';
 
 export default function App() {
-  const [connections, setConnections] = useState<DispatcherConnectionsItem[]>([]);
-  const [connected, setConnected] = useState(socket.connected);
-
-  useEffect(() => {
-    const onConnections = (items: DispatcherConnectionsItem[]) => setConnections(items);
-    const onConnect = () => setConnected(true);
-    const onDisconnect = () => setConnected(false);
-
-    socket.on('dispatcher:connections', onConnections);
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-
-    return () => {
-      socket.off('dispatcher:connections', onConnections);
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-    };
-  }, []);
-
   return (
-    <main className="page">
-      <h1>
-        Диспетчер{' '}
-        <span className={connected ? 'badge badge--on' : 'badge badge--off'}>
-          {connected ? 'онлайн' : 'офлайн'}
-        </span>
-      </h1>
-      <p>
-        Активных соединений: <strong>{connections.length}</strong>
-      </p>
-      <ul className="list">
-        {connections.map((item, index) => (
-          <li key={index} className="list__item">
-            <span>{item.role}</span>
-            <span>{item.token}</span>
-          </li>
-        ))}
-      </ul>
-    </main>
+    <Box h="100dvh" w="100%" overflow="hidden" p="4" display="flex" flexDirection="column" boxSizing="border-box">
+      <HStack align="stretch" gap="4" flex="1" minH={0} minW={0} w="100%">
+        <SettingsColumn />
+        <DriversColumn />
+        <PassengersColumn />
+        <OrdersColumn />
+      </HStack>
+    </Box>
   );
 }

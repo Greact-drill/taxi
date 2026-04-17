@@ -23,6 +23,11 @@ export class PassengerService {
     return { id: record.id, name: record.name, phone: record.phone };
   }
 
+  async list(): Promise<Passenger[]> {
+    const records = await this.store.list();
+    return records.map((r) => ({ id: r.id, name: r.name, phone: r.phone }));
+  }
+
   async findByToken(token: string): Promise<Passenger | undefined> {
     const record = await this.store.findWhere((p) => p.token === token);
     if (!record) return;
