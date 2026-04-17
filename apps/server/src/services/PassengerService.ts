@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Passenger, PassengerRecord, PassengerRegister } from '@packages/shared';
+import type { Passenger, PassengerRegister } from '@packages/shared';
 import { PassengerStore } from '../stores/PassengerStore';
 
 export class PassengerService {
@@ -27,7 +27,7 @@ export class PassengerService {
   }
 
   async findByToken(token: string): Promise<Passenger | undefined> {
-    const record = await this.store.findWhere((p) => p.token === token);
+    const record = await this.store.findByToken(token);
     if (!record) return;
     return { id: record.id, name: record.name, phone: record.phone };
   }

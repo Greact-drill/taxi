@@ -1,14 +1,41 @@
 services:
+  taxi_postgres:
+    container_name: taxi_postgres
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-taxi}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - taxi_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-taxi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - backend
+
   taxi_server:
     container_name: taxi_server
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile.server
+    depends_on:
+      taxi_postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@taxi_postgres:5432/${POSTGRES_DB:-taxi}?schema=public
     networks:
       - proxy
 
   taxi_dispatcher:
     container_name: taxi_dispatcher
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile.spa
@@ -19,6 +46,7 @@ services:
 
   taxi_driver:
     container_name: taxi_driver
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile.spa
@@ -29,6 +57,7 @@ services:
 
   taxi_passenger:
     container_name: taxi_passenger
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile.spa
@@ -36,6 +65,9 @@ services:
         APP: passenger
     networks:
       - proxy
+
+volumes:
+  taxi_postgres_data:
 
 networks:
   proxy:

@@ -1,33 +1,39 @@
-import type { DriverRecord } from '@packages/shared';
+import type { Prisma, PrismaClient, DriverRecord } from '../generated/prisma/client';
 
 export class DriverStore {
-  private driverStore = new Map<number, DriverRecord>();
-  private nextId = 1;
+  constructor(private readonly prisma: PrismaClient) {}
 
-  async create(data: Omit<DriverRecord, 'id'>): Promise<DriverRecord> {
-    const driver: DriverRecord = { ...data, id: this.nextId++ };
-    this.driverStore.set(driver.id, driver);
-    return driver;
+  async create(data: Prisma.DriverRecordUncheckedCreateInput): Promise<DriverRecord> {
+    return this.prisma.driverRecord.create({ data });
   }
 
-  async findWhere(match: (driver: DriverRecord) => boolean): Promise<DriverRecord | undefined> {
-    for (const driver of this.driverStore.values()) {
-      if (match(driver)) return driver;
-    }
+  async findByLogin(login: string): Promise<DriverRecord | undefined> {
+    return (await this.prisma.driverRecord.findUnique({ where: { login } })) ?? undefined;
+  }
+
+  async findByToken(token: string): Promise<DriverRecord | undefined> {
+    return (await this.prisma.driverRecord.findUnique({ where: { token } })) ?? undefined;
   }
 
   async getById(id: number): Promise<DriverRecord | undefined> {
-    return this.driverStore.get(id);
+    return (await this.prisma.driverRecord.findUnique({ where: { id } })) ?? undefined;
   }
 
-  async update(id: number, patch: Partial<DriverRecord>): Promise<DriverRecord> {
-    const record = this.driverStore.get(id);
-    if (!record) throw Error(`DriverStore: Record not found ${id}`);
-    for (const [key, value] of Object.entries(patch)) {
-      if (value === undefined) continue;
-      (record as Record<string, unknown>)[key] = value;
-    }
-    record.id = id;
-    return record;
+  async update(
+    id: number,
+    patch: { name?: string; car?: string; login?: string; hash?: string; token?: string },
+  ): Promise<DriverRecord> {
+    const data: Prisma.DriverRecordUncheckedUpdateInput = {};
+
+    if (patch.name !== undefined) data.name = patch.name;
+    if (patch.car !== undefined) data.car = patch.car;
+    if (patch.login !== undefined) data.login = patch.login;
+    if (patch.hash !== undefined) data.hash = patch.hash;
+    if (patch.token !== undefined) data.token = patch.token;
+
+    return this.prisma.driverRecord.update({
+      where: { id },
+      data,
+    });
   }
 }

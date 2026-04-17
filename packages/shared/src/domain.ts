@@ -22,14 +22,16 @@ export type DriverLogin = {
   password: string;
 };
 
-export enum OrderStatus {
-  AWAITING_DRIVER = 'awaiting_driver',
-  DRIVER_ASSIGNED = 'driver_assigned',
-  DRIVER_ARRIVED = 'driver_arrived',
-  ON_TRIP = 'on_trip',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-}
+export const OrderStatus = {
+  AWAITING_DRIVER: 'awaiting_driver',
+  DRIVER_ASSIGNED: 'driver_assigned',
+  DRIVER_ARRIVED: 'driver_arrived',
+  ON_TRIP: 'on_trip',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+} as const;
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
 export type ChatAuthorRole = 'passenger' | 'driver' | 'dispatcher';
 

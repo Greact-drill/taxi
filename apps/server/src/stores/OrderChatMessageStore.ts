@@ -1,19 +1,16 @@
-import type { OrderChatMessageRecord } from '@packages/shared';
+import type { Prisma, PrismaClient, OrderChatMessageRecord } from '../generated/prisma/client';
 
 export class OrderChatMessageStore {
-  private records: OrderChatMessageRecord[] = [];
-  private nextId = 1;
+  constructor(private readonly prisma: PrismaClient) {}
 
   async listByOrderId(orderId: number): Promise<OrderChatMessageRecord[]> {
-    return this.records.filter((item) => item.orderId === orderId);
+    return this.prisma.orderChatMessageRecord.findMany({
+      where: { orderId },
+      orderBy: { id: 'asc' },
+    });
   }
 
-  async create(data: Omit<OrderChatMessageRecord, 'id'>): Promise<OrderChatMessageRecord> {
-    const record: OrderChatMessageRecord = {
-      id: this.nextId++,
-      ...data,
-    };
-    this.records.push(record);
-    return record;
+  async create(data: Prisma.OrderChatMessageRecordUncheckedCreateInput): Promise<OrderChatMessageRecord> {
+    return this.prisma.orderChatMessageRecord.create({ data });
   }
 }

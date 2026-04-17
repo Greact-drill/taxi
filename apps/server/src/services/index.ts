@@ -6,6 +6,7 @@ import { DriverService } from '../services/DriverService';
 import { OrderService } from '../services/OrderService';
 import { OrderChatService } from '../services/OrderChatService';
 import { OrderChatMessageStore } from '../stores/OrderChatMessageStore';
+import { prisma } from '../prisma';
 
 export type Services = {
     passengerService: PassengerService;
@@ -15,10 +16,12 @@ export type Services = {
 };
 
 export async function createServices(): Promise<Services> {
-    const passengerStore = new PassengerStore();
-    const driverStore = new DriverStore();
-    const orderStore = new OrderStore();
-    const orderChatMessageStore = new OrderChatMessageStore();
+    await prisma.$connect();
+
+    const passengerStore = new PassengerStore(prisma);
+    const driverStore = new DriverStore(prisma);
+    const orderStore = new OrderStore(prisma);
+    const orderChatMessageStore = new OrderChatMessageStore(prisma);
     const passengerService = new PassengerService(passengerStore);
     const driverService = new DriverService(driverStore);
     const orderChatService = new OrderChatService(orderChatMessageStore);

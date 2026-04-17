@@ -2,10 +2,10 @@ import {
   OrderStatus,
   type DriverOrder,
   type Order,
-  type OrderRecord,
   type Passenger,
   type PassengerOrder,
 } from '@packages/shared';
+import type { OrderRecord } from '../generated/prisma/client';
 import { OrderStore } from '../stores/OrderStore';
 import { PassengerService } from './PassengerService';
 import { DriverService } from './DriverService';
@@ -30,7 +30,7 @@ export class OrderService {
       to: record.to,
       driver,
       status: record.status,
-      cancelReason: record.cancelReason,
+      cancelReason: record.cancelReason ?? undefined,
     };
     //const messages = await this.orderChatService.messages(orderShell);
     return order;
@@ -56,7 +56,7 @@ export class OrderService {
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
-    const rows = await this.store.listWhere((order) => order.passengerId === passengerId);
+    const rows = await this.store.listByPassengerId(passengerId);
     const out: PassengerOrder[] = [];
     for (const r of rows) {
       const order = await this.toOrder(r);
@@ -67,7 +67,7 @@ export class OrderService {
   }
 
   async listOfDriver(driverId: number): Promise<DriverOrder[]> {
-    const rows = await this.store.listWhere((order) => order.driverId === driverId);
+    const rows = await this.store.listByDriverId(driverId);
     const out: DriverOrder[] = [];
     for (const record of rows) {
       const order = await this.toOrder(record);
@@ -78,7 +78,7 @@ export class OrderService {
   }
 
   async listOfActive(): Promise<DriverOrder[]> {
-    const rows = await this.store.listWhere((order) => order.status === OrderStatus.AWAITING_DRIVER);
+    const rows = await this.store.listActive();
     const out: DriverOrder[] = [];
     for (const record of rows) {
       const order = await this.toOrder(record);
