@@ -13,6 +13,7 @@ RUN pnpm install --frozen-lockfile --filter server...
 COPY apps/server ./apps/server
 COPY packages/shared ./packages/shared
 
+ARG DATABASE_URL
 
 # сборка приложения
 RUN pnpm --filter server build
@@ -23,7 +24,6 @@ RUN pnpm --filter server exec prisma db push
 EXPOSE 3001
 
 ENV NODE_ENV=production
-ENV DATABASE_URL=${DATABASE_URL}
 
 # запуск приложения
 CMD ["sh", "-c", "pnpm --filter server exec prisma db push && pnpm --filter server start"]
