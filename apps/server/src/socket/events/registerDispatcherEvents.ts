@@ -1,6 +1,6 @@
 import type { Server as SocketIOServer } from 'socket.io';
 import { type SocketRuntimeContext } from '../SocketRuntime.js';
-import type { DispatcherConnectionsItem } from '@packages/shared';
+import type { DispatcherConnectionsItem, Driver } from '@packages/shared';
 
 const ONLINE_TIMEOUT = 20_000;
 
@@ -27,6 +27,7 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
       id = `passenger:${ctx.socket.data.passenger.id}`;
     }
     if (id) {
+      // TODO проверить, что это прервт проверку на оффла при перезагрузке клиента
       ctx.statusMap[id] = 'online';
       ctx.send('dispatcher', 'dispatcher:status:change', id, 'online');
     }
@@ -75,5 +76,31 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     ctx.socket.emit('dispatcher:orders', await ctx.orderService.list());
   });
 
+  ctx.on(
+    'dispatcher:drivers:update',
+    async (id: number, patch: Partial<Driver>) => {
+      const result = await ctx.driverService.update(id, {
+        name: patch.name,
+        car: patch.car,
+        login: patch.login,
+      });
+      ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
+      ctx.send(`driver:${id}`, 'driver:profile', result);
+    },
+  );
+
+  ctx.on('dispatcher:drivers:delete', async (id: number) => {
+    await ctx.driverService.remove(id);
+    ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
+  });
+
+  ctx.on('dispatcher:drivers:password', async (id: number, newPassword: string) => {
+    if (typeof newPassword !== 'string' || newPassword.length === 0) {
+      throw new Error('Некорректный пароль');
+    }
+    await ctx.driverService.setPassword(id, newPassword);
+    ctx.io.in(`driver:${id}`).disconnectSockets(true);
+    ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
+  });
 }
 

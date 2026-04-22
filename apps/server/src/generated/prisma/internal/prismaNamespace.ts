@@ -758,7 +758,9 @@ export const DriverRecordScalarFieldEnum = {
   car: 'car',
   login: 'login',
   hash: 'hash',
-  token: 'token'
+  token: 'token',
+  deleted: 'deleted',
+  deletedAt: 'deletedAt'
 } as const
 
 export type DriverRecordScalarFieldEnum = (typeof DriverRecordScalarFieldEnum)[keyof typeof DriverRecordScalarFieldEnum]
@@ -852,6 +854,13 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'OrderStatus'
  */
 export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus'>
@@ -862,13 +871,6 @@ export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'OrderStatus[]'
  */
 export type ListEnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 

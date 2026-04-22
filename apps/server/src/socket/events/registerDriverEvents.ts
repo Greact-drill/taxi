@@ -16,13 +16,17 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
   });
 
   ctx.on('driver:auth:request', async () => {
-    const driver = ctx.socket.data.driver as Driver | undefined;
+    const driver = ctx.socket.data.driver;
     ctx.socket.emit('auth:profile', driver);
   });
 
   ctx.on('driver:profile:update', async (profile: Partial<Driver>) => {
     const driver = ctx.requireDriver();
-    const result = await ctx.driverService.update(driver.id, profile);
+    const result = await ctx.driverService.update(driver.id, {
+      name: profile.name,
+      car: profile.car,
+      login: profile.login,
+    });
     ctx.send(`driver:${driver.id}`, 'driver:profile', result);
   });
 

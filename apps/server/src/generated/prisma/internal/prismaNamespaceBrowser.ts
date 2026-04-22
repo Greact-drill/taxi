@@ -89,7 +89,9 @@ export const DriverRecordScalarFieldEnum = {
   car: 'car',
   login: 'login',
   hash: 'hash',
-  token: 'token'
+  token: 'token',
+  deleted: 'deleted',
+  deletedAt: 'deletedAt'
 } as const
 
 export type DriverRecordScalarFieldEnum = (typeof DriverRecordScalarFieldEnum)[keyof typeof DriverRecordScalarFieldEnum]

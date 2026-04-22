@@ -41,6 +41,8 @@ export type DriverRecordMinAggregateOutputType = {
   login: string | null
   hash: string | null
   token: string | null
+  deleted: boolean | null
+  deletedAt: string | null
 }
 
 export type DriverRecordMaxAggregateOutputType = {
@@ -50,6 +52,8 @@ export type DriverRecordMaxAggregateOutputType = {
   login: string | null
   hash: string | null
   token: string | null
+  deleted: boolean | null
+  deletedAt: string | null
 }
 
 export type DriverRecordCountAggregateOutputType = {
@@ -59,6 +63,8 @@ export type DriverRecordCountAggregateOutputType = {
   login: number
   hash: number
   token: number
+  deleted: number
+  deletedAt: number
   _all: number
 }
 
@@ -78,6 +84,8 @@ export type DriverRecordMinAggregateInputType = {
   login?: true
   hash?: true
   token?: true
+  deleted?: true
+  deletedAt?: true
 }
 
 export type DriverRecordMaxAggregateInputType = {
@@ -87,6 +95,8 @@ export type DriverRecordMaxAggregateInputType = {
   login?: true
   hash?: true
   token?: true
+  deleted?: true
+  deletedAt?: true
 }
 
 export type DriverRecordCountAggregateInputType = {
@@ -96,6 +106,8 @@ export type DriverRecordCountAggregateInputType = {
   login?: true
   hash?: true
   token?: true
+  deleted?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -192,6 +204,8 @@ export type DriverRecordGroupByOutputType = {
   login: string
   hash: string
   token: string
+  deleted: boolean
+  deletedAt: string | null
   _count: DriverRecordCountAggregateOutputType | null
   _avg: DriverRecordAvgAggregateOutputType | null
   _sum: DriverRecordSumAggregateOutputType | null
@@ -224,6 +238,8 @@ export type DriverRecordWhereInput = {
   login?: Prisma.StringFilter<"DriverRecord"> | string
   hash?: Prisma.StringFilter<"DriverRecord"> | string
   token?: Prisma.StringFilter<"DriverRecord"> | string
+  deleted?: Prisma.BoolFilter<"DriverRecord"> | boolean
+  deletedAt?: Prisma.StringNullableFilter<"DriverRecord"> | string | null
   orders?: Prisma.OrderRecordListRelationFilter
 }
 
@@ -234,6 +250,8 @@ export type DriverRecordOrderByWithRelationInput = {
   login?: Prisma.SortOrder
   hash?: Prisma.SortOrder
   token?: Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   orders?: Prisma.OrderRecordOrderByRelationAggregateInput
 }
 
@@ -247,6 +265,8 @@ export type DriverRecordWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"DriverRecord"> | string
   car?: Prisma.StringFilter<"DriverRecord"> | string
   hash?: Prisma.StringFilter<"DriverRecord"> | string
+  deleted?: Prisma.BoolFilter<"DriverRecord"> | boolean
+  deletedAt?: Prisma.StringNullableFilter<"DriverRecord"> | string | null
   orders?: Prisma.OrderRecordListRelationFilter
 }, "id" | "login" | "token">
 
@@ -257,6 +277,8 @@ export type DriverRecordOrderByWithAggregationInput = {
   login?: Prisma.SortOrder
   hash?: Prisma.SortOrder
   token?: Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DriverRecordCountOrderByAggregateInput
   _avg?: Prisma.DriverRecordAvgOrderByAggregateInput
   _max?: Prisma.DriverRecordMaxOrderByAggregateInput
@@ -274,6 +296,8 @@ export type DriverRecordScalarWhereWithAggregatesInput = {
   login?: Prisma.StringWithAggregatesFilter<"DriverRecord"> | string
   hash?: Prisma.StringWithAggregatesFilter<"DriverRecord"> | string
   token?: Prisma.StringWithAggregatesFilter<"DriverRecord"> | string
+  deleted?: Prisma.BoolWithAggregatesFilter<"DriverRecord"> | boolean
+  deletedAt?: Prisma.StringNullableWithAggregatesFilter<"DriverRecord"> | string | null
 }
 
 export type DriverRecordCreateInput = {
@@ -282,6 +306,8 @@ export type DriverRecordCreateInput = {
   login: string
   hash: string
   token: string
+  deleted?: boolean
+  deletedAt?: string | null
   orders?: Prisma.OrderRecordCreateNestedManyWithoutDriverInput
 }
 
@@ -292,6 +318,8 @@ export type DriverRecordUncheckedCreateInput = {
   login: string
   hash: string
   token: string
+  deleted?: boolean
+  deletedAt?: string | null
   orders?: Prisma.OrderRecordUncheckedCreateNestedManyWithoutDriverInput
 }
 
@@ -301,6 +329,8 @@ export type DriverRecordUpdateInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
   hash?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orders?: Prisma.OrderRecordUpdateManyWithoutDriverNestedInput
 }
 
@@ -311,6 +341,8 @@ export type DriverRecordUncheckedUpdateInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
   hash?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orders?: Prisma.OrderRecordUncheckedUpdateManyWithoutDriverNestedInput
 }
 
@@ -321,6 +353,8 @@ export type DriverRecordCreateManyInput = {
   login: string
   hash: string
   token: string
+  deleted?: boolean
+  deletedAt?: string | null
 }
 
 export type DriverRecordUpdateManyMutationInput = {
@@ -329,6 +363,8 @@ export type DriverRecordUpdateManyMutationInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
   hash?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DriverRecordUncheckedUpdateManyInput = {
@@ -338,6 +374,8 @@ export type DriverRecordUncheckedUpdateManyInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
   hash?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DriverRecordCountOrderByAggregateInput = {
@@ -347,6 +385,8 @@ export type DriverRecordCountOrderByAggregateInput = {
   login?: Prisma.SortOrder
   hash?: Prisma.SortOrder
   token?: Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type DriverRecordAvgOrderByAggregateInput = {
@@ -360,6 +400,8 @@ export type DriverRecordMaxOrderByAggregateInput = {
   login?: Prisma.SortOrder
   hash?: Prisma.SortOrder
   token?: Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type DriverRecordMinOrderByAggregateInput = {
@@ -369,6 +411,8 @@ export type DriverRecordMinOrderByAggregateInput = {
   login?: Prisma.SortOrder
   hash?: Prisma.SortOrder
   token?: Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type DriverRecordSumOrderByAggregateInput = {
@@ -378,6 +422,14 @@ export type DriverRecordSumOrderByAggregateInput = {
 export type DriverRecordNullableScalarRelationFilter = {
   is?: Prisma.DriverRecordWhereInput | null
   isNot?: Prisma.DriverRecordWhereInput | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DriverRecordCreateNestedOneWithoutOrdersInput = {
@@ -402,6 +454,8 @@ export type DriverRecordCreateWithoutOrdersInput = {
   login: string
   hash: string
   token: string
+  deleted?: boolean
+  deletedAt?: string | null
 }
 
 export type DriverRecordUncheckedCreateWithoutOrdersInput = {
@@ -411,6 +465,8 @@ export type DriverRecordUncheckedCreateWithoutOrdersInput = {
   login: string
   hash: string
   token: string
+  deleted?: boolean
+  deletedAt?: string | null
 }
 
 export type DriverRecordCreateOrConnectWithoutOrdersInput = {
@@ -435,6 +491,8 @@ export type DriverRecordUpdateWithoutOrdersInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
   hash?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DriverRecordUncheckedUpdateWithoutOrdersInput = {
@@ -444,6 +502,8 @@ export type DriverRecordUncheckedUpdateWithoutOrdersInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
   hash?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -484,6 +544,8 @@ export type DriverRecordSelect<ExtArgs extends runtime.Types.Extensions.Internal
   login?: boolean
   hash?: boolean
   token?: boolean
+  deleted?: boolean
+  deletedAt?: boolean
   orders?: boolean | Prisma.DriverRecord$ordersArgs<ExtArgs>
   _count?: boolean | Prisma.DriverRecordCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["driverRecord"]>
@@ -495,6 +557,8 @@ export type DriverRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   login?: boolean
   hash?: boolean
   token?: boolean
+  deleted?: boolean
+  deletedAt?: boolean
 }, ExtArgs["result"]["driverRecord"]>
 
 export type DriverRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -504,6 +568,8 @@ export type DriverRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   login?: boolean
   hash?: boolean
   token?: boolean
+  deleted?: boolean
+  deletedAt?: boolean
 }, ExtArgs["result"]["driverRecord"]>
 
 export type DriverRecordSelectScalar = {
@@ -513,9 +579,11 @@ export type DriverRecordSelectScalar = {
   login?: boolean
   hash?: boolean
   token?: boolean
+  deleted?: boolean
+  deletedAt?: boolean
 }
 
-export type DriverRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "car" | "login" | "hash" | "token", ExtArgs["result"]["driverRecord"]>
+export type DriverRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "car" | "login" | "hash" | "token" | "deleted" | "deletedAt", ExtArgs["result"]["driverRecord"]>
 export type DriverRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | Prisma.DriverRecord$ordersArgs<ExtArgs>
   _count?: boolean | Prisma.DriverRecordCountOutputTypeDefaultArgs<ExtArgs>
@@ -535,6 +603,8 @@ export type $DriverRecordPayload<ExtArgs extends runtime.Types.Extensions.Intern
     login: string
     hash: string
     token: string
+    deleted: boolean
+    deletedAt: string | null
   }, ExtArgs["result"]["driverRecord"]>
   composites: {}
 }
@@ -965,6 +1035,8 @@ export interface DriverRecordFieldRefs {
   readonly login: Prisma.FieldRef<"DriverRecord", 'String'>
   readonly hash: Prisma.FieldRef<"DriverRecord", 'String'>
   readonly token: Prisma.FieldRef<"DriverRecord", 'String'>
+  readonly deleted: Prisma.FieldRef<"DriverRecord", 'Boolean'>
+  readonly deletedAt: Prisma.FieldRef<"DriverRecord", 'String'>
 }
     
 

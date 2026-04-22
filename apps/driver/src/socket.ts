@@ -1,4 +1,4 @@
-import { Driver, DriverOrder, OrderChatMessage, OrderStatus, PassengerOrder } from '@packages/shared';
+import { Driver, DriverOrder, OrderChatMessage, OrderStatus, Passenger, PassengerOrder } from '@packages/shared';
 import { io } from 'socket.io-client';
 import { store } from './store';
 
@@ -51,7 +51,12 @@ socket.on('auth:token', (token: string) => {
   setTokenReconnect(token);
 });
 
-socket.on('auth:profile', (user: Driver) => {
+socket.on('auth:profile', (user?: Driver) => {
+  if (user) store.setCurrentUser(user);
+  else store.clearCurrentUser();
+});
+
+socket.on('driver:profile', (user: Driver) => {
   store.setCurrentUser(user);
 });
 
@@ -93,5 +98,5 @@ socket.on('passenger:order:messages', (orderId: number, messages: OrderChatMessa
 });
 
 socket.on('server:online:request', () => {
-  socket.emit('server:online', `driver:${store.currentUser?.id}`);
+  if (store.currentUser) socket.emit('server:online', `driver:${store.currentUser.id}`);
 });

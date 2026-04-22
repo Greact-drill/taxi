@@ -21,6 +21,7 @@ export type Driver = {
   id: number;
   name: string;
   car: string;
+  login: string;
 };
 
 export type DriverLogin = {

@@ -87,6 +87,5 @@ socket.on('driver:order:messages', (orderId: number, messages: OrderChatMessage[
 });
 
 socket.on('server:online:request', () => {
-  console.log('server:online:request', `passenger:${store.currentUser?.id}`);
-  socket.emit('server:online', `passenger:${store.currentUser?.id}`);
+  if (store.currentUser) socket.emit('server:online', `passenger:${store.currentUser?.id}`);
 });
