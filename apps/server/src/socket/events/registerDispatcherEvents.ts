@@ -18,7 +18,7 @@ async function getConnections(io: SocketIOServer): Promise<DispatcherConnections
 }
 
 export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
-  
+
   (async () => {
     let id: string | undefined;
     if (ctx.socket.data.driver) {
@@ -34,6 +34,7 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
   })();
 
   ctx.socket.on('disconnect', async () => {
+    console.log('disconnect');
     let id: string | undefined;
     if (ctx.socket.data.driver) {
       id = `driver:${ctx.socket.data.driver.id}`;
@@ -56,13 +57,13 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     console.log('server:online', id);
     ctx.statusMap[id] = 'online';
     ctx.send('dispatcher', 'dispatcher:status:change', id, 'online');
-  });  
+  });
 
   ctx.on('dispatcher:status:map:request', async () => {
     ctx.socket.emit('dispatcher:status:map', ctx.statusMap);
     ctx.send('driver', 'server:online:request');
     ctx.send('passenger', 'server:online:request');
-  });  
+  });
 
   ctx.on('dispatcher:drivers:request', async () => {
     ctx.socket.emit('dispatcher:drivers', await ctx.driverService.list());

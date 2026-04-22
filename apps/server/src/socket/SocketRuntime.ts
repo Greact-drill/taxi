@@ -52,7 +52,7 @@ export function joinRoleRooms(socket: SocketIOClient, role: string): void {
   }
 }
 
-export function createSocketRuntime(io: SocketIOServer, socket: SocketIOClient, services: SocketRuntimeServices): SocketRuntimeContext {
+export function createSocketRuntime(io: SocketIOServer, socket: SocketIOClient, services: SocketRuntimeServices, statusMap: StatusMap): SocketRuntimeContext {
   const { passengerService, driverService, orderService, orderChatService } = services;
 
   function requirePassenger(): Passenger {
@@ -114,8 +114,6 @@ export function createSocketRuntime(io: SocketIOServer, socket: SocketIOClient, 
     io.to(room).emit(event, ...payloadArgs);
   }
 
-  const onlineMap: StatusMap = {};
-
   return {
     io,
     socket,
@@ -123,7 +121,7 @@ export function createSocketRuntime(io: SocketIOServer, socket: SocketIOClient, 
     driverService,
     orderService,
     orderChatService,
-    statusMap: onlineMap,
+    statusMap,
 
     requirePassenger,
     requireDriver,

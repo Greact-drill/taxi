@@ -5,6 +5,9 @@ import { registerPassengerEvents } from './events/registerPassengerEvents.js';
 import { registerDriverEvents } from './events/registerDriverEvents.js';
 import { registerDispatcherEvents } from './events/registerDispatcherEvents.js';
 import type { Services } from '../services/index.js';
+import { StatusMap } from '@packages/shared';
+
+const statusMap: StatusMap = {};
 
 export async function createSocketServer(httpServer: HttpServer, services: Services): Promise<SocketIOServer> {
   const io = new SocketIOServer(httpServer, {
@@ -46,7 +49,7 @@ export async function createSocketServer(httpServer: HttpServer, services: Servi
 
     joinRoleRooms(socket, role);
 
-    const ctx = createSocketRuntime(io, socket, services);
+    const ctx = createSocketRuntime(io, socket, services, statusMap);
     registerPassengerEvents(ctx);
     registerDriverEvents(ctx);
     registerDispatcherEvents(ctx);
