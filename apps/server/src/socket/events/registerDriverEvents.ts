@@ -1,4 +1,4 @@
-import type { Driver, DriverLogin, DriverOrder } from '@packages/shared';
+import type { Driver, DriverLoginInput, DriverOrder } from '@packages/shared';
 import { OrderStatus } from '@packages/shared';
 import type { SocketRuntimeContext } from '../SocketRuntime.js';
 import { CANCELLED_CLEAN_TIMEOUT, COMPLETED_CLEAN_TIMEOUT } from '../SocketRuntime.js';
@@ -10,7 +10,7 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
     throw Error('Самостоятельная регистрация не доступна для водителя');
   });
 
-  ctx.on('driver:auth:login', async (credentials: DriverLogin) => {
+  ctx.on('driver:auth:login', async (credentials: DriverLoginInput) => {
     const token = await ctx.driverService.login(credentials);
     ctx.socket.emit('auth:token', token);
   });

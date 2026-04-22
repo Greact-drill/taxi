@@ -24,10 +24,18 @@ export type Driver = {
   login: string;
 };
 
-export type DriverLogin = {
+export type DriverCreateInput = {
+  name: string;
+  car: string;
   login: string;
   password: string;
 };
+
+export type DriverLoginInput = {
+  login: string;
+  password: string;
+};
+
 
 export const OrderStatus = {
   AWAITING_DRIVER: 'awaiting_driver',

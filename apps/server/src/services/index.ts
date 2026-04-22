@@ -1,5 +1,4 @@
 import { PassengerStore } from '../stores/PassengerStore.js';
-import { DriverStore } from '../stores/DriverStore.js';
 import { OrderStore } from '../stores/OrderStore.js';
 import { PassengerService } from './PassengerService.js';
 import { DriverService } from './DriverService.js';
@@ -19,11 +18,10 @@ export async function createServices(): Promise<Services> {
   await prisma.$connect();
 
   const passengerStore = new PassengerStore(prisma);
-  const driverStore = new DriverStore(prisma);
   const orderStore = new OrderStore(prisma);
   const orderChatMessageStore = new OrderChatMessageStore(prisma);
   const passengerService = new PassengerService(passengerStore);
-  const driverService = new DriverService(driverStore);
+  const driverService = new DriverService(prisma.driverRecord);
   const orderChatService = new OrderChatService(orderChatMessageStore);
   const orderService = new OrderService(orderStore, passengerService, driverService);
 

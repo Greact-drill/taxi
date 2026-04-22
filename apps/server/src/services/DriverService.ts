@@ -1,119 +1,98 @@
 import { randomUUID } from 'node:crypto';
-import type { Driver, DriverLogin } from '@packages/shared';
+import type { Driver, DriverCreateInput, DriverLoginInput } from '@packages/shared';
 import { makePasswordHash, verifyPassword } from '../password.js';
-import { DriverStore } from '../stores/DriverStore.js';
-import type { DriverRecord } from '../generated/prisma/client.js';
-
-export type DriverCreateInput = {
-  name: string;
-  car: string;
-  login: string;
-  password: string;
-};
+import type { DriverRecord, Prisma } from '../generated/prisma/client.js';
 
 function mapRecord(record: DriverRecord): Driver {
-  return {
-    id: record.id,
-    name: record.name,
-    car: record.car,
-    login: record.deleted ? '—' : record.login,
-  };
+  const { id, name, car, login } = record;
+  return { id, name, car, login };
 }
 
 export class DriverService {
-  constructor(private readonly store: DriverStore) { }
+  constructor(private readonly orm: Prisma.DriverRecordDelegate) { }
 
   async create(input: DriverCreateInput): Promise<Driver> {
-    const name = input.name.trim();
-    const car = input.car.trim();
-    const login = input.login.trim();
-    const password = input.password;
-    const canSubmit = name.length > 0 && car.length > 0 && login.length > 0 && password.length > 0;
-    if (!canSubmit) {
-      throw new Error(`Некорректные данные водителя: ${name} ${car} ${login}`);
-    }
-    if (await this.findByLogin(login)) {
-      throw new Error('Водитель с таким логином уже существует');
-    }
-
-    const record = await this.store.create({
-      name,
-      car,
-      login,
-      hash: await makePasswordHash(password),
-      token: randomUUID(),
+    const { name, car, login, password } = input;
+    const record = await this.orm.create({
+      data: {
+        name,
+        car,
+        login,
+        hash: await makePasswordHash(password),
+        token: randomUUID(),
+      },
     });
     return mapRecord(record);
   }
 
   async getById(id: number): Promise<Driver | undefined> {
-    const record = await this.store.getById(id);
+    const record = await this.orm.findUnique({ where: { id } });
     if (!record) return;
     return mapRecord(record);
   }
 
   async list(): Promise<Driver[]> {
-    const records = await this.store.list();
+    const records = await this.orm.findMany({
+      where: { deleted: false },
+      orderBy: { id: 'asc' },
+    });
     return records.map(mapRecord);
   }
 
-  async login(data: DriverLogin): Promise<string> {
-    const login = data.login.trim();
-    const record = await this.store.findByLogin(login);
-    if (!record || record.deleted || !(await verifyPassword(data.password, record.hash))) {
-      throw new Error('Неверный логин или пароль');
-    }
-    return record.token;
+  async login(input: DriverLoginInput): Promise<string> {
+    const { login, password } = input;
+    const record = await this.orm.findUnique({ where: { login } });
+    const valid = record && !record.deleted && await verifyPassword(password, record.hash);
+    if (!valid) throw new Error('Неверный логин или пароль');
+    return record.token!;
   }
 
   async findByToken(token: string): Promise<Driver | undefined> {
-    const record = await this.store.findByToken(token);
+    const record = await this.orm.findUnique({ where: { token } });
     if (!record || record.deleted) return;
     return mapRecord(record);
   }
 
   async findByLogin(login: string): Promise<Driver | undefined> {
-    const record = await this.store.findByLogin(login);
+    const record = await this.orm.findUnique({ where: { login } });
     if (!record) return;
     return mapRecord(record);
   }
 
-  async update(id: number, updates: Partial<Driver>): Promise<Driver> {
-    const name = updates.name !== undefined ? updates.name.trim() : undefined;
-    const car = updates.car !== undefined ? updates.car.trim() : undefined;
-    const newLogin = updates.login !== undefined ? updates.login.trim() : undefined;
-
-    if (newLogin !== undefined && newLogin.length === 0) {
-      throw new Error('Логин не может быть пустым');
-    }
-
-    const before = await this.store.getById(id);
-    if (!before || before.deleted) throw new Error('Водитель не найден');
-
-    const record = await this.store.update(id, {
-      name,
-      car,
-      login: newLogin,
+  async update(id: number, input: Partial<Driver>): Promise<Driver> {
+    const { name, car, login } = input;
+    const record = await this.orm.update({
+      where: { id },
+      data: {
+        name,
+        car,
+        login,
+      }
     });
     return mapRecord(record);
   }
 
-  async setPassword(id: number, newPassword: string): Promise<Driver> {
-    const existing = await this.store.getById(id);
-    if (!existing || existing.deleted) throw new Error('Водитель не найден');
-    const trimmed = newPassword.trim();
-    if (trimmed.length === 0) {
-      throw new Error('Пароль не может быть пустым');
-    }
-    const record = await this.store.update(id, {
-      hash: await makePasswordHash(trimmed),
-      token: randomUUID(),
+  async setPassword(id: number, password: string): Promise<Driver> {
+    const record = await this.orm.update({
+      where: { id },
+      data: {
+        hash: await makePasswordHash(password),
+        token: randomUUID(),
+      }
     });
     return mapRecord(record);
   }
 
   async remove(id: number): Promise<void> {
-    await this.store.delete(id);
+    await this.orm.update({
+      where: { id },
+      data: {
+        deleted: true,
+        deletedAt: new Date().toISOString(),
+        token: null,
+        hash: '',
+      },
+    });
   }
 
   async bootstrap(): Promise<void> {
