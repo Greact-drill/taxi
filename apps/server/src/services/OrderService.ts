@@ -11,11 +11,25 @@ import type { OrderRecord, Prisma } from '../generated/prisma/client.js';
 const dto = {
   passenger: { select: { id: true, name: true, phone: true } },
   driver: { select: { id: true, name: true, car: true } },
-}
+};
 
-function mapRecord(record: OrderRecord): Order {
+type OrderRow = OrderRecord & {
+  passenger?: Order['passenger'];
+  driver?: Order['driver'];
+};
+
+function mapRecord(record: OrderRow): Order {
   const { id, createdAt, passenger, driver, from, to, status, cancelReason } = record;
-  return { id, createdAt, passenger, driver, from, to, status, cancelReason };
+  return {
+    id,
+    createdAt,
+    passenger: passenger as Order['passenger'],
+    driver,
+    from,
+    to,
+    status: status as Order['status'],
+    cancelReason: cancelReason ?? undefined,
+  };
 }
 
 export class OrderService {
@@ -34,18 +48,18 @@ export class OrderService {
       }
     });
 
-    return { ...mapRecord(record), passenger };
+    return { ...mapRecord(record as OrderRow), passenger };
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
     const records = await this.orm.findMany({
       where: { passengerId, deleted: false },
-      orderBy: { id: 'asc' },
+      orderBy: { createdAt: 'asc' },
       include: { driver: dto.driver },
     });
     const out: PassengerOrder[] = [];
     for (const record of records) {
-      out.push(mapRecord(record));
+      out.push(mapRecord(record as OrderRow) as PassengerOrder);
     }
     return out;
   }
@@ -53,12 +67,12 @@ export class OrderService {
   async listOfDriver(driverId: number): Promise<DriverOrder[]> {
     const records = await this.orm.findMany({
       where: { driverId, deleted: false },
-      orderBy: { id: 'asc' },
+      orderBy: { createdAt: 'asc' },
       include: { passenger: dto.passenger },
     });
     const out: DriverOrder[] = [];
     for (const record of records) {
-      out.push(mapRecord(record));
+      out.push(mapRecord(record as OrderRow) as DriverOrder);
     }
     return out;
   }
@@ -69,12 +83,12 @@ export class OrderService {
         status: OrderStatus.AWAITING_DRIVER,
         deleted: false,
       },
-      orderBy: { id: 'asc' },
+      orderBy: { createdAt: 'asc' },
       include: { passenger: dto.passenger },
     });
     const out: DriverOrder[] = [];
     for (const record of records) {
-      out.push(mapRecord(record));
+      out.push(mapRecord(record as OrderRow) as DriverOrder);
     }
     return out;
   }
@@ -82,12 +96,12 @@ export class OrderService {
   async list(): Promise<Order[]> {
     const records = await this.orm.findMany({
       where: { deleted: false },
-      orderBy: { id: 'asc' },
+      orderBy: { createdAt: 'asc' },
       include: dto,
     });
     const out: Order[] = [];
     for (const record of records) {
-      out.push(mapRecord(record));
+      out.push(mapRecord(record as OrderRow));
     }
     return out;
   }
@@ -98,7 +112,7 @@ export class OrderService {
       include: dto,
     });
     if (!record) return;
-    return mapRecord(record);
+    return mapRecord(record as OrderRow);
   }
 
   async update(id: number, input: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
@@ -126,7 +140,7 @@ export class OrderService {
       data: patch,
       include: dto,
     });
-    return mapRecord(record);
+    return mapRecord(record as OrderRow);
   }
 
   async delete(id: number): Promise<void> {

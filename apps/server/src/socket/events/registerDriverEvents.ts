@@ -1,5 +1,5 @@
 import type { Driver, DriverLoginInput, DriverOrder } from '@packages/shared';
-import { OrderStatus } from '@packages/shared';
+import { ChatAuthorRole, OrderStatus } from '@packages/shared';
 import type { SocketRuntimeContext } from '../SocketRuntime.js';
 import { CANCELLED_CLEAN_TIMEOUT, COMPLETED_CLEAN_TIMEOUT } from '../SocketRuntime.js';
 
@@ -140,7 +140,7 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
 
   ctx.on('driver:order:messages:send', async (driverOrder: DriverOrder, text: string) => {
     const driver = ctx.requireDriver();
-    await ctx.orderChatService.sendMessage(driverOrder, { text, authorRole: 'driver' });
+    await ctx.orderChatService.sendMessage(driverOrder, { text, authorRole: ChatAuthorRole.DRIVER });
     const messages = await ctx.orderChatService.messages(driverOrder);
 
     ctx.send(

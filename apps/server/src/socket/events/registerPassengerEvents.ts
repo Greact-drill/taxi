@@ -1,4 +1,5 @@
-import type { Passenger, PassengerOrder, PassengerRegisterInput } from '@packages/shared';
+import type { OrderCreateInput, Passenger, PassengerOrder, PassengerRegisterInput } from '@packages/shared';
+import { ChatAuthorRole } from '@packages/shared';
 import { OrderStatus } from '@packages/shared';
 import type { SocketRuntimeContext } from '../SocketRuntime.js';
 import { CANCELLED_CLEAN_TIMEOUT } from '../SocketRuntime.js';
@@ -36,7 +37,11 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
 
   ctx.on('passenger:orders:create', async (input: Partial<PassengerOrder>) => {
     const passenger = ctx.requirePassenger();
-    await ctx.orderService.create(input, passenger);
+    const payload: OrderCreateInput = {
+      from: String(input.from ?? ''),
+      to: String(input.to ?? ''),
+    };
+    await ctx.orderService.create(payload, passenger);
 
     ctx.send(
       `passenger:${passenger.id}`,
@@ -148,7 +153,7 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
 
   ctx.on('passenger:order:messages:send', async (passengerOrder: PassengerOrder, text: string) => {
     const passenger = ctx.requirePassenger();
-    await ctx.orderChatService.sendMessage(passengerOrder, { text, authorRole: 'passenger' });
+    await ctx.orderChatService.sendMessage(passengerOrder, { text, authorRole: ChatAuthorRole.PASSENGER });
     const messages = await ctx.orderChatService.messages(passengerOrder);
 
     ctx.send(
