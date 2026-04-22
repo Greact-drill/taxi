@@ -9,6 +9,7 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
   ctx.on('passenger:auth:register', async (userData: PassengerRegisterInput) => {
     const token = await ctx.passengerService.register(userData);
     ctx.socket.emit('auth:token', token);
+    // TODO уведомить диспетчера о новом пассажире
   });
 
   ctx.on('passenger:auth:login', async () => {

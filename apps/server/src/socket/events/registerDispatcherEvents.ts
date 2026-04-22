@@ -87,6 +87,8 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     const result = await ctx.driverService.update(id, input);
     ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
     ctx.send(`driver:${id}`, 'driver:profile', result);
+    // TOOD уведомить так же пассажиров, которые имеют активные заказы с этим водителем
+    // TODO обновить список заказов и у самого диспетчера
   });
 
   ctx.on('dispatcher:drivers:password', async (id: number, newPassword: string) => {
@@ -106,6 +108,8 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     const result = await ctx.passengerService.update(id, input);
     ctx.send('dispatcher', 'dispatcher:passengers', await ctx.passengerService.list());
     ctx.send(`passenger:${id}`, 'passenger:profile', result);
+    // TODO уведомить так же водителей, которые имеют активные заказы с этим пассажиром
+    // TODO обновить список заказов и у самого диспетчера
   });
 
   ctx.on('dispatcher:passengers:delete', async (id: number) => {
