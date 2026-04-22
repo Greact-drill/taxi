@@ -38,8 +38,8 @@ export class PassengerService {
     return mapRecord(record);
   }
 
-  async update(id: number, patch: Partial<Passenger>): Promise<Passenger> {
-    const { name, phone } = patch;
+  async update(id: number, input: Partial<Passenger>): Promise<Passenger> {
+    const { name, phone } = input;
     const record = await this.orm.update({
       where: { id },
       data: { name, phone },

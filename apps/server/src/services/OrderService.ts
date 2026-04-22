@@ -1,129 +1,141 @@
 import {
+  OrderCreateInput,
   OrderStatus,
   type DriverOrder,
   type Order,
   type Passenger,
   type PassengerOrder,
 } from '@packages/shared';
-import type { OrderRecord } from '../generated/prisma/client.js';
-import { OrderStore } from '../stores/OrderStore.js';
-import { PassengerService } from './PassengerService.js';
-import { DriverService } from './DriverService.js';
+import type { OrderRecord, Prisma } from '../generated/prisma/client.js';
+
+const dto = {
+  passenger: { select: { id: true, name: true, phone: true } },
+  driver: { select: { id: true, name: true, car: true } },
+}
+
+function mapRecord(record: OrderRecord): Order {
+  const { id, createdAt, passenger, driver, from, to, status, cancelReason } = record;
+  return { id, createdAt, passenger, driver, from, to, status, cancelReason };
+}
 
 export class OrderService {
-  constructor(
-    private readonly store: OrderStore,
-    private readonly passengerService: PassengerService,
-    private readonly driverService: DriverService,
-  ) { }
+  constructor(private readonly orm: Prisma.OrderRecordDelegate) { }
 
-  private async toOrder(record: OrderRecord): Promise<Order> {
-    const passenger = (await this.passengerService.getById(record.passengerId))!;
-    const driver = record.driverId ? await this.driverService.getById(record.driverId) : undefined;
-    const order: Order = {
-      id: record.id,
-      createdAt: record.createdAt,
-      passenger,
-      from: record.from,
-      to: record.to,
-      driver,
-      status: record.status,
-      cancelReason: record.cancelReason ?? undefined,
-    };
-    return order;
-  }
-  async create(input: Partial<PassengerOrder>, passenger: Passenger): Promise<Order> {
-    const from = (input.from ?? '').trim();
-    const to = (input.to ?? '').trim();
-    const canSubmit = passenger && from.length > 0 && to.length > 0;
-    if (!canSubmit) {
-      throw new Error(`Некорректные данные заказа: ${from} ${to}`);
-    }
+  async create(input: OrderCreateInput, passenger: Passenger): Promise<Order> {
+    const { from, to } = input;
 
-    const record = await this.store.create({
-      passengerId: passenger.id,
-      from,
-      to,
-      status: input.status ?? OrderStatus.AWAITING_DRIVER,
-      createdAt: new Date().toISOString(),
+    const record = await this.orm.create({
+      data: {
+        passengerId: passenger.id,
+        from,
+        to,
+        status: OrderStatus.AWAITING_DRIVER,
+        createdAt: new Date().toISOString(),
+      }
     });
 
-    return this.toOrder(record);
+    return { ...mapRecord(record), passenger };
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
-    const records = await this.store.listByPassengerId(passengerId);
+    const records = await this.orm.findMany({
+      where: { passengerId, deleted: false },
+      orderBy: { id: 'asc' },
+      include: { driver: dto.driver },
+    });
     const out: PassengerOrder[] = [];
-    for (const r of records) {
-      const order = await this.toOrder(r);
-      const { passenger: _omit, ...passengerOrder } = order;
-      out.push(passengerOrder);
+    for (const record of records) {
+      out.push(mapRecord(record));
     }
     return out;
   }
 
   async listOfDriver(driverId: number): Promise<DriverOrder[]> {
-    const records = await this.store.listByDriverId(driverId);
+    const records = await this.orm.findMany({
+      where: { driverId, deleted: false },
+      orderBy: { id: 'asc' },
+      include: { passenger: dto.passenger },
+    });
     const out: DriverOrder[] = [];
     for (const record of records) {
-      const order = await this.toOrder(record);
-      const { driver: _omit, ...driverOrder } = order;
-      out.push(driverOrder);
+      out.push(mapRecord(record));
     }
     return out;
   }
 
   async listOfActive(): Promise<DriverOrder[]> {
-    const records = await this.store.listActive();
+    const records = await this.orm.findMany({
+      where: {
+        status: OrderStatus.AWAITING_DRIVER,
+        deleted: false,
+      },
+      orderBy: { id: 'asc' },
+      include: { passenger: dto.passenger },
+    });
     const out: DriverOrder[] = [];
     for (const record of records) {
-      const order = await this.toOrder(record);
-      const { driver: _omit, ...driverOrder } = order;
-      out.push(driverOrder);
+      out.push(mapRecord(record));
     }
     return out;
   }
 
-  async list() : Promise<Order[]> {
-    const records = await this.store.list();
+  async list(): Promise<Order[]> {
+    const records = await this.orm.findMany({
+      where: { deleted: false },
+      orderBy: { id: 'asc' },
+      include: dto,
+    });
     const out: Order[] = [];
     for (const record of records) {
-      const order = await this.toOrder(record);
-      out.push(order);
+      out.push(mapRecord(record));
     }
     return out;
   }
 
   async findById(id: number): Promise<Order | undefined> {
-    const record = await this.store.findById(id);
+    const record = await this.orm.findUnique({
+      where: { id },
+      include: dto,
+    });
     if (!record) return;
-    return this.toOrder(record);
+    return mapRecord(record);
   }
 
-  async update(id: number, updates: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
+  async update(id: number, input: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
     const patch: Partial<OrderRecord> = {
-      from: updates.from,
-      to: updates.to,
-      status: updates.status,
+      from: input.from,
+      to: input.to,
+      status: input.status,
     };
-    if ('driver' in updates && updates.driver) {
-      patch.driverId = updates.driver.id;
+    if ('driver' in input && input.driver) {
+      patch.driverId = input.driver.id;
     }
-    if (updates.status === OrderStatus.DRIVER_ASSIGNED) {
+    if (input.status === OrderStatus.DRIVER_ASSIGNED) {
       patch.assignedAt = new Date().toISOString();
     }
-    if (updates.status === OrderStatus.COMPLETED) {
+    if (input.status === OrderStatus.COMPLETED) {
       patch.completedAt = new Date().toISOString();
     }
-    if (updates.status === OrderStatus.CANCELLED) {
-      patch.cancelReason = updates.cancelReason;
+    if (input.status === OrderStatus.CANCELLED) {
+      patch.cancelReason = input.cancelReason;
       patch.completedAt = new Date().toISOString();
     }
-    const record = await this.store.update(id, patch);
-    return this.toOrder(record);
+
+    const record = await this.orm.update({
+      where: { id },
+      data: patch,
+      include: dto,
+    });
+    return mapRecord(record);
   }
 
   async delete(id: number): Promise<void> {
-    await this.store.delete(id);
+    await this.orm.update({
+      where: { id },
+      data: {
+        deleted: true,
+        deletedAt: new Date().toISOString(),
+      },
+    });
   }
 }

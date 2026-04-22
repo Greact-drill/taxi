@@ -36,27 +36,14 @@ export type DriverLoginInput = {
   password: string;
 };
 
-
-export const OrderStatus = {
-  AWAITING_DRIVER: 'awaiting_driver',
-  DRIVER_ASSIGNED: 'driver_assigned',
-  DRIVER_ARRIVED: 'driver_arrived',
-  ON_TRIP: 'on_trip',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
-} as const;
-
-export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
-
-export type ChatAuthorRole = 'passenger' | 'driver' | 'dispatcher';
-
-/** Сообщение чата заказа; связь с заказом только через `Order.messages`. Идентификатор заказа — в `OrderChatMessageRecord.orderId` (stores). */
-export type OrderChatMessage = {
-  id: number;
-  authorRole: ChatAuthorRole;
-  text: string;
-  createdAt: string;
-};
+export enum OrderStatus {
+  AWAITING_DRIVER = 'awaiting_driver',
+  DRIVER_ASSIGNED = 'driver_assigned',
+  DRIVER_ARRIVED = 'driver_arrived',
+  ON_TRIP = 'on_trip',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
 
 export type Order = {
   id: number;
@@ -71,6 +58,24 @@ export type Order = {
   assignedAt?: string;
   completedAt?: string;
   deletedAt?: string;
+};
+
+export type OrderCreateInput = {
+  from: string;
+  to: string;
+};
+
+export enum ChatAuthorRole {
+  PASSENGER = 'passenger',
+  DRIVER = 'driver',
+  DISPATCHER = 'dispatcher',
+}
+
+export type OrderChatMessage = {
+  id: number;
+  authorRole: ChatAuthorRole;
+  text: string;
+  createdAt: string;
 };
 
 export type PassengerOrder = Omit<Order, 'passenger'>;

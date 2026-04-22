@@ -1,4 +1,3 @@
-import { OrderStore } from '../stores/OrderStore.js';
 import { PassengerService } from './PassengerService.js';
 import { DriverService } from './DriverService.js';
 import { OrderService } from './OrderService.js';
@@ -16,12 +15,11 @@ export type Services = {
 export async function createServices(): Promise<Services> {
   await prisma.$connect();
 
-  const orderStore = new OrderStore(prisma);
   const orderChatMessageStore = new OrderChatMessageStore(prisma);
   const passengerService = new PassengerService(prisma.passengerRecord);
   const driverService = new DriverService(prisma.driverRecord);
   const orderChatService = new OrderChatService(orderChatMessageStore);
-  const orderService = new OrderService(orderStore, passengerService, driverService);
+  const orderService = new OrderService(prisma.orderRecord, passengerService, driverService);
 
   /** Тестовые водители для локальной разработки (логин = пароль). */
   await driverService.bootstrap();
