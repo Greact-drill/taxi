@@ -1,0 +1,15 @@
+services:
+  taxi_postgres:
+    container_name: taxi-database-dev
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-taxi}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - taxi_postgres_data:/var/lib/postgresql/data
+    ports:
+      - 54321:5432
+
+volumes:
+  taxi_postgres_data:

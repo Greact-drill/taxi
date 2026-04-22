@@ -1,11 +1,12 @@
-import { PassengerStore } from '../stores/PassengerStore';
-import { DriverStore } from '../stores/DriverStore';
-import { OrderStore } from '../stores/OrderStore';
-import { PassengerService } from '../services/PassengerService';
-import { DriverService } from '../services/DriverService';
-import { OrderService } from '../services/OrderService';
-import { OrderChatService } from '../services/OrderChatService';
-import { OrderChatMessageStore } from '../stores/OrderChatMessageStore';
+import { PassengerStore } from '../stores/PassengerStore.js';
+import { DriverStore } from '../stores/DriverStore.js';
+import { OrderStore } from '../stores/OrderStore.js';
+import { PassengerService } from './PassengerService.js';
+import { DriverService } from './DriverService.js';
+import { OrderService } from './OrderService.js';
+import { OrderChatService } from './OrderChatService.js';
+import { OrderChatMessageStore } from '../stores/OrderChatMessageStore.js';
+import { prisma } from '../prisma.js';
 
 export type Services = {
   passengerService: PassengerService;
@@ -15,10 +16,12 @@ export type Services = {
 };
 
 export async function createServices(): Promise<Services> {
-  const passengerStore = new PassengerStore();
-  const driverStore = new DriverStore();
-  const orderStore = new OrderStore();
-  const orderChatMessageStore = new OrderChatMessageStore();
+  await prisma.$connect();
+
+  const passengerStore = new PassengerStore(prisma);
+  const driverStore = new DriverStore(prisma);
+  const orderStore = new OrderStore(prisma);
+  const orderChatMessageStore = new OrderChatMessageStore(prisma);
   const passengerService = new PassengerService(passengerStore);
   const driverService = new DriverService(driverStore);
   const orderChatService = new OrderChatService(orderChatMessageStore);

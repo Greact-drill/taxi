@@ -1,37 +1,30 @@
-import type { PassengerRecord } from '@packages/shared';
+import type { Prisma, PrismaClient, PassengerRecord } from '../generated/prisma/client.js';
 
 export class PassengerStore {
-  private passengerStore = new Map<number, PassengerRecord>();
-  private nextId = 1;
+  constructor(private readonly prisma: PrismaClient) {}
 
-  async create(data: Omit<PassengerRecord, 'id'>): Promise<PassengerRecord> {
-    const passenger: PassengerRecord = { ...data, id: this.nextId++ };
-    this.passengerStore.set(passenger.id, passenger);
-    return passenger;
+  async create(data: Prisma.PassengerRecordUncheckedCreateInput): Promise<PassengerRecord> {
+    return this.prisma.passengerRecord.create({ data });
   }
 
-  async findWhere(match: (passenger: PassengerRecord) => boolean): Promise<PassengerRecord | undefined> {
-    for (const passenger of this.passengerStore.values()) {
-      if (match(passenger)) return passenger;
-    }
+  async findByToken(token: string): Promise<PassengerRecord | null> {
+    return (await this.prisma.passengerRecord.findUnique({ where: { token } }));
   }
 
-  async getById(id: number): Promise<PassengerRecord | undefined> {
-    return this.passengerStore.get(id);
+  async getById(id: number): Promise<PassengerRecord | null> {
+    return (await this.prisma.passengerRecord.findUnique({ where: { id } }));
   }
 
-  async list(): Promise<PassengerRecord[]> {
-    return [...this.passengerStore.values()];
-  }
+  async update(id: number, patch: { name?: string; phone?: string; token?: string }): Promise<PassengerRecord> {
+    const data: Prisma.PassengerRecordUncheckedUpdateInput = {};
 
-  async update(id: number, patch: Partial<PassengerRecord>): Promise<PassengerRecord> {
-    const record = this.passengerStore.get(id);
-    if (!record) throw Error(`PassengerStore: Record not found ${id}`);
-    for (const [key, value] of Object.entries(patch)) {
-      if (value === undefined) continue;
-      (record as Record<string, unknown>)[key] = value;
-    }
-    record.id = id;
-    return record;
+    if (patch.name !== undefined) data.name = patch.name;
+    if (patch.phone !== undefined) data.phone = patch.phone;
+    if (patch.token !== undefined) data.token = patch.token;
+
+    return this.prisma.passengerRecord.update({
+      where: { id },
+      data,
+    });
   }
 }

@@ -1,14 +1,16 @@
 services:
   taxi_server:
-    container_name: taxi_server
+    container_name: taxi-server-${BRANCH}
     build:
       context: .
       dockerfile: Dockerfile.server
+      args:
+        DATABASE_URL: ${DATABASE_URL}
     networks:
       - proxy
 
   taxi_dispatcher:
-    container_name: taxi_dispatcher
+    container_name: taxi-dispatcher-${BRANCH}
     build:
       context: .
       dockerfile: Dockerfile.spa
@@ -18,7 +20,7 @@ services:
       - proxy
 
   taxi_driver:
-    container_name: taxi_driver
+    container_name: taxi-driver-${BRANCH}
     build:
       context: .
       dockerfile: Dockerfile.spa
@@ -28,7 +30,7 @@ services:
       - proxy
 
   taxi_passenger:
-    container_name: taxi_passenger
+    container_name: taxi-passenger-${BRANCH}
     build:
       context: .
       dockerfile: Dockerfile.spa
