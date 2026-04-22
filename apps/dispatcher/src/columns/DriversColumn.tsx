@@ -6,10 +6,10 @@ import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
 import { DriverAppHeader } from '../components/DriverAppHeader';
 import { socket } from '../socket';
-import { store } from '../store';
+import { store, checkOnline } from '../store';
 
 export const DriversColumn = observer(function DriversColumn() {
-  const { online, drivers } = store;
+  const { drivers } = store;
 
   useEffect(() => {
     socket.emit('dispatcher:drivers:request');
@@ -22,7 +22,7 @@ export const DriversColumn = observer(function DriversColumn() {
       </Text>
       {drivers.map((driver) => (
         <Card key={driver.id}>
-          <DriverAppHeader driver={driver} online={online} />
+          <DriverAppHeader driver={driver} online={checkOnline(`driver:${driver.id}`)} />
         </Card>
       ))}
     </DispatcherColumn>

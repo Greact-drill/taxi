@@ -6,7 +6,7 @@ export type OrderNetworkStatusBadgeProps = {
 };
 
 export function OrderNetworkStatusBadge({ online }: OrderNetworkStatusBadgeProps) {
-  const label = online ? 'В сети' : 'Нет сети';
+  const label = online ? 'В сети' : 'Не в сети';
   const StatusIcon = online ? CircleCheck : CircleX;
 
   return (

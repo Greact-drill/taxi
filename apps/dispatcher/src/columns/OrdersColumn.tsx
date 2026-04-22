@@ -8,10 +8,10 @@ import { DispatcherColumn } from '../components/DispatcherColumn';
 import { OrderDriverRow } from '../components/OrderDriverRow';
 import { OrderPassengerRow } from '../components/OrderPassengerRow';
 import { socket } from '../socket';
-import { store } from '../store';
+import { checkOnline, store } from '../store';
 
 export const OrdersColumn = observer(function OrdersColumn() {
-  const { online, orders } = store;
+  const { orders } = store;
 
   useEffect(() => {
     socket.emit('dispatcher:orders:request');
@@ -27,8 +27,8 @@ export const OrdersColumn = observer(function OrdersColumn() {
           <Box px="3" pt="3" pb="1">
             <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
           </Box>
-          <OrderPassengerRow passenger={order.passenger} online={online} />
-          {order.driver ? <OrderDriverRow driver={order.driver} online={online} /> : null}
+          <OrderPassengerRow passenger={order.passenger} online={checkOnline(`passenger:${order.passenger.id}`)} />
+          {order.driver ? <OrderDriverRow driver={order.driver} online={checkOnline(`driver:${order.driver.id}`)} /> : null}
         </Card>
       ))}
     </DispatcherColumn>

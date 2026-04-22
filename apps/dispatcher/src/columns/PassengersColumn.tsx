@@ -6,10 +6,10 @@ import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
 import { PassengerAppHeader } from '../components/PassengerAppHeader';
 import { socket } from '../socket';
-import { store } from '../store';
+import { checkOnline, store } from '../store';
 
 export const PassengersColumn = observer(function PassengersColumn() {
-  const { online, passengers } = store;
+  const { passengers } = store;
 
   useEffect(() => {
     socket.emit('dispatcher:passengers:request');
@@ -22,7 +22,7 @@ export const PassengersColumn = observer(function PassengersColumn() {
       </Text>
       {passengers.map((passenger) => (
         <Card key={passenger.id}>
-          <PassengerAppHeader passenger={passenger} online={online} />
+          <PassengerAppHeader passenger={passenger} online={checkOnline(`passenger:${passenger.id}`)} />
         </Card>
       ))}
     </DispatcherColumn>

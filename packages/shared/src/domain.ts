@@ -1,5 +1,11 @@
 export type DispatcherConnectionsItem = { role: string; token?: string };
 
+export type Status = 'online' | 'offline' | 'checking';
+
+export type StatusMap = {
+  [id: string]: Status;
+}
+
 export type Passenger = {
   id: number;
   name: string;

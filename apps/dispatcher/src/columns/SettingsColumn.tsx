@@ -19,7 +19,7 @@ export const SettingsColumn = observer(function SettingsColumn() {
         Настройки / Навигация
       </Text>
       <Card>
-        <Box p="2">
+        <Box p="3">
           <OrderNetworkStatusBadge online={online} />
         </Box>
       </Card>

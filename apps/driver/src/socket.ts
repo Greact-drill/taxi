@@ -91,3 +91,7 @@ socket.on('passenger:order:messages', (orderId: number, messages: OrderChatMessa
     else store.openOrderForm(order);
   }
 });
+
+socket.on('server:online:request', () => {
+  socket.emit('server:online', `driver:${store.currentUser?.id}`);
+});

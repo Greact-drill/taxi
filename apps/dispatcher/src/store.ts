@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import type { Driver, Passenger, Order } from '@packages/shared';
+import type { Driver, Passenger, Order, StatusMap } from '@packages/shared';
 
 const TOKEN_STORAGE_KEY = 'taxi_dispatcher_token';
 
@@ -47,10 +47,19 @@ class Store {
     this.orders = orders;
   }
 
+  statusMap: StatusMap;
+  setStatusMap(statusMap: StatusMap) {
+    this.statusMap = statusMap;
+  }
+  changeStatusMap(id: string, status: 'online' | 'offline' | 'checking') {
+    this.statusMap = { ...this.statusMap, [id]: status };
+  }
+
   constructor() {
     this.drivers = [];
     this.passengers = [];
     this.orders = [];
+    this.statusMap = {};
     makeAutoObservable(this);
   }
 }
@@ -58,3 +67,7 @@ class Store {
 export const store = new Store();
 
 export const useStore = () => store;
+
+export const checkOnline = (id: string): boolean => {
+  return store.statusMap[id] === 'online';
+}

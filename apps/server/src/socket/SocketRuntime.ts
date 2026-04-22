@@ -1,6 +1,6 @@
 import { inspect } from 'node:util';
 import type { Server as SocketIOServer, Socket as SocketIOClient } from 'socket.io';
-import type { Driver, Order, Passenger } from '@packages/shared';
+import type { Driver, StatusMap, Order, Passenger } from '@packages/shared';
 import type { PassengerService } from '../services/PassengerService.js';
 import type { DriverService } from '../services/DriverService.js';
 import type { OrderService } from '../services/OrderService.js';
@@ -28,6 +28,7 @@ export type SocketRuntimeContext = {
   driverService: DriverService;
   orderService: OrderService;
   orderChatService: OrderChatService;
+  statusMap: StatusMap;
 
   requirePassenger: () => Passenger;
   requireDriver: () => Driver;
@@ -113,6 +114,8 @@ export function createSocketRuntime(io: SocketIOServer, socket: SocketIOClient, 
     io.to(room).emit(event, ...payloadArgs);
   }
 
+  const onlineMap: StatusMap = {};
+
   return {
     io,
     socket,
@@ -120,6 +123,7 @@ export function createSocketRuntime(io: SocketIOServer, socket: SocketIOClient, 
     driverService,
     orderService,
     orderChatService,
+    statusMap: onlineMap,
 
     requirePassenger,
     requireDriver,

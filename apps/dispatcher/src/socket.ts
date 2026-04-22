@@ -1,4 +1,4 @@
-import type { Driver, Order, Passenger } from '@packages/shared';
+import type { Driver, StatusMap, Order, Passenger, Status } from '@packages/shared';
 import { io } from 'socket.io-client';
 import { store } from './store';
 
@@ -60,4 +60,12 @@ socket.on('dispatcher:passengers', (passengers: Passenger[]) => {
 
 socket.on('dispatcher:orders', (orders: Order[]) => {
   store.setOrders(orders);
+});
+
+socket.on('dispatcher:status:map', (statusMap: StatusMap) => {
+  store.setStatusMap(statusMap);
+});
+
+socket.on('dispatcher:status:change', (id: string, status: Status) => {
+  store.changeStatusMap(id, status);
 });
