@@ -1,6 +1,6 @@
 import type { Server as SocketIOServer } from 'socket.io';
 import { type SocketRuntimeContext } from '../SocketRuntime.js';
-import type { DispatcherConnectionsItem, Driver } from '@packages/shared';
+import type { DispatcherConnectionsItem, Driver, DriverCreateInput, Passenger } from '@packages/shared';
 
 const ONLINE_TIMEOUT = 20_000;
 
@@ -19,6 +19,7 @@ async function getConnections(io: SocketIOServer): Promise<DispatcherConnections
 
 export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
 
+  // online status map
   (async () => {
     let id: string | undefined;
     if (ctx.socket.data.driver) {
@@ -63,6 +64,7 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     ctx.send('passenger', 'server:online:request');
   });
 
+  // columns data requests
   ctx.on('dispatcher:drivers:request', async () => {
     ctx.socket.emit('dispatcher:drivers', await ctx.driverService.list());
   });
@@ -75,19 +77,16 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     ctx.socket.emit('dispatcher:orders', await ctx.orderService.list());
   });
 
-  ctx.on(
-    'dispatcher:drivers:update',
-    async (id: number, patch: Partial<Driver>) => {
-      const result = await ctx.driverService.update(id, patch);
-      ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
-      ctx.send(`driver:${id}`, 'driver:profile', result);
-    },
-  );
-
-  ctx.on('dispatcher:drivers:delete', async (id: number) => {
-    await ctx.driverService.remove(id);
-    ctx.send(`driver:${id}`, 'auth:reconnect');
+  // drivers management events
+  ctx.on('dispatcher:drivers:create', async (input: DriverCreateInput) => {
+    await ctx.driverService.create(input);
     ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
+  });
+
+  ctx.on('dispatcher:drivers:update', async (id: number, input: Partial<Driver>) => {
+    const result = await ctx.driverService.update(id, input);
+    ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
+    ctx.send(`driver:${id}`, 'driver:profile', result);
   });
 
   ctx.on('dispatcher:drivers:password', async (id: number, newPassword: string) => {
@@ -95,5 +94,25 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     ctx.send(`driver:${id}`, 'auth:reconnect');
     ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
   });
+
+  ctx.on('dispatcher:drivers:delete', async (id: number) => {
+    await ctx.driverService.remove(id);
+    ctx.send(`driver:${id}`, 'auth:reconnect');
+    ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
+  });
+
+  // passengers management events
+  ctx.on('dispatcher:passengers:update', async (id: number, input: Partial<Passenger>) => {
+    const result = await ctx.passengerService.update(id, input);
+    ctx.send('dispatcher', 'dispatcher:passengers', await ctx.passengerService.list());
+    ctx.send(`passenger:${id}`, 'passenger:profile', result);
+  });
+
+  ctx.on('dispatcher:passengers:delete', async (id: number) => {
+    await ctx.passengerService.remove(id);
+    ctx.send(`passenger:${id}`, 'auth:reconnect');
+    ctx.send('dispatcher', 'dispatcher:passengers', await ctx.passengerService.list());
+  });
+
 }
 

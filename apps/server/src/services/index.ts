@@ -16,8 +16,8 @@ export async function createServices(): Promise<Services> {
 
   const passengerService = new PassengerService(prisma.passengerRecord);
   const driverService = new DriverService(prisma.driverRecord);
-  const orderChatService = new OrderChatService(prisma.orderChatMessageRecord);
   const orderService = new OrderService(prisma.orderRecord);
+  const orderChatService = new OrderChatService(prisma.orderChatMessageRecord);
 
   /** Тестовые водители для локальной разработки (логин = пароль). */
   await driverService.bootstrap();

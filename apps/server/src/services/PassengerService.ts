@@ -46,4 +46,15 @@ export class PassengerService {
     });
     return mapRecord(record);
   }
+
+  async remove(id: number): Promise<void> {
+    await this.orm.update({
+      where: { id },
+      data: {
+        deleted: true,
+        deletedAt: new Date().toISOString(),
+        token: null
+      },
+    });
+  }
 }
