@@ -1,41 +1,49 @@
 import { randomUUID } from 'node:crypto';
-import type { Passenger, PassengerRegister } from '@packages/shared';
-import { PassengerStore } from '../stores/PassengerStore.js';
+import type { Passenger, PassengerRegisterInput } from '@packages/shared';
+import type { PassengerRecord, Prisma } from '../generated/prisma/client.js';
+
+function mapRecord(record: PassengerRecord): Passenger {
+  const { id, name, phone } = record;
+  return { id, name, phone };
+}
 
 export class PassengerService {
-  constructor(private readonly store: PassengerStore) { }
+  constructor(private readonly orm: Prisma.PassengerRecordDelegate) { }
 
-  async register(input: PassengerRegister): Promise<string> {
-    const name = (input.name ?? '').trim();
-    const phone = (input.phone ?? '').trim();
-    const isPhoneValid = /^\+?\d+$/.test(phone);
-    const canSubmit = name.length > 0 && phone.length > 0 && isPhoneValid;
-    if (!canSubmit) {
-      throw new Error(`Некорректные данные регистрации: ${name} ${phone}`);
-    }
-    const record = await this.store.create({ name, phone, token: randomUUID() });
-    return record.token;
+  async register(input: PassengerRegisterInput): Promise<string> {
+    const { name, phone } = input;
+    const record = await this.orm.create({
+      data: { name, phone, token: randomUUID() },
+    });
+    return record.token!;
   }
 
   async getById(id: number): Promise<Passenger | undefined> {
-    const record = await this.store.getById(id);
+    const record = await this.orm.findUnique({ where: { id } });
     if (!record) return;
-    return { id: record.id, name: record.name, phone: record.phone };
+    return mapRecord(record);
   }
 
   async list(): Promise<Passenger[]> {
-    const records = await this.store.list();
-    return records.map((r) => ({ id: r.id, name: r.name, phone: r.phone }));
+    const records = await this.orm.findMany({
+      where: { deleted: false },
+      orderBy: { id: 'asc' },
+    });
+    return records.map(mapRecord);
   }
 
   async findByToken(token: string): Promise<Passenger | undefined> {
-    const record = await this.store.findByToken(token);
+    const record = await this.orm.findUnique({ where: { token } });
     if (!record) return;
-    return { id: record.id, name: record.name, phone: record.phone };
+    return mapRecord(record);
   }
 
   async update(id: number, patch: Partial<Passenger>): Promise<Passenger> {
-    const record = await this.store.update(id, { name: patch.name, phone: patch.phone });
-    return { id: record.id, name: record.name, phone: record.phone };
+    const { name, phone } = patch;
+    const record = await this.orm.update({
+      where: { id },
+      data: { name, phone },
+    });
+    return mapRecord(record);
   }
 }

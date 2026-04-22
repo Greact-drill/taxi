@@ -746,7 +746,9 @@ export const PassengerRecordScalarFieldEnum = {
   id: 'id',
   name: 'name',
   phone: 'phone',
-  token: 'token'
+  token: 'token',
+  deleted: 'deleted',
+  deletedAt: 'deletedAt'
 } as const
 
 export type PassengerRecordScalarFieldEnum = (typeof PassengerRecordScalarFieldEnum)[keyof typeof PassengerRecordScalarFieldEnum]

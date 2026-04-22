@@ -12,7 +12,7 @@ export type Passenger = {
   phone: string;
 };
 
-export type PassengerRegister = {
+export type PassengerRegisterInput = {
   name: string;
   phone: string;
 };

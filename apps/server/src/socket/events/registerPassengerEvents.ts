@@ -1,11 +1,11 @@
-import type { Passenger, PassengerOrder, PassengerRegister } from '@packages/shared';
+import type { Passenger, PassengerOrder, PassengerRegisterInput } from '@packages/shared';
 import { OrderStatus } from '@packages/shared';
 import type { SocketRuntimeContext } from '../SocketRuntime.js';
 import { CANCELLED_CLEAN_TIMEOUT } from '../SocketRuntime.js';
 
 export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
   // auth events (passenger*)
-  ctx.on('passenger:auth:register', async (userData: PassengerRegister) => {
+  ctx.on('passenger:auth:register', async (userData: PassengerRegisterInput) => {
     const token = await ctx.passengerService.register(userData);
     ctx.socket.emit('auth:token', token);
   });

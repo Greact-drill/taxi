@@ -39,6 +39,8 @@ export type PassengerRecordMinAggregateOutputType = {
   name: string | null
   phone: string | null
   token: string | null
+  deleted: boolean | null
+  deletedAt: string | null
 }
 
 export type PassengerRecordMaxAggregateOutputType = {
@@ -46,6 +48,8 @@ export type PassengerRecordMaxAggregateOutputType = {
   name: string | null
   phone: string | null
   token: string | null
+  deleted: boolean | null
+  deletedAt: string | null
 }
 
 export type PassengerRecordCountAggregateOutputType = {
@@ -53,6 +57,8 @@ export type PassengerRecordCountAggregateOutputType = {
   name: number
   phone: number
   token: number
+  deleted: number
+  deletedAt: number
   _all: number
 }
 
@@ -70,6 +76,8 @@ export type PassengerRecordMinAggregateInputType = {
   name?: true
   phone?: true
   token?: true
+  deleted?: true
+  deletedAt?: true
 }
 
 export type PassengerRecordMaxAggregateInputType = {
@@ -77,6 +85,8 @@ export type PassengerRecordMaxAggregateInputType = {
   name?: true
   phone?: true
   token?: true
+  deleted?: true
+  deletedAt?: true
 }
 
 export type PassengerRecordCountAggregateInputType = {
@@ -84,6 +94,8 @@ export type PassengerRecordCountAggregateInputType = {
   name?: true
   phone?: true
   token?: true
+  deleted?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -177,7 +189,9 @@ export type PassengerRecordGroupByOutputType = {
   id: number
   name: string
   phone: string
-  token: string
+  token: string | null
+  deleted: boolean
+  deletedAt: string | null
   _count: PassengerRecordCountAggregateOutputType | null
   _avg: PassengerRecordAvgAggregateOutputType | null
   _sum: PassengerRecordSumAggregateOutputType | null
@@ -207,7 +221,9 @@ export type PassengerRecordWhereInput = {
   id?: Prisma.IntFilter<"PassengerRecord"> | number
   name?: Prisma.StringFilter<"PassengerRecord"> | string
   phone?: Prisma.StringFilter<"PassengerRecord"> | string
-  token?: Prisma.StringFilter<"PassengerRecord"> | string
+  token?: Prisma.StringNullableFilter<"PassengerRecord"> | string | null
+  deleted?: Prisma.BoolFilter<"PassengerRecord"> | boolean
+  deletedAt?: Prisma.StringNullableFilter<"PassengerRecord"> | string | null
   orders?: Prisma.OrderRecordListRelationFilter
 }
 
@@ -215,7 +231,9 @@ export type PassengerRecordOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
-  token?: Prisma.SortOrder
+  token?: Prisma.SortOrderInput | Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   orders?: Prisma.OrderRecordOrderByRelationAggregateInput
 }
 
@@ -227,6 +245,8 @@ export type PassengerRecordWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.PassengerRecordWhereInput | Prisma.PassengerRecordWhereInput[]
   name?: Prisma.StringFilter<"PassengerRecord"> | string
   phone?: Prisma.StringFilter<"PassengerRecord"> | string
+  deleted?: Prisma.BoolFilter<"PassengerRecord"> | boolean
+  deletedAt?: Prisma.StringNullableFilter<"PassengerRecord"> | string | null
   orders?: Prisma.OrderRecordListRelationFilter
 }, "id" | "token">
 
@@ -234,7 +254,9 @@ export type PassengerRecordOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
-  token?: Prisma.SortOrder
+  token?: Prisma.SortOrderInput | Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PassengerRecordCountOrderByAggregateInput
   _avg?: Prisma.PassengerRecordAvgOrderByAggregateInput
   _max?: Prisma.PassengerRecordMaxOrderByAggregateInput
@@ -249,13 +271,17 @@ export type PassengerRecordScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"PassengerRecord"> | number
   name?: Prisma.StringWithAggregatesFilter<"PassengerRecord"> | string
   phone?: Prisma.StringWithAggregatesFilter<"PassengerRecord"> | string
-  token?: Prisma.StringWithAggregatesFilter<"PassengerRecord"> | string
+  token?: Prisma.StringNullableWithAggregatesFilter<"PassengerRecord"> | string | null
+  deleted?: Prisma.BoolWithAggregatesFilter<"PassengerRecord"> | boolean
+  deletedAt?: Prisma.StringNullableWithAggregatesFilter<"PassengerRecord"> | string | null
 }
 
 export type PassengerRecordCreateInput = {
   name: string
   phone: string
-  token: string
+  token?: string | null
+  deleted?: boolean
+  deletedAt?: string | null
   orders?: Prisma.OrderRecordCreateNestedManyWithoutPassengerInput
 }
 
@@ -263,14 +289,18 @@ export type PassengerRecordUncheckedCreateInput = {
   id?: number
   name: string
   phone: string
-  token: string
+  token?: string | null
+  deleted?: boolean
+  deletedAt?: string | null
   orders?: Prisma.OrderRecordUncheckedCreateNestedManyWithoutPassengerInput
 }
 
 export type PassengerRecordUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orders?: Prisma.OrderRecordUpdateManyWithoutPassengerNestedInput
 }
 
@@ -278,7 +308,9 @@ export type PassengerRecordUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orders?: Prisma.OrderRecordUncheckedUpdateManyWithoutPassengerNestedInput
 }
 
@@ -286,20 +318,26 @@ export type PassengerRecordCreateManyInput = {
   id?: number
   name: string
   phone: string
-  token: string
+  token?: string | null
+  deleted?: boolean
+  deletedAt?: string | null
 }
 
 export type PassengerRecordUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PassengerRecordUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PassengerRecordCountOrderByAggregateInput = {
@@ -307,6 +345,8 @@ export type PassengerRecordCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   token?: Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type PassengerRecordAvgOrderByAggregateInput = {
@@ -318,6 +358,8 @@ export type PassengerRecordMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   token?: Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type PassengerRecordMinOrderByAggregateInput = {
@@ -325,6 +367,8 @@ export type PassengerRecordMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   token?: Prisma.SortOrder
+  deleted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type PassengerRecordSumOrderByAggregateInput = {
@@ -338,6 +382,14 @@ export type PassengerRecordScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type IntFieldUpdateOperationsInput = {
@@ -365,14 +417,18 @@ export type PassengerRecordUpdateOneRequiredWithoutOrdersNestedInput = {
 export type PassengerRecordCreateWithoutOrdersInput = {
   name: string
   phone: string
-  token: string
+  token?: string | null
+  deleted?: boolean
+  deletedAt?: string | null
 }
 
 export type PassengerRecordUncheckedCreateWithoutOrdersInput = {
   id?: number
   name: string
   phone: string
-  token: string
+  token?: string | null
+  deleted?: boolean
+  deletedAt?: string | null
 }
 
 export type PassengerRecordCreateOrConnectWithoutOrdersInput = {
@@ -394,14 +450,18 @@ export type PassengerRecordUpdateToOneWithWhereWithoutOrdersInput = {
 export type PassengerRecordUpdateWithoutOrdersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PassengerRecordUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
-  token?: Prisma.StringFieldUpdateOperationsInput | string
+  token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -440,6 +500,8 @@ export type PassengerRecordSelect<ExtArgs extends runtime.Types.Extensions.Inter
   name?: boolean
   phone?: boolean
   token?: boolean
+  deleted?: boolean
+  deletedAt?: boolean
   orders?: boolean | Prisma.PassengerRecord$ordersArgs<ExtArgs>
   _count?: boolean | Prisma.PassengerRecordCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["passengerRecord"]>
@@ -449,6 +511,8 @@ export type PassengerRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   name?: boolean
   phone?: boolean
   token?: boolean
+  deleted?: boolean
+  deletedAt?: boolean
 }, ExtArgs["result"]["passengerRecord"]>
 
 export type PassengerRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -456,6 +520,8 @@ export type PassengerRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   name?: boolean
   phone?: boolean
   token?: boolean
+  deleted?: boolean
+  deletedAt?: boolean
 }, ExtArgs["result"]["passengerRecord"]>
 
 export type PassengerRecordSelectScalar = {
@@ -463,9 +529,11 @@ export type PassengerRecordSelectScalar = {
   name?: boolean
   phone?: boolean
   token?: boolean
+  deleted?: boolean
+  deletedAt?: boolean
 }
 
-export type PassengerRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "token", ExtArgs["result"]["passengerRecord"]>
+export type PassengerRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "token" | "deleted" | "deletedAt", ExtArgs["result"]["passengerRecord"]>
 export type PassengerRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | Prisma.PassengerRecord$ordersArgs<ExtArgs>
   _count?: boolean | Prisma.PassengerRecordCountOutputTypeDefaultArgs<ExtArgs>
@@ -482,7 +550,9 @@ export type $PassengerRecordPayload<ExtArgs extends runtime.Types.Extensions.Int
     id: number
     name: string
     phone: string
-    token: string
+    token: string | null
+    deleted: boolean
+    deletedAt: string | null
   }, ExtArgs["result"]["passengerRecord"]>
   composites: {}
 }
@@ -911,6 +981,8 @@ export interface PassengerRecordFieldRefs {
   readonly name: Prisma.FieldRef<"PassengerRecord", 'String'>
   readonly phone: Prisma.FieldRef<"PassengerRecord", 'String'>
   readonly token: Prisma.FieldRef<"PassengerRecord", 'String'>
+  readonly deleted: Prisma.FieldRef<"PassengerRecord", 'Boolean'>
+  readonly deletedAt: Prisma.FieldRef<"PassengerRecord", 'String'>
 }
     
 

@@ -424,14 +424,6 @@ export type DriverRecordNullableScalarRelationFilter = {
   isNot?: Prisma.DriverRecordWhereInput | null
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type DriverRecordCreateNestedOneWithoutOrdersInput = {
   create?: Prisma.XOR<Prisma.DriverRecordCreateWithoutOrdersInput, Prisma.DriverRecordUncheckedCreateWithoutOrdersInput>
   connectOrCreate?: Prisma.DriverRecordCreateOrConnectWithoutOrdersInput

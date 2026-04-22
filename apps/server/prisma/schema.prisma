@@ -12,7 +12,10 @@ model PassengerRecord {
   id    Int    @id @default(autoincrement())
   name  String
   phone String
-  token String @unique
+  token String? @unique
+
+  deleted    Boolean @default(false)
+  deletedAt  String?
 
   orders OrderRecord[]
 }
@@ -24,6 +27,7 @@ model DriverRecord {
   login      String  @unique
   hash       String
   token      String? @unique
+  
   deleted    Boolean @default(false)
   deletedAt  String?
 
