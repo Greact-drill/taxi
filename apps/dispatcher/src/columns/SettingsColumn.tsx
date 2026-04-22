@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Box, Text } from '@chakra-ui/react';
+import { Box, HStack, Text } from '@chakra-ui/react';
 import { OrderNetworkStatusBadge } from '@packages/order-ui';
 import { observer } from 'mobx-react-lite';
 
@@ -18,10 +18,11 @@ export const SettingsColumn = observer(function SettingsColumn() {
       <Text px="3" py="2" fontWeight="semibold" fontSize="sm">
         Настройки / Навигация
       </Text>
-      <Card>
-        <Box p="3">
+      <Card>        
+        <HStack p={3} align="center" gap="3" minW={0} justify="space-between">
+          <Text fontSize="sm" color="gray.800" truncate>Администратор</Text>
           <OrderNetworkStatusBadge online={online} />
-        </Box>
+        </HStack>
       </Card>
     </DispatcherColumn>
   );
