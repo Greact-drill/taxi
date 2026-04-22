@@ -26,7 +26,7 @@ export class DriverStore {
     id: number,
     patch: { name?: string; car?: string; login?: string; hash?: string; token?: string },
   ): Promise<DriverRecord> {
-    const data: Prisma.DriverRecordUncheckedUpdateInput = { };
+    const data: Prisma.DriverRecordUncheckedUpdateInput = {};
 
     if (patch.name !== undefined) data.name = patch.name;
     if (patch.car !== undefined) data.car = patch.car;
@@ -58,7 +58,7 @@ export class DriverStore {
       data: {
         deleted: true,
         deletedAt: new Date().toISOString(),
-        token: randomUUID(),
+        token: null,
         hash: '',
       },
     });

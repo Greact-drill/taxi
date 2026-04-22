@@ -1,4 +1,3 @@
-import { inspect } from 'node:util';
 import type { Server as SocketIOServer, Socket as SocketIOClient } from 'socket.io';
 import type { Driver, StatusMap, Order, Passenger } from '@packages/shared';
 import type { PassengerService } from '../services/PassengerService.js';
@@ -71,10 +70,7 @@ export function createSocketRuntime(io: SocketIOServer, socket: SocketIOClient, 
     const message = error instanceof Error ? error.message : 'Unknown server error';
     if (error instanceof Error) {
       console.error(error.stack ?? `${error.name}: ${error.message}`);
-      if (error.cause) console.error('cause:', error.cause);
-    } else {
-      console.error(inspect(error, { depth: 4, colors: true }));
-    }
+    };
     socket.emit('error', message);
   }
 

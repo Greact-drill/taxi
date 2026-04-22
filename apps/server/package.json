@@ -6,7 +6,7 @@
     "dev": "tsx watch src/index.ts",
     "prebuild": "pnpm --filter @packages/shared run build && prisma generate",
     "build": "tsc -p tsconfig.json",
-    "prestart": "prisma db push",
+    "prestart": "prisma db deploy",
     "start": "node dist/index.js"
   },
   "dependencies": {

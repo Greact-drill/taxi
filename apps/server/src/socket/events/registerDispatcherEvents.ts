@@ -34,7 +34,6 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
   })();
 
   ctx.socket.on('disconnect', async () => {
-    console.log('disconnect');
     let id: string | undefined;
     if (ctx.socket.data.driver) {
       id = `driver:${ctx.socket.data.driver.id}`;
@@ -54,7 +53,6 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
   });
 
   ctx.on('server:online', async (id: number) => {
-    console.log('server:online', id);
     ctx.statusMap[id] = 'online';
     ctx.send('dispatcher', 'dispatcher:status:change', id, 'online');
   });
@@ -80,11 +78,7 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
   ctx.on(
     'dispatcher:drivers:update',
     async (id: number, patch: Partial<Driver>) => {
-      const result = await ctx.driverService.update(id, {
-        name: patch.name,
-        car: patch.car,
-        login: patch.login,
-      });
+      const result = await ctx.driverService.update(id, patch);
       ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
       ctx.send(`driver:${id}`, 'driver:profile', result);
     },
@@ -92,15 +86,13 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
 
   ctx.on('dispatcher:drivers:delete', async (id: number) => {
     await ctx.driverService.remove(id);
+    ctx.send(`driver:${id}`, 'auth:reconnect');
     ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
   });
 
   ctx.on('dispatcher:drivers:password', async (id: number, newPassword: string) => {
-    if (typeof newPassword !== 'string' || newPassword.length === 0) {
-      throw new Error('Некорректный пароль');
-    }
     await ctx.driverService.setPassword(id, newPassword);
-    ctx.io.in(`driver:${id}`).disconnectSockets(true);
+    ctx.send(`driver:${id}`, 'auth:reconnect');
     ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
   });
 }

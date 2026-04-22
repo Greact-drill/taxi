@@ -150,18 +150,16 @@ export function DriverEditDialog(props: DriverEditDialogProps) {
                   Сессия водителя в приложении будет завершена; для работы потребуется повторный вход с новым паролем.
                 </Text>
                 <Input
-                  type="password"
-                  autoComplete="new-password"
                   placeholder="Новый пароль"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
-                <HStack gap="2" flexWrap="wrap">
+                <HStack gap="2" flexWrap="wrap" justify="space-between">
                   <Button variant="outline" size="sm" onClick={onGeneratePassword}>
-                    🎲 Сгенерировать (пароль)
+                    🎲 Случайный
                   </Button>
                   <Button variant="outline" size="sm" onClick={onCopyCreds} disabled={!newPassword.trim()}>
-                    Копировать (в буфер для отправки)
+                    📋 Скопировать для отправки
                   </Button>
                 </HStack>
                 <Button
@@ -170,7 +168,7 @@ export function DriverEditDialog(props: DriverEditDialogProps) {
                   onClick={onPasswordCommit}
                   disabled={!canSubmitPassword}
                 >
-                  Сменить пароль
+                  Установить пароль
                 </Button>
                 <Button
                   variant="outline"

@@ -51,6 +51,11 @@ socket.on('auth:token', (token: string) => {
   setTokenReconnect(token);
 });
 
+socket.on('auth:reconnect', () => {
+  clearTokenReconnect();
+  store.setError('Доступ изменен. Войдите снова.');
+});
+
 socket.on('auth:profile', (user?: Driver) => {
   if (user) store.setCurrentUser(user);
   else store.clearCurrentUser();

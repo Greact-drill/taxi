@@ -23,7 +23,7 @@ model DriverRecord {
   car        String
   login      String  @unique
   hash       String
-  token      String  @unique
+  token      String? @unique
   deleted    Boolean @default(false)
   deletedAt  String?
 
