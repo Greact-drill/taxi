@@ -32,6 +32,13 @@ export class OrderStore {
     });
   }
 
+  async list(): Promise<OrderRecord[]> {
+    return this.prisma.orderRecord.findMany({
+      where: { deleted: false },
+      orderBy: { id: 'asc' },
+    });
+  }
+
   async findById(id: number): Promise<OrderRecord | null> {
     return (
       await this.prisma.orderRecord.findUnique({

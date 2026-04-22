@@ -36,4 +36,11 @@ export class DriverStore {
       data,
     });
   }
+
+  async list(): Promise<DriverRecord[]> {
+    return this.prisma.driverRecord.findMany({
+      orderBy: { id: 'asc' },
+    });
+  }
+  
 }

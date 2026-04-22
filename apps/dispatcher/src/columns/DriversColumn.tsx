@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 
+import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
 import { DriverAppHeader } from '../components/DriverAppHeader';
 import { socket } from '../socket';
@@ -20,7 +21,9 @@ export const DriversColumn = observer(function DriversColumn() {
         Водители
       </Text>
       {drivers.map((driver) => (
-        <DriverAppHeader key={driver.id} driver={driver} online={online} />
+        <Card key={driver.id}>
+          <DriverAppHeader driver={driver} online={online} />
+        </Card>
       ))}
     </DispatcherColumn>
   );

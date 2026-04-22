@@ -3,6 +3,7 @@ import { Box, Text } from '@chakra-ui/react';
 import { OrderNetworkStatusBadge } from '@packages/order-ui';
 import { observer } from 'mobx-react-lite';
 
+import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
 import { socket } from '../socket';
 import { store } from '../store';
@@ -15,11 +16,13 @@ export const SettingsColumn = observer(function SettingsColumn() {
   return (
     <DispatcherColumn>
       <Text px="3" py="2" fontWeight="semibold" fontSize="sm">
-        Настройки
+        Настройки / Навигация
       </Text>
-      <Box p="3">
-        <OrderNetworkStatusBadge online={online} />
-      </Box>
+      <Card>
+        <Box p="2">
+          <OrderNetworkStatusBadge online={online} />
+        </Box>
+      </Card>
     </DispatcherColumn>
   );
 });

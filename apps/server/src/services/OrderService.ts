@@ -84,6 +84,16 @@ export class OrderService {
     return out;
   }
 
+  async list() : Promise<Order[]> {
+    const records = await this.store.list();
+    const out: Order[] = [];
+    for (const record of records) {
+      const order = await this.toOrder(record);
+      out.push(order);
+    }
+    return out;
+  }
+
   async findById(id: number): Promise<Order | undefined> {
     const record = await this.store.findById(id);
     if (!record) return;

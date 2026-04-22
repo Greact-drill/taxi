@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 
+import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
 import { PassengerAppHeader } from '../components/PassengerAppHeader';
 import { socket } from '../socket';
@@ -20,7 +21,9 @@ export const PassengersColumn = observer(function PassengersColumn() {
         Пассажиры
       </Text>
       {passengers.map((passenger) => (
-        <PassengerAppHeader key={passenger.id} passenger={passenger} online={online} />
+        <Card key={passenger.id}>
+          <PassengerAppHeader passenger={passenger} online={online} />
+        </Card>
       ))}
     </DispatcherColumn>
   );

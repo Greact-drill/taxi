@@ -28,6 +28,7 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
   });
 
   ctx.on('dispatcher:drivers:request', async () => {
+    console.log('dispatcher:drivers:request', );
     ctx.socket.emit('dispatcher:drivers', await ctx.driverService.list());
   });
 

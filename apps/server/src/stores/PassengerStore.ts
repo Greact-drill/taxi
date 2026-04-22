@@ -27,4 +27,10 @@ export class PassengerStore {
       data,
     });
   }
+
+  async list(): Promise<PassengerRecord[]> {
+    return this.prisma.passengerRecord.findMany({
+      orderBy: { id: 'asc' },
+    });
+  }
 }
