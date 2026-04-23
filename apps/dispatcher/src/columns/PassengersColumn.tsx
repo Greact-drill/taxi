@@ -41,8 +41,10 @@ export const PassengersColumn = observer(function PassengersColumn() {
       ))}
       <PassengerEditDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onExitComplete={() => setEditing(null)}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setEditing(null);
+        }}
         passenger={editing}
       />
     </DispatcherColumn>

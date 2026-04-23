@@ -70,8 +70,10 @@ export const DriversColumn = observer(function DriversColumn() {
       <DriverCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
       <DriverEditDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onExitComplete={() => setEditing(null)}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setEditing(null);
+        }}
         driver={editing}
       />
     </DispatcherColumn>
