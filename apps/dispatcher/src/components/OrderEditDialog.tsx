@@ -9,9 +9,13 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { OrderStatus, type Driver, type Order, type Passenger } from '@packages/shared';
+import { OrderStatus, type Order } from '@packages/shared';
 import { ArrowLeft } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { DriverSelect } from './DriverSelect';
+import { EventDateTimeField } from './EventDateTimeField';
+import { PassengerSelect } from './PassengerSelect';
+import { StatusSelect } from './StatusSelect';
 import { socket } from '../socket';
 import { store } from '../store';
 
@@ -24,18 +28,6 @@ export function OrderEditDialog(props: OrderEditDialogProps) {
   const [draft, setDraft] = useState<Order>({ ...props.order });
 
   const canSave = draft.createdAt.trim().length > 0 && draft.from.trim().length > 0 && draft.to.trim().length > 0;
-
-  const driversById = useMemo(() => {
-    const map = new Map<number, Driver>();
-    for (const d of store.drivers) map.set(d.id, d);
-    return map;
-  }, [store.drivers]);
-
-  const passengersById = useMemo(() => {
-    const map = new Map<number, Passenger>();
-    for (const p of store.passengers) map.set(p.id, p);
-    return map;
-  }, [store.passengers]);
 
   function onSave(): void {
     if (!canSave) return;
@@ -74,30 +66,16 @@ export function OrderEditDialog(props: OrderEditDialogProps) {
       </DialogHeader>
       <DialogBody>
         <VStack gap="3" align="stretch">
-          <Input
-            placeholder="Дата создания"
-            value={draft.createdAt}
-            onChange={(e) => setDraft({ ...draft, createdAt: e.target.value })}
+          <EventDateTimeField
+            iso={draft.createdAt}
+            onChange={(nextIso) => setDraft({ ...draft, createdAt: nextIso })}
           />
 
-          <VStack align="stretch" gap="1">
-            <Text fontSize="sm" color="gray.600">
-              Пассажир
-            </Text>
-            <select
-              value={String(draft.passenger.id)}
-              onChange={(e) => {
-                const next = passengersById.get(Number(e.target.value));
-                if (next) setDraft({ ...draft, passenger: next });
-              }}
-            >
-              {store.passengers.map((p) => (
-                <option key={p.id} value={p.id}>
-                  #{p.id} {p.name} ({p.phone})
-                </option>
-              ))}
-            </select>
-          </VStack>
+          <PassengerSelect
+            passengers={store.passengers}
+            value={draft.passenger}
+            onChange={(passenger) => setDraft({ ...draft, passenger })}
+          />
 
           <Input
             placeholder="Откуда"
@@ -110,52 +88,24 @@ export function OrderEditDialog(props: OrderEditDialogProps) {
             onChange={(e) => setDraft({ ...draft, to: e.target.value })}
           />
 
-          <VStack align="stretch" gap="1">
-            <Text fontSize="sm" color="gray.600">
-              Водитель
-            </Text>
-            <select
-              value={draft.driver ? String(draft.driver.id) : ''}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (!value) {
-                  setDraft({ ...draft, driver: undefined });
-                  return;
-                }
-                const next = driversById.get(Number(value));
-                if (next) setDraft({ ...draft, driver: next });
-              }}
-            >
-              <option value="">Без водителя</option>
-              {store.drivers.map((d) => (
-                <option key={d.id} value={d.id}>
-                  #{d.id} {d.name} ({d.car})
-                </option>
-              ))}
-            </select>
-          </VStack>
-
-          <VStack align="stretch" gap="1">
-            <Text fontSize="sm" color="gray.600">
-              Статус
-            </Text>
-            <select
-              value={draft.status}
-              onChange={(e) => setDraft({ ...draft, status: e.target.value as OrderStatus })}
-            >
-              {Object.values(OrderStatus).map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </VStack>
-
-          <Input
-            placeholder="Причина отмены"
-            value={draft.cancelReason ?? ''}
-            onChange={(e) => setDraft({ ...draft, cancelReason: e.target.value || undefined })}
+          <DriverSelect
+            drivers={store.drivers}
+            value={draft.driver}
+            onChange={(driver) => setDraft({ ...draft, driver })}
           />
+
+          <StatusSelect
+            value={draft.status}
+            onChange={(status) => setDraft({ ...draft, status })}
+          />
+
+          {draft.status === OrderStatus.CANCELLED && (
+            <Input
+              placeholder="Причина отмены"
+              value={draft.cancelReason ?? ''}
+              onChange={(e) => setDraft({ ...draft, cancelReason: e.target.value || undefined })}
+            />
+          )}
 
           <VStack align="stretch" gap="2">
             <Button onClick={onSave} disabled={!canSave}>

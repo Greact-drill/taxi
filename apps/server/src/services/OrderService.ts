@@ -129,8 +129,6 @@ export class OrderService {
     }
     if ('driver' in input && input.driver) {
       patch.driverId = input.driver.id;
-    } else if ('driver' in input && input.driver === undefined) {
-      patch.driverId = null;
     }
     if (input.status === OrderStatus.DRIVER_ASSIGNED) {
       patch.assignedAt = new Date().toISOString();
