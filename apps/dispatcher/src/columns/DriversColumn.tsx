@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Text, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  DialogBackdrop,
+  DialogContent,
+  DialogPositioner,
+  DialogRoot,
+  Portal,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import { Plus } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import type { Driver } from '@packages/shared';
@@ -67,15 +77,37 @@ export const DriversColumn = observer(function DriversColumn() {
           </Text>
         </VStack>
       </Button>
-      <DriverCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
-      <DriverEditDialog
-        open={dialogOpen}
-        onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) setEditing(null);
+      <DialogRoot
+        open={createOpen}
+        onOpenChange={(d) => {
+          setCreateOpen(d.open);
         }}
-        driver={editing}
-      />
+        size="sm"
+      >
+        <Portal>
+          <DialogBackdrop />
+          <DialogPositioner>
+            <DialogContent>
+              <DriverCreateDialog close={() => setCreateOpen(false)} />
+            </DialogContent>
+          </DialogPositioner>
+        </Portal>
+      </DialogRoot>
+      <DialogRoot
+        open={dialogOpen}
+        onOpenChange={(d) => {
+          setDialogOpen(d.open);
+          if (!d.open) setEditing(null);
+        }}
+        size="sm"
+      >
+        <Portal>
+          <DialogBackdrop />
+          <DialogPositioner>
+            <DialogContent>{editing && <DriverEditDialog key={editing.id} driver={editing} close={() => setDialogOpen(false)} />}</DialogContent>
+          </DialogPositioner>
+        </Portal>
+      </DialogRoot>
     </DispatcherColumn>
   );
 });

@@ -12,7 +12,7 @@ export class OrderChatService {
 
     return records.map((record: OrderChatMessageRecord): OrderChatMessage => ({
       id: record.id,
-      authorRole: record.authorRole,
+      authorRole: record.authorRole as ChatAuthorRole,
       text: record.text,
       createdAt: record.createdAt,
     }));

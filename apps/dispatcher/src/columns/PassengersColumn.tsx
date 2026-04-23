@@ -39,14 +39,17 @@ export const PassengersColumn = observer(function PassengersColumn() {
           </Card>
         </Box>
       ))}
-      <PassengerEditDialog
-        open={dialogOpen}
-        onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) setEditing(null);
-        }}
-        passenger={editing}
-      />
+      {editing && (
+        <PassengerEditDialog
+          key={editing.id}
+          open={dialogOpen}
+          onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) setEditing(null);
+          }}
+          passenger={editing}
+        />
+      )}
     </DispatcherColumn>
   );
 });

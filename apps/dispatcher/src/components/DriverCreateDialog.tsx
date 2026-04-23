@@ -1,21 +1,16 @@
 import {
   Button,
-  DialogBackdrop,
   DialogBody,
   DialogCloseTrigger,
-  DialogContent,
   DialogHeader,
-  DialogPositioner,
-  DialogRoot,
   DialogTitle,
   HStack,
   Input,
-  Portal,
   VStack,
 } from '@chakra-ui/react';
 import type { DriverCreateInput } from '@packages/shared';
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { socket } from '../socket';
 import { store } from '../store';
 
@@ -34,16 +29,14 @@ const emptyDraft = (): DriverCreateInput => ({
 });
 
 export type DriverCreateDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  close: () => void;
 };
 
 export function DriverCreateDialog(props: DriverCreateDialogProps) {
+  // Черновик не сбрасываем при каждом open: инстанс остаётся смонтированным, пользователь может
+  // закрыть диалог с частично заполненной формой и продолжить позже. Пустой шаблон — только после
+  // успешной отправки (и при первом mount).
   const [draft, setDraft] = useState<DriverCreateInput>(emptyDraft);
-
-  useEffect(() => {
-    if (props.open) setDraft(emptyDraft());
-  }, [props.open]);
 
   const name = draft.name.trim();
   const car = draft.car.trim();
@@ -60,7 +53,8 @@ export function DriverCreateDialog(props: DriverCreateDialogProps) {
       login,
       password,
     });
-    props.onOpenChange(false);
+    setDraft(emptyDraft());
+    props.close();
   }
 
   function onGeneratePassword(): void {
@@ -75,73 +69,62 @@ export function DriverCreateDialog(props: DriverCreateDialogProps) {
   }
 
   return (
-    <DialogRoot
-      open={props.open}
-      onOpenChange={(d) => props.onOpenChange(d.open)}
-      size="sm"
-    >
-      <Portal>
-        <DialogBackdrop />
-        <DialogPositioner>
-          <DialogContent>
-            <DialogHeader>
-              <HStack align="center" gap="3" w="100%">
-                <Button
-                  variant="outline"
-                  onClick={() => props.onOpenChange(false)}
-                  w="10"
-                  h="10"
-                  minW="10"
-                  p="0"
-                  aria-label="Назад"
-                  flexShrink={0}
-                >
-                  <ArrowLeft size={18} aria-hidden />
-                </Button>
-                <DialogTitle flex="1" minW={0} lineHeight="1.2">
-                  Новый водитель
-                </DialogTitle>
-                <DialogCloseTrigger />
-              </HStack>
-            </DialogHeader>
-            <DialogBody>
-              <VStack gap="3" align="stretch">
-                <Input
-                  placeholder="Имя"
-                  value={draft.name}
-                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                />
-                <Input
-                  placeholder="Автомобиль"
-                  value={draft.car}
-                  onChange={(e) => setDraft({ ...draft, car: e.target.value })}
-                />
-                <Input
-                  placeholder="Логин"
-                  value={draft.login}
-                  onChange={(e) => setDraft({ ...draft, login: e.target.value })}
-                />
-                <Input
-                  placeholder="Пароль"
-                  value={draft.password}
-                  onChange={(e) => setDraft({ ...draft, password: e.target.value })}
-                />
-                <HStack gap="2" flexWrap="wrap" justify="space-between">
-                  <Button variant="outline" size="sm" onClick={onGeneratePassword}>
-                    🎲 Случайный
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={onCopyCreds} disabled={!draft.password.trim()}>
-                    📋 Скопировать для отправки
-                  </Button>
-                </HStack>
-                <Button onClick={onSubmit} disabled={!canSubmit}>
-                  Зарегистрировать
-                </Button>
-              </VStack>
-            </DialogBody>
-          </DialogContent>
-        </DialogPositioner>
-      </Portal>
-    </DialogRoot>
+    <>
+      <DialogHeader>
+        <HStack align="center" gap="3" w="100%">
+          <Button
+            variant="outline"
+            onClick={props.close}
+            w="10"
+            h="10"
+            minW="10"
+            p="0"
+            aria-label="Назад"
+            flexShrink={0}
+          >
+            <ArrowLeft size={18} aria-hidden />
+          </Button>
+          <DialogTitle flex="1" minW={0} lineHeight="1.2">
+            Новый водитель
+          </DialogTitle>
+          <DialogCloseTrigger />
+        </HStack>
+      </DialogHeader>
+      <DialogBody>
+        <VStack gap="3" align="stretch">
+          <Input
+            placeholder="Имя"
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+          />
+          <Input
+            placeholder="Автомобиль"
+            value={draft.car}
+            onChange={(e) => setDraft({ ...draft, car: e.target.value })}
+          />
+          <Input
+            placeholder="Логин"
+            value={draft.login}
+            onChange={(e) => setDraft({ ...draft, login: e.target.value })}
+          />
+          <Input
+            placeholder="Пароль"
+            value={draft.password}
+            onChange={(e) => setDraft({ ...draft, password: e.target.value })}
+          />
+          <HStack gap="2" flexWrap="wrap" justify="space-between">
+            <Button variant="outline" size="sm" onClick={onGeneratePassword}>
+              🎲 Случайный
+            </Button>
+            <Button variant="outline" size="sm" onClick={onCopyCreds} disabled={!draft.password.trim()}>
+              📋 Скопировать для отправки
+            </Button>
+          </HStack>
+          <Button onClick={onSubmit} disabled={!canSubmit}>
+            Зарегистрировать
+          </Button>
+        </VStack>
+      </DialogBody>
+    </>
   );
 }

@@ -15,41 +15,34 @@ import {
 } from '@chakra-ui/react';
 import type { Passenger } from '@packages/shared';
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { socket } from '../socket';
 import { store } from '../store';
 
 export type PassengerEditDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  passenger: Passenger | null;
+  passenger: Passenger;
 };
 
 export function PassengerEditDialog(props: PassengerEditDialogProps) {
-  const [draft, setDraft] = useState<Passenger | null>(null);
+  // Родитель монтирует диалог только при выбранном пассажире и задаёт key={editing.id}:
+  // при открытии и смене пассажира экземпляр новый — отдельный useEffect для сброса draft не нужен.
+  const [draft, setDraft] = useState<Passenger>({ ...props.passenger });
 
-  useEffect(() => {
-    if (props.open && props.passenger) {
-      setDraft({ ...props.passenger });
-    }
-  }, [props.open, props.passenger]);
-
-  const current = props.passenger;
-  const name = (draft?.name ?? '').trim();
-  const phone = (draft?.phone ?? '').trim();
+  const name = draft.name.trim();
+  const phone = draft.phone.trim();
   const canSave = name.length > 0 && phone.length > 0;
 
   function onSave(): void {
-    if (!draft || !current) return;
     store.clearError();
-    socket.emit('dispatcher:passengers:update', current.id, draft);
+    socket.emit('dispatcher:passengers:update', props.passenger.id, draft);
     props.onOpenChange(false);
   }
 
   function onDelete(): void {
-    if (!current) return;
     store.clearError();
-    socket.emit('dispatcher:passengers:delete', current.id);
+    socket.emit('dispatcher:passengers:delete', props.passenger.id);
     props.onOpenChange(false);
   }
 
@@ -78,38 +71,32 @@ export function PassengerEditDialog(props: PassengerEditDialogProps) {
                   <ArrowLeft size={18} aria-hidden />
                 </Button>
                 <DialogTitle flex="1" minW={0} lineHeight="1.2">
-                  {current ? `Пассажир #${current.id}` : 'Пассажир'}
+                  Пассажир #{props.passenger.id}
                 </DialogTitle>
                 <DialogCloseTrigger />
               </HStack>
             </DialogHeader>
             <DialogBody>
-              {current && (
-                <VStack gap="3" align="stretch">
-                  <Input
-                    placeholder="Имя"
-                    value={draft?.name ?? ''}
-                    onChange={(e) =>
-                      setDraft((p) => (p ? { ...p, name: e.target.value } : p))
-                    }
-                  />
-                  <Input
-                    placeholder="Телефон"
-                    value={draft?.phone ?? ''}
-                    onChange={(e) =>
-                      setDraft((p) => (p ? { ...p, phone: e.target.value } : p))
-                    }
-                  />
-                  <VStack align="stretch" gap="2">
-                    <Button onClick={onSave} disabled={!canSave}>
-                      Сохранить
-                    </Button>
-                    <Button colorPalette="red" variant="outline" onClick={onDelete}>
-                      Удалить
-                    </Button>
-                  </VStack>
+              <VStack gap="3" align="stretch">
+                <Input
+                  placeholder="Имя"
+                  value={draft.name}
+                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                />
+                <Input
+                  placeholder="Телефон"
+                  value={draft.phone}
+                  onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
+                />
+                <VStack align="stretch" gap="2">
+                  <Button onClick={onSave} disabled={!canSave}>
+                    Сохранить
+                  </Button>
+                  <Button colorPalette="red" variant="outline" onClick={onDelete}>
+                    Удалить
+                  </Button>
                 </VStack>
-              )}
+              </VStack>
             </DialogBody>
           </DialogContent>
         </DialogPositioner>
