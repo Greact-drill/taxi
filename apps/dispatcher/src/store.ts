@@ -52,11 +52,33 @@ class Store {
     this.onlines = onlines;
   }
 
+  screen: 'list' | 'form';
+  screenForm: 'create' | 'edit';
+  screenFormData: Driver | null;
+
+  openCreateDriverForm() {
+    this.screen = 'form';
+    this.screenForm = 'create';
+  }
+
+  openEditDriverForm(driver: Driver) {
+    this.screen = 'form';
+    this.screenForm = 'edit';
+    this.screenFormData = driver;
+  }
+
+  openList() {
+    this.screen = 'list';
+  }
+
   constructor() {
     this.drivers = [];
     this.passengers = [];
     this.orders = [];
     this.onlines = new Set();
+    this.screen = 'list';
+    this.screenForm = 'create';
+    this.screenFormData = null;
     makeAutoObservable(this);
   }
 }

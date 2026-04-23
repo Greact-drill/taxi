@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   Box,
   Button,
@@ -12,7 +12,6 @@ import {
 } from '@chakra-ui/react';
 import { Plus } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-import type { Driver } from '@packages/shared';
 
 import { Card } from '../components/Card';
 import { DriverCreateDialog } from '../components/DriverCreateDialog';
@@ -22,11 +21,8 @@ import { DriverAppHeader } from '../components/DriverAppHeader';
 import { socket } from '../socket';
 import { store, checkOnline } from '../store';
 
-export const DriversColumn = observer(function DriversColumn() {
-  const { drivers } = store;
-  const [editing, setEditing] = useState<Driver | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
+function DriversColumn() {
+  const { drivers, screen, screenForm, screenFormData } = store;
 
   useEffect(() => {
     socket.emit('dispatcher:drivers:request');
@@ -42,10 +38,7 @@ export const DriversColumn = observer(function DriversColumn() {
           key={driver.id}
           w="100%"
           cursor="pointer"
-          onClick={() => {
-            setEditing(driver);
-            setDialogOpen(true);
-          }}
+          onClick={() => store.openEditDriverForm(driver)}
         >
           <Card>
             <DriverAppHeader driver={driver} online={checkOnline(`driver:${driver.id}`)} />
@@ -66,7 +59,7 @@ export const DriversColumn = observer(function DriversColumn() {
         display="flex"
         alignItems="center"
         justifyContent="center"
-        onClick={() => setCreateOpen(true)}
+        onClick={() => store.openCreateDriverForm()}
       >
         <VStack gap="1" align="center">
           <Box color="purple.600" lineHeight="0">
@@ -78,9 +71,9 @@ export const DriversColumn = observer(function DriversColumn() {
         </VStack>
       </Button>
       <DialogRoot
-        open={createOpen}
-        onOpenChange={(d) => {
-          setCreateOpen(d.open);
+        open={screen === 'form'}
+        onOpenChange={(dialog) => {
+          if (!dialog.open) store.openList();
         }}
         size="sm"
       >
@@ -88,26 +81,20 @@ export const DriversColumn = observer(function DriversColumn() {
           <DialogBackdrop />
           <DialogPositioner>
             <DialogContent>
-              <DriverCreateDialog close={() => setCreateOpen(false)} />
+              {screenForm === 'create' && <DriverCreateDialog close={() => store.openList()} />}
+              {screenForm === 'edit' && screenFormData && (
+                <DriverEditDialog
+                  key={screenFormData.id}
+                  driver={screenFormData}
+                  close={() => store.openList()}
+                />
+              )}
             </DialogContent>
-          </DialogPositioner>
-        </Portal>
-      </DialogRoot>
-      <DialogRoot
-        open={dialogOpen}
-        onOpenChange={(d) => {
-          setDialogOpen(d.open);
-          if (!d.open) setEditing(null);
-        }}
-        size="sm"
-      >
-        <Portal>
-          <DialogBackdrop />
-          <DialogPositioner>
-            <DialogContent>{editing && <DriverEditDialog key={editing.id} driver={editing} close={() => setDialogOpen(false)} />}</DialogContent>
           </DialogPositioner>
         </Portal>
       </DialogRoot>
     </DispatcherColumn>
   );
-});
+};
+
+export default observer(DriversColumn);
