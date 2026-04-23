@@ -97,6 +97,7 @@ export function createSocketRuntime(io: SocketIOServer, socket: SocketIOClient, 
         if (order.driver) {
           send(`driver:${order.driver.id}`, 'driver:orders', await orderService.listOfDriver(order.driver.id));
         }
+        send('dispatcher', 'dispatcher:orders', await orderService.list());
       }
     });
   }

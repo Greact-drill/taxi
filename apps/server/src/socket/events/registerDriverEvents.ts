@@ -13,6 +13,7 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
   ctx.on('driver:auth:login', async (credentials: DriverLoginInput) => {
     const token = await ctx.driverService.login(credentials);
     ctx.socket.emit('auth:token', token);
+    ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
   });
 
   ctx.on('driver:auth:request', async () => {
@@ -28,6 +29,7 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
       login: profile.login,
     });
     ctx.send(`driver:${driver.id}`, 'driver:profile', result);
+    ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
   });
 
   // driver orders events
@@ -53,37 +55,19 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
     const driver = ctx.requireDriver();
     await ctx.orderService.update(order.id, { driver, status: OrderStatus.DRIVER_ASSIGNED });
 
-    ctx.send(
-      `passenger:${order.passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(order.passenger.id),
-    );
-    ctx.send(
-      `driver:${driver.id}`,
-      'driver:orders',
-      await ctx.orderService.listOfDriver(driver.id),
-    );
-    ctx.send(
-      'driver',
-      'driver:orders:active',
-      await ctx.orderService.listOfActive(),
-    );
+    ctx.send(`passenger:${order.passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(order.passenger.id));
+    ctx.send(`driver:${driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(driver.id));
+    ctx.send('driver', 'driver:orders:active', await ctx.orderService.listOfActive());
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
   });
 
   ctx.on('driver:orders:next', async (order: DriverOrder, status: OrderStatus) => {
     const driver = ctx.requireDriver();
     await ctx.orderService.update(order.id, { status });
 
-    ctx.send(
-      `passenger:${order.passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(order.passenger.id),
-    );
-    ctx.send(
-      `driver:${driver.id}`,
-      'driver:orders',
-      await ctx.orderService.listOfDriver(driver.id),
-    );
+    ctx.send(`passenger:${order.passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(order.passenger.id));
+    ctx.send(`driver:${driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(driver.id));
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
 
     if (status === OrderStatus.COMPLETED) {
       ctx.deleteAfterTimeout({ ...order, driver }, COMPLETED_CLEAN_TIMEOUT);
@@ -97,16 +81,9 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
       cancelReason: reason,
     });
 
-    ctx.send(
-      `passenger:${order.passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(order.passenger.id),
-    );
-    ctx.send(
-      `driver:${driver.id}`,
-      'driver:orders',
-      await ctx.orderService.listOfDriver(driver.id),
-    );
+    ctx.send(`passenger:${order.passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(order.passenger.id));
+    ctx.send(`driver:${driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(driver.id));
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
 
     ctx.deleteAfterTimeout({ ...order, driver }, CANCELLED_CLEAN_TIMEOUT);
   });
@@ -115,16 +92,9 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
     const driver = ctx.requireDriver();
     await ctx.orderService.delete(order.id);
 
-    ctx.send(
-      `passenger:${order.passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(order.passenger.id),
-    );
-    ctx.send(
-      `driver:${driver.id}`,
-      'driver:orders',
-      await ctx.orderService.listOfDriver(driver.id),
-    );
+    ctx.send(`passenger:${order.passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(order.passenger.id));
+    ctx.send(`driver:${driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(driver.id));
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
   });
 
   ctx.on('driver:order:messages:request', async (driverOrder: DriverOrder) => {

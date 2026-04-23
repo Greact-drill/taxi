@@ -9,7 +9,7 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
   ctx.on('passenger:auth:register', async (userData: PassengerRegisterInput) => {
     const token = await ctx.passengerService.register(userData);
     ctx.socket.emit('auth:token', token);
-    // TODO уведомить диспетчера о новом пассажире
+    ctx.send('dispatcher', 'dispatcher:passengers', await ctx.passengerService.list());
   });
 
   ctx.on('passenger:auth:login', async () => {
@@ -25,15 +25,12 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
     const passenger = ctx.requirePassenger();
     const result = await ctx.passengerService.update(passenger.id, profile);
     ctx.send(`passenger:${passenger.id}`, 'passenger:profile', result);
+    ctx.send('dispatcher', 'dispatcher:passengers', await ctx.passengerService.list());
   });
 
   ctx.on('passenger:orders:request', async () => {
     const passenger = ctx.requirePassenger();
-    ctx.send(
-      `passenger:${passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(passenger.id),
-    );
+    ctx.send(`passenger:${passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(passenger.id));
   });
 
   ctx.on('passenger:orders:create', async (input: Partial<PassengerOrder>) => {
@@ -44,16 +41,9 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
     };
     await ctx.orderService.create(payload, passenger);
 
-    ctx.send(
-      `passenger:${passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(passenger.id),
-    );
-    ctx.send(
-      'driver',
-      'driver:orders:active',
-      await ctx.orderService.listOfActive(),
-    );
+    ctx.send(`passenger:${passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(passenger.id));
+    ctx.send('driver', 'driver:orders:active', await ctx.orderService.listOfActive());
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
   });
 
   ctx.on('passenger:orders:update', async (input: Partial<PassengerOrder>) => {
@@ -62,26 +52,15 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
 
     const result = await ctx.orderService.update(input.id, { ...input });
 
-    ctx.send(
-      `passenger:${passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(passenger.id),
-    );
+    ctx.send(`passenger:${passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(passenger.id));
 
     if (result.driver) {
       const driver = result.driver;
-      ctx.send(
-        `driver:${driver.id}`,
-        'driver:orders',
-        await ctx.orderService.listOfDriver(driver.id),
-      );
+      ctx.send(`driver:${driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(driver.id));
     } else {
-      ctx.send(
-        'driver',
-        'driver:orders:active',
-        await ctx.orderService.listOfActive(),
-      );
+      ctx.send('driver', 'driver:orders:active', await ctx.orderService.listOfActive());
     }
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
   });
 
   ctx.on('passenger:orders:cancel', async (input: PassengerOrder, reason: string) => {
@@ -92,27 +71,14 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
       cancelReason: reason,
     });
 
-    ctx.send(
-      `passenger:${passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(passenger.id),
-    );
-
+    ctx.send(`passenger:${passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(passenger.id));
     if (order.driver) {
-      ctx.send(
-        `driver:${order.driver.id}`,
-        'driver:orders',
-        await ctx.orderService.listOfDriver(order.driver.id),
-      );
+      ctx.send(`driver:${order.driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(order.driver.id));
     }
-
     if (input.status === OrderStatus.AWAITING_DRIVER) {
-      ctx.send(
-        'driver',
-        'driver:orders:active',
-        await ctx.orderService.listOfActive(),
-      );
+      ctx.send('driver', 'driver:orders:active', await ctx.orderService.listOfActive());
     }
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
 
     ctx.deleteAfterTimeout(order, CANCELLED_CLEAN_TIMEOUT);
   });
@@ -120,25 +86,12 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
   ctx.on('passenger:orders:delete', async (order: PassengerOrder) => {
     const passenger = ctx.requirePassenger();
 
-    ctx.send(
-      `passenger:${passenger.id}`,
-      'passenger:orders',
-      await ctx.orderService.listOfPassenger(passenger.id),
-    );
-
+    ctx.send(`passenger:${passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(passenger.id));
     if (order.driver) {
-      ctx.send(
-        `driver:${order.driver.id}`,
-        'driver:orders',
-        await ctx.orderService.listOfDriver(order.driver.id),
-      );
+      ctx.send(`driver:${order.driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(order.driver.id));
     }
-
-    ctx.send(
-      'driver',
-      'driver:orders:active',
-      await ctx.orderService.listOfActive(),
-    );
+    ctx.send('driver', 'driver:orders:active', await ctx.orderService.listOfActive());
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
   });
 
   ctx.on('passenger:order:messages:request', async (passengerOrder: PassengerOrder) => {

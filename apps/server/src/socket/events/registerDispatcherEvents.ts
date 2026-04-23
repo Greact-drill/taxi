@@ -1,21 +1,7 @@
-import type { Server as SocketIOServer } from 'socket.io';
 import { type SocketRuntimeContext } from '../SocketRuntime.js';
-import type { DispatcherConnectionsItem, Driver, DriverCreateInput, Passenger } from '@packages/shared';
+import type { Driver, DriverCreateInput, Passenger } from '@packages/shared';
 
 const ONLINE_TIMEOUT = 20_000;
-
-async function getConnections(io: SocketIOServer): Promise<DispatcherConnectionsItem[]> {
-  const sockets = await io.fetchSockets();
-  const items: DispatcherConnectionsItem[] = sockets.map((s) => {
-    const role = s.handshake.auth?.role;
-    const token = s.handshake.auth?.token;
-    return {
-      role: typeof role === 'string' ? role : 'unknown',
-      token: typeof token === 'string' ? token : undefined,
-    };
-  });
-  return items;
-}
 
 export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
 
@@ -28,7 +14,6 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
       id = `passenger:${ctx.socket.data.passenger.id}`;
     }
     if (id) {
-      // TODO проверить, что это прервт проверку на оффла при перезагрузке клиента
       ctx.statusMap[id] = 'online';
       ctx.send('dispatcher', 'dispatcher:status:change', id, 'online');
     }
@@ -60,6 +45,7 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
 
   ctx.on('dispatcher:status:map:request', async () => {
     ctx.socket.emit('dispatcher:status:map', ctx.statusMap);
+    ctx.statusMap = {};
     ctx.send('driver', 'server:online:request');
     ctx.send('passenger', 'server:online:request');
   });
