@@ -1,5 +1,11 @@
 import { type SocketRuntimeContext } from '../SocketRuntime.js';
-import type { Driver, DriverCreateInput, Passenger } from '@packages/shared';
+import type {
+  Driver,
+  DriverCreateInput,
+  DriverOrder,
+  Passenger,
+  PassengerOrder,
+} from '@packages/shared';
 
 const ONLINE_TIMEOUT = 20_000;
 
@@ -61,6 +67,17 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
 
   ctx.on('dispatcher:orders:request', async () => {
     ctx.socket.emit('dispatcher:orders', await ctx.orderService.list());
+  });
+
+  // orders management events
+  ctx.on('dispatcher:orders:update', async (id: number, input: Partial<PassengerOrder> | Partial<DriverOrder>) => {
+    await ctx.orderService.update(id, input);
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
+  });
+
+  ctx.on('dispatcher:orders:delete', async (id: number) => {
+    await ctx.orderService.delete(id);
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
   });
 
   // drivers management events

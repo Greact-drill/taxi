@@ -5,11 +5,12 @@ import {
   DialogRoot,
   Portal,
 } from '@chakra-ui/react';
-import type { Driver, Passenger } from '@packages/shared';
+import type { Driver, Order, Passenger } from '@packages/shared';
 import { observer } from 'mobx-react-lite';
 import { store } from '../store';
 import { DriverCreateDialog } from './DriverCreateDialog';
 import { DriverEditDialog } from './DriverEditDialog';
+import { OrderEditDialog } from './OrderEditDialog';
 import { PassengerEditDialog } from './PassengerEditDialog';
 
 function FormDialogRoot() {
@@ -41,6 +42,13 @@ function FormDialogRoot() {
               <PassengerEditDialog
                 key={screenFormData.id}
                 passenger={screenFormData as Passenger}
+                close={() => store.openList()}
+              />
+            )}
+            {screenForm === 'edit' && screenFormDataType === 'order' && screenFormData && (
+              <OrderEditDialog
+                key={screenFormData.id}
+                order={screenFormData as Order}
                 close={() => store.openList()}
               />
             )}

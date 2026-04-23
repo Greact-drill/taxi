@@ -77,6 +77,13 @@ class Store {
     this.screenFormDataType = 'passenger';
   }
 
+  openEditOrderForm(order: Order) {
+    this.screen = 'form';
+    this.screenForm = 'edit';
+    this.screenFormData = order;
+    this.screenFormDataType = 'order';
+  }
+
   openList() {
     this.screen = 'list';
   }

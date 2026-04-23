@@ -13,6 +13,7 @@ const dto = {
   driver: { select: { id: true, name: true, car: true } },
 };
 
+// TODO refactor types
 type OrderRow = OrderRecord & {
   passenger?: Order['passenger'];
   driver?: Order['driver'];
@@ -117,12 +118,19 @@ export class OrderService {
 
   async update(id: number, input: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
     const patch: Partial<OrderRecord> = {
+      createdAt: input.createdAt,
       from: input.from,
       to: input.to,
       status: input.status,
+      cancelReason: input.cancelReason,
     };
+    if ('passenger' in input && input.passenger) {
+      patch.passengerId = input.passenger.id;
+    }
     if ('driver' in input && input.driver) {
       patch.driverId = input.driver.id;
+    } else if ('driver' in input && input.driver === undefined) {
+      patch.driverId = null;
     }
     if (input.status === OrderStatus.DRIVER_ASSIGNED) {
       patch.assignedAt = new Date().toISOString();

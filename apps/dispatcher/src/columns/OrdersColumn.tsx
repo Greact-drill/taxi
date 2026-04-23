@@ -23,13 +23,15 @@ export const OrdersColumn = observer(function OrdersColumn() {
         Заявки
       </Text>
       {orders.map((order) => (
-        <Card key={order.id}>
+        <Box key={order.id} cursor="pointer" onClick={() => store.openEditOrderForm(order)}>
+          <Card>
           <Box px="3" pt="3" pb="1">
             <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
           </Box>
           <OrderPassengerRow passenger={order.passenger} online={checkOnline(`passenger:${order.passenger.id}`)} />
           {order.driver ? <OrderDriverRow driver={order.driver} online={checkOnline(`driver:${order.driver.id}`)} /> : null}
-        </Card>
+          </Card>
+        </Box>
       ))}
     </DispatcherColumn>
   );
