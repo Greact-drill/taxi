@@ -54,17 +54,27 @@ class Store {
 
   screen: 'list' | 'form';
   screenForm: 'create' | 'edit';
-  screenFormData: Driver | null;
+  screenFormData: Driver | Passenger | Order | null;
+  screenFormDataType: 'driver' | 'passenger' | 'order' | null;
 
   openCreateDriverForm() {
     this.screen = 'form';
     this.screenForm = 'create';
+    this.screenFormDataType = 'driver';
   }
 
   openEditDriverForm(driver: Driver) {
     this.screen = 'form';
     this.screenForm = 'edit';
     this.screenFormData = driver;
+    this.screenFormDataType = 'driver';
+  }
+
+  openEditPassengerForm(passenger: Passenger) {
+    this.screen = 'form';
+    this.screenForm = 'edit';
+    this.screenFormData = passenger;
+    this.screenFormDataType = 'passenger';
   }
 
   openList() {
@@ -79,6 +89,7 @@ class Store {
     this.screen = 'list';
     this.screenForm = 'create';
     this.screenFormData = null;
+    this.screenFormDataType = null;
     makeAutoObservable(this);
   }
 }

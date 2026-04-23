@@ -2,11 +2,6 @@ import { useEffect } from 'react';
 import {
   Box,
   Button,
-  DialogBackdrop,
-  DialogContent,
-  DialogPositioner,
-  DialogRoot,
-  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -14,15 +9,13 @@ import { Plus } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 
 import { Card } from '../components/Card';
-import { DriverCreateDialog } from '../components/DriverCreateDialog';
-import { DriverEditDialog } from '../components/DriverEditDialog';
 import { DispatcherColumn } from '../components/DispatcherColumn';
 import { DriverAppHeader } from '../components/DriverAppHeader';
 import { socket } from '../socket';
 import { store, checkOnline } from '../store';
 
 function DriversColumn() {
-  const { drivers, screen, screenForm, screenFormData } = store;
+  const { drivers } = store;
 
   useEffect(() => {
     socket.emit('dispatcher:drivers:request');
@@ -70,29 +63,6 @@ function DriversColumn() {
           </Text>
         </VStack>
       </Button>
-      <DialogRoot
-        open={screen === 'form'}
-        onOpenChange={(dialog) => {
-          if (!dialog.open) store.openList();
-        }}
-        size="sm"
-      >
-        <Portal>
-          <DialogBackdrop />
-          <DialogPositioner>
-            <DialogContent>
-              {screenForm === 'create' && <DriverCreateDialog close={() => store.openList()} />}
-              {screenForm === 'edit' && screenFormData && (
-                <DriverEditDialog
-                  key={screenFormData.id}
-                  driver={screenFormData}
-                  close={() => store.openList()}
-                />
-              )}
-            </DialogContent>
-          </DialogPositioner>
-        </Portal>
-      </DialogRoot>
     </DispatcherColumn>
   );
 };

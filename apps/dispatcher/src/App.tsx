@@ -3,10 +3,13 @@ import { socket } from './socket';
 
 import { Box, HStack } from '@chakra-ui/react';
 
+import FormDialogRoot from './components/FormDialogRoot';
 import DriversColumn from './columns/DriversColumn';
+import PassengersColumn from './columns/PassengersColumn';
+
 import { OrdersColumn } from './columns/OrdersColumn';
-import { PassengersColumn } from './columns/PassengersColumn';
 import { SettingsColumn } from './columns/SettingsColumn';
+
 import { store } from './store';
 import { observer } from 'mobx-react-lite';
 
@@ -29,7 +32,8 @@ function App() {
         <DriversColumn />
         <PassengersColumn />
         <OrdersColumn />
-      </HStack>
+      </HStack>      
+      <FormDialogRoot />
     </Box>
   );
 }
