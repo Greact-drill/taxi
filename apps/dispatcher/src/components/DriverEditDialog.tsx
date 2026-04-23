@@ -39,14 +39,19 @@ export function DriverEditDialog(props: DriverEditDialogProps) {
   const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
-    if (props.open && props.driver) {
+    if (!props.open) {
+      setDraft(null);
+      setPasswordMode(false);
+      setNewPassword('');
+      return;
+    }
+    if (props.driver) {
       setDraft({ ...props.driver });
       setPasswordMode(false);
       setNewPassword('');
     }
   }, [props.open, props.driver]);
 
-  const current = props.driver;
   const login = (draft?.login ?? '').trim();
   const name = (draft?.name ?? '').trim();
   const car = (draft?.car ?? '').trim();
@@ -54,25 +59,25 @@ export function DriverEditDialog(props: DriverEditDialogProps) {
   const canSubmitPassword = newPassword.trim().length > 0;
 
   function onSave(): void {
-    if (!draft || !current) return;
+    if (!draft) return;
     store.clearError();
-    socket.emit('dispatcher:drivers:update', current.id, draft);
+    socket.emit('dispatcher:drivers:update', draft.id, draft);
     props.onOpenChange(false);
   }
 
   function onDelete(): void {
-    if (!current) return;
+    if (!draft) return;
     store.clearError();
-    socket.emit('dispatcher:drivers:delete', current.id);
+    socket.emit('dispatcher:drivers:delete', draft.id);
     props.onOpenChange(false);
   }
 
   function onPasswordCommit(): void {
-    if (!current) return;
+    if (!draft) return;
     store.clearError();
     const pwd = newPassword.trim();
     if (!pwd) return;
-    socket.emit('dispatcher:drivers:password', current.id, pwd);
+    socket.emit('dispatcher:drivers:password', draft.id, pwd);
     setPasswordMode(false);
     setNewPassword('');
   }
@@ -82,8 +87,9 @@ export function DriverEditDialog(props: DriverEditDialogProps) {
   }
 
   function onCopyCreds(): void {
+    if (!draft) return;
     const pwd = newPassword.trim();
-    const l = (draft?.login ?? '').trim();
+    const l = draft.login.trim();
     const text = `Добрый день! Данные для входа: логин ${l}, пароль ${pwd}. Не передавайте их посторонним.`;
     void navigator.clipboard.writeText(text);
   }
@@ -93,6 +99,7 @@ export function DriverEditDialog(props: DriverEditDialogProps) {
       open={props.open}
       onOpenChange={(d) => {
         if (!d.open) {
+          setDraft(null);
           setPasswordMode(false);
           setNewPassword('');
         }
@@ -119,13 +126,13 @@ export function DriverEditDialog(props: DriverEditDialogProps) {
                   <ArrowLeft size={18} aria-hidden />
                 </Button>
                 <DialogTitle flex="1" minW={0} lineHeight="1.2">
-                  {current ? `Водитель #${current.id}` : 'Водитель'}
+                  {draft ? `Водитель #${draft.id}` : props.driver ? `Водитель #${props.driver.id}` : 'Водитель'}
                 </DialogTitle>
                 <DialogCloseTrigger />
               </HStack>
             </DialogHeader>
             <DialogBody>
-              {current &&
+              {draft &&
                 (passwordMode ? (
                   <VStack gap="3" align="stretch">
                     <Text fontSize="sm" color="gray.700">
@@ -167,24 +174,18 @@ export function DriverEditDialog(props: DriverEditDialogProps) {
                   <VStack gap="3" align="stretch">
                     <Input
                       placeholder="Логин"
-                      value={draft?.login ?? ''}
-                      onChange={(e) =>
-                        setDraft((p) => (p ? { ...p, login: e.target.value } : p))
-                      }
+                      value={draft.login}
+                      onChange={(e) => setDraft({ ...draft, login: e.target.value })}
                     />
                     <Input
                       placeholder="Имя"
-                      value={draft?.name ?? ''}
-                      onChange={(e) =>
-                        setDraft((p) => (p ? { ...p, name: e.target.value } : p))
-                      }
+                      value={draft.name}
+                      onChange={(e) => setDraft({ ...draft, name: e.target.value })}
                     />
                     <Input
                       placeholder="Автомобиль"
-                      value={draft?.car ?? ''}
-                      onChange={(e) =>
-                        setDraft((p) => (p ? { ...p, car: e.target.value } : p))
-                      }
+                      value={draft.car}
+                      onChange={(e) => setDraft({ ...draft, car: e.target.value })}
                     />
                     <HStack gap="2" flexWrap="wrap" justify="space-between" align="center">
                       <Text fontSize="sm" color="gray.500">

@@ -64,7 +64,7 @@ export function DriverCreateDialog(props: DriverCreateDialogProps) {
   }
 
   function onGeneratePassword(): void {
-    setDraft((p) => ({ ...p, password: generatePassword() }));
+    setDraft({ ...draft, password: generatePassword() });
   }
 
   function onCopyCreds(): void {
@@ -109,22 +109,22 @@ export function DriverCreateDialog(props: DriverCreateDialogProps) {
                 <Input
                   placeholder="Имя"
                   value={draft.name}
-                  onChange={(e) => setDraft((p) => ({ ...p, name: e.target.value }))}
+                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
                 />
                 <Input
                   placeholder="Автомобиль"
                   value={draft.car}
-                  onChange={(e) => setDraft((p) => ({ ...p, car: e.target.value }))}
+                  onChange={(e) => setDraft({ ...draft, car: e.target.value })}
                 />
                 <Input
                   placeholder="Логин"
                   value={draft.login}
-                  onChange={(e) => setDraft((p) => ({ ...p, login: e.target.value }))}
+                  onChange={(e) => setDraft({ ...draft, login: e.target.value })}
                 />
                 <Input
                   placeholder="Пароль"
                   value={draft.password}
-                  onChange={(e) => setDraft((p) => ({ ...p, password: e.target.value }))}
+                  onChange={(e) => setDraft({ ...draft, password: e.target.value })}
                 />
                 <HStack gap="2" flexWrap="wrap" justify="space-between">
                   <Button variant="outline" size="sm" onClick={onGeneratePassword}>
