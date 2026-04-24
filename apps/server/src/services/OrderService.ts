@@ -1,4 +1,5 @@
 import {
+  Driver,
   OrderCreateInput,
   OrderStatus,
   type DriverOrder,
@@ -12,44 +13,23 @@ const dto = {
   passenger: { select: { id: true, name: true, phone: true } },
   driver: { select: { id: true, name: true, car: true } },
 };
-
-// TODO refactor types
-type OrderRow = OrderRecord & {
-  passenger?: Order['passenger'];
-  driver?: Order['driver'];
-};
-
-function mapRecord(record: OrderRow): Order {
-  const { id, createdAt, passenger, driver, from, to, status, cancelReason } = record;
-  return {
-    id,
-    createdAt,
-    passenger: passenger as Order['passenger'],
-    driver,
-    from,
-    to,
-    status: status as Order['status'],
-    cancelReason: cancelReason ?? undefined,
-  };
-}
-
 export class OrderService {
   constructor(private readonly orm: Prisma.OrderRecordDelegate) { }
 
   async create(input: OrderCreateInput, passenger: Passenger): Promise<Order> {
     const { from, to } = input;
 
-    const record = await this.orm.create({
-      data: {
+    const { id, createdAt, status } = await this.orm.create({ 
+      data:{
         passengerId: passenger.id,
         from,
         to,
         status: OrderStatus.AWAITING_DRIVER,
         createdAt: new Date().toISOString(),
       }
-    });
+     });
 
-    return { ...mapRecord(record as OrderRow), passenger };
+    return { id, createdAt, from, to, status: status as OrderStatus, passenger };
   }
 
   async listOfPassenger(passengerId: number): Promise<PassengerOrder[]> {
@@ -60,8 +40,9 @@ export class OrderService {
     });
     const out: PassengerOrder[] = [];
     for (const record of records) {
-      out.push(mapRecord(record as OrderRow) as PassengerOrder);
-    }
+      const { id, createdAt, from, to, driver, status, cancelReason } = record;
+      out.push({ id, createdAt, from, to, driver: driver as Driver, status: status as OrderStatus, cancelReason: cancelReason ?? undefined });
+    }  
     return out;
   }
 
@@ -73,7 +54,8 @@ export class OrderService {
     });
     const out: DriverOrder[] = [];
     for (const record of records) {
-      out.push(mapRecord(record as OrderRow) as DriverOrder);
+      const { id, createdAt, passenger, from, to, status, cancelReason } = record;
+      out.push({ id, createdAt, passenger: passenger as Passenger, from, to, status: status as OrderStatus, cancelReason: cancelReason ?? undefined });
     }
     return out;
   }
@@ -89,7 +71,8 @@ export class OrderService {
     });
     const out: DriverOrder[] = [];
     for (const record of records) {
-      out.push(mapRecord(record as OrderRow) as DriverOrder);
+      const { id, createdAt, passenger, from, to, status, cancelReason } = record;
+      out.push({ id, createdAt, passenger: passenger as Passenger, from, to, status: status as OrderStatus, cancelReason: cancelReason ?? undefined });
     }
     return out;
   }
@@ -102,7 +85,8 @@ export class OrderService {
     });
     const out: Order[] = [];
     for (const record of records) {
-      out.push(mapRecord(record as OrderRow));
+      const { id, createdAt, passenger, from, to, driver, status, cancelReason } = record;
+      out.push({ id, createdAt, passenger: passenger as Passenger, from, to, driver: driver as Driver, status: status as OrderStatus, cancelReason: cancelReason ?? undefined });
     }
     return out;
   }
@@ -113,7 +97,8 @@ export class OrderService {
       include: dto,
     });
     if (!record) return;
-    return mapRecord(record as OrderRow);
+    const { createdAt, passenger, from, to, driver, status, cancelReason } = record;
+    return { id, createdAt, passenger: passenger as Passenger, from, to, driver: driver as Driver, status: status as OrderStatus, cancelReason: cancelReason ?? undefined };
   }
 
   async update(id: number, input: Partial<PassengerOrder> | Partial<DriverOrder>): Promise<Order> {
@@ -146,7 +131,8 @@ export class OrderService {
       data: patch,
       include: dto,
     });
-    return mapRecord(record as OrderRow);
+    const { createdAt, passenger, from, to, driver, status, cancelReason } = record;
+    return { id, createdAt, passenger: passenger as Passenger, from, to, driver: driver as Driver, status: status as OrderStatus, cancelReason: cancelReason ?? undefined };
   }
 
   async delete(id: number): Promise<void> {

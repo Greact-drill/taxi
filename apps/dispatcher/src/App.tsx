@@ -28,7 +28,7 @@ function App() {
         </Box>
       )}
       <HStack align="stretch" gap="4" flex="1" minH={0} minW={0} w="100%">
-        <SettingsColumn />
+        {/* <SettingsColumn /> */}
         <DriversColumn />
         <PassengersColumn />
         <OrdersColumn />
