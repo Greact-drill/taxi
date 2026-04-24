@@ -105,9 +105,9 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     const messages = await ctx.orderChatService.messages(order);
 
     ctx.send('dispatcher', 'dispatcher:order:messages', orderId, messages);
-    ctx.send(`passenger:${order.passenger.id}`, 'passenger:order:messages', orderId, messages);
+    ctx.send(`passenger:${order.passenger.id}`, 'driver:order:messages', orderId, messages); // как сообщения водителя
     if (order.driver) {
-      ctx.send(`driver:${order.driver.id}`, 'driver:order:messages', orderId, messages);
+      ctx.send(`driver:${order.driver.id}`, 'driver:order:messages', orderId, messages); // как сообщения "главного"водителя
     }
   });
 

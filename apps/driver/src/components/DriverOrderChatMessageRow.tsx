@@ -6,7 +6,7 @@ export type DriverOrderChatMessageRowProps = {
 };
 
 export function DriverOrderChatMessageRow({ message }: DriverOrderChatMessageRowProps) {
-  const isDriver = message.authorRole === 'driver';
+  const isDriver = message.authorRole === 'driver' || message.authorRole === 'dispatcher';
   const messageTime = new Date(message.createdAt).toLocaleTimeString('ru-RU', {
     hour: '2-digit',
     minute: '2-digit',

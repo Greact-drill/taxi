@@ -7,6 +7,11 @@ export type DispatcherOrderChatMessageRowProps = {
 
 export function DispatcherOrderChatMessageRow({ message }: DispatcherOrderChatMessageRowProps) {
   const isDispatcher = message.authorRole === ChatAuthorRole.DISPATCHER;
+  const bg = {
+    [ChatAuthorRole.DISPATCHER]: 'white',
+    [ChatAuthorRole.DRIVER]: 'purple.50',
+    [ChatAuthorRole.PASSENGER]: 'blue.50',
+  }
 
   const messageTime = new Date(message.createdAt).toLocaleTimeString('ru-RU', {
     hour: '2-digit',
@@ -20,7 +25,7 @@ export function DispatcherOrderChatMessageRow({ message }: DispatcherOrderChatMe
         px="3"
         py="2"
         borderRadius="xl"
-        bg={isDispatcher ? 'colorPalette.subtle' : 'white'}
+        bg={bg[message.authorRole]}
         color="gray.900"
         alignSelf={isDispatcher ? 'end' : 'start'}
       >
