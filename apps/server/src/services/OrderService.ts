@@ -77,6 +77,52 @@ export class OrderService {
     return out;
   }
 
+  async listRelatedPassengersByDriver(driverId: number): Promise<Passenger[]> {
+    const records = await this.orm.findMany({
+      where: { driverId, deleted: false },
+      include: { passenger: dto.passenger },
+    });
+    const map = new Map<number, Passenger>();
+    for (const record of records) {
+      map.set(record.passenger.id, record.passenger as Passenger);
+    }
+    return [...map.values()];
+  }
+
+  async listRelatedDriversByPassenger(passengerId: number): Promise<Driver[]> {
+    const records = await this.orm.findMany({
+      where: { passengerId, deleted: false, driverId: { not: null } },
+      include: { driver: dto.driver },
+    });
+    const map = new Map<number, Driver>();
+    for (const record of records) {
+      if (!record.driver) continue;
+      map.set(record.driver.id, record.driver as Driver);
+    }
+    return [...map.values()];
+  }
+
+  async passengerHasActiveOrders(passengerId: number): Promise<boolean> {
+    const count = await this.orm.count({
+      where: {
+        passengerId,
+        status: OrderStatus.AWAITING_DRIVER,
+        deleted: false,
+      },
+    });
+    return count > 0;
+  }
+
+  async passengerHasOrders(passengerId: number): Promise<boolean> {
+    const count = await this.orm.count({
+      where: {
+        passengerId,
+        deleted: false,
+      },
+    });
+    return count > 0;
+  }
+
   async list(): Promise<Order[]> {
     const records = await this.orm.findMany({
       where: { deleted: false },
@@ -135,13 +181,16 @@ export class OrderService {
     return { id, createdAt, passenger: passenger as Passenger, from, to, driver: driver as Driver, status: status as OrderStatus, cancelReason: cancelReason ?? undefined };
   }
 
-  async delete(id: number): Promise<void> {
-    await this.orm.update({
+  async delete(id: number): Promise<Order> {
+    const record = await this.orm.update({
       where: { id },
       data: {
         deleted: true,
         deletedAt: new Date().toISOString(),
       },
+      include: dto,
     });
+    const { createdAt, passenger, from, to, driver, status, cancelReason } = record;
+    return { id, createdAt, passenger: passenger as Passenger, from, to, driver: driver as Driver, status: status as OrderStatus, cancelReason: cancelReason ?? undefined };
   }
 }

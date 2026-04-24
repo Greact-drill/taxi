@@ -72,14 +72,23 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
 
   // orders management events
   ctx.on('dispatcher:orders:update', async (id: number, input: Partial<PassengerOrder> | Partial<DriverOrder>) => {
-    await ctx.orderService.update(id, input);
+    const order = await ctx.orderService.update(id, input);
+
     ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
-    // TODO уведомить так же водителей и пассажиров, которые видят этот заказ
+    ctx.send(`passenger:${order.passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(order.passenger.id));
+    if (order.driver) {
+      ctx.send(`driver:${order.driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(order.driver.id));
+    }
   });
 
   ctx.on('dispatcher:orders:delete', async (id: number) => {
-    await ctx.orderService.delete(id);
+    const order = await ctx.orderService.delete(id);
+
     ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
+    ctx.send(`passenger:${order.passenger.id}`, 'passenger:orders', await ctx.orderService.listOfPassenger(order.passenger.id));
+    if (order.driver) {
+      ctx.send(`driver:${order.driver.id}`, 'driver:orders', await ctx.orderService.listOfDriver(order.driver.id));
+    }
   });
 
   ctx.on('dispatcher:order:messages:request', async (orderId: number) => {
@@ -109,11 +118,18 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
   });
 
   ctx.on('dispatcher:drivers:update', async (id: number, input: Partial<Driver>) => {
-    const result = await ctx.driverService.update(id, input);
+    const driver = await ctx.driverService.update(id, input);
     ctx.send('dispatcher', 'dispatcher:drivers', await ctx.driverService.list());
-    ctx.send(`driver:${id}`, 'driver:profile', result);
-    // TOOD уведомить так же пассажиров, которые имеют активные заказы с этим водителем
-    // TODO обновить список заказов и у самого диспетчера
+    ctx.send(`driver:${id}`, 'driver:profile', driver);
+    const passengers = await ctx.orderService.listRelatedPassengersByDriver(id);
+    for (const passenger of passengers) {
+      ctx.send(
+        `passenger:${passenger.id}`,
+        'passenger:orders',
+        await ctx.orderService.listOfPassenger(passenger.id),
+      );
+    }
+    ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
   });
 
   ctx.on('dispatcher:drivers:password', async (id: number, newPassword: string) => {
@@ -130,11 +146,23 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
 
   // passengers management events
   ctx.on('dispatcher:passengers:update', async (id: number, input: Partial<Passenger>) => {
-    const result = await ctx.passengerService.update(id, input);
+    const passenger = await ctx.passengerService.update(id, input);
     ctx.send('dispatcher', 'dispatcher:passengers', await ctx.passengerService.list());
-    ctx.send(`passenger:${id}`, 'passenger:profile', result);
-    // TODO уведомить так же водителей, которые имеют активные заказы с этим пассажиром
-    // TODO обновить список заказов и у самого диспетчера
+    ctx.send(`passenger:${id}`, 'passenger:profile', passenger);
+    const drivers = await ctx.orderService.listRelatedDriversByPassenger(id);
+    for (const driver of drivers) {
+      ctx.send(
+        `driver:${driver.id}`,
+        'driver:orders',
+        await ctx.orderService.listOfDriver(driver.id),
+      );
+    }
+    if (await ctx.orderService.passengerHasActiveOrders(id)) {
+      ctx.send('driver', 'driver:orders:active', await ctx.orderService.listOfActive());
+    }
+    if (await ctx.orderService.passengerHasOrders(id)) {
+      ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
+    }
   });
 
   ctx.on('dispatcher:passengers:delete', async (id: number) => {

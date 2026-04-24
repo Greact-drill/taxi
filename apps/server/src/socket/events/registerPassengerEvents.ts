@@ -26,6 +26,21 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
     const result = await ctx.passengerService.update(passenger.id, profile);
     ctx.send(`passenger:${passenger.id}`, 'passenger:profile', result);
     ctx.send('dispatcher', 'dispatcher:passengers', await ctx.passengerService.list());
+
+    const drivers = await ctx.orderService.listRelatedDriversByPassenger(passenger.id);
+    for (const driver of drivers) {
+      ctx.send(
+        `driver:${driver.id}`,
+        'driver:orders',
+        await ctx.orderService.listOfDriver(driver.id),
+      );
+    }
+    if (await ctx.orderService.passengerHasActiveOrders(passenger.id)) {
+      ctx.send('driver', 'driver:orders:active', await ctx.orderService.listOfActive());
+    }
+    if (await ctx.orderService.passengerHasOrders(passenger.id)) {
+      ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
+    }
   });
 
   ctx.on('passenger:orders:request', async () => {
