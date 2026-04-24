@@ -1,8 +1,7 @@
 import { Box, HStack } from '@chakra-ui/react';
+import { ContactCard } from '@packages/order-ui';
 import { UserRound } from 'lucide-react';
 import type { Passenger } from '@packages/shared';
-
-import { ContactCard } from './ContactCard';
 
 export type OrderPassengerRowProps = {
   passenger: Passenger;

@@ -1,7 +1,6 @@
 import { Box, HStack, Text } from '@chakra-ui/react';
+import { ContactCard } from '@packages/order-ui';
 import type { Passenger } from '@packages/shared';
-
-import { ContactCard } from './ContactCard';
 
 export type PassengerAppHeaderProps = {
   passenger: Passenger;

@@ -1,12 +1,15 @@
 import { observer } from 'mobx-react-lite';
-import { Box, Center } from '@chakra-ui/react';
+import { Box, Center, HStack } from '@chakra-ui/react';
+import { AppHeader, DriverAppHeader, OrderNetworkStatusBadge } from '@packages/order-ui';
 // import { ScreenResolutionInfo } from '@packages/order-ui';
 
-import DriverAppHeader from './components/DriverAppHeader';
+import DriverAppMenu from './components/DriverAppMenu';
 import DriverAppContentScreen from './screens/DriverAppContentScreen';
-import { store } from './store';
+import { useStore } from './store';
 
 function App() {
+  const store = useStore();
+
   return (
     <Box
       bg="white"
@@ -16,7 +19,24 @@ function App() {
       display="flex"
       flexDirection="column"
     >
-      <DriverAppHeader />
+      <AppHeader>
+        {store.currentUser ? (
+          <>
+            <Box flex="1" minW={0}>
+              <DriverAppHeader
+                driver={store.currentUser}
+                online={store.online}
+              />
+            </Box>
+            <DriverAppMenu />
+          </>
+        ) : (
+          <>
+            <OrderNetworkStatusBadge online={store.online} />
+            <DriverAppMenu />
+          </>
+        )}
+      </AppHeader>
 
       <Box
         as="main"

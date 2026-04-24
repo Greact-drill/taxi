@@ -1,8 +1,7 @@
 import { Box, HStack } from '@chakra-ui/react';
+import { ContactCard } from '@packages/order-ui';
 import { Car } from 'lucide-react';
 import type { Driver } from '@packages/shared';
-
-import { ContactCard } from './ContactCard';
 
 export type OrderDriverRowProps = {
   driver: Driver;

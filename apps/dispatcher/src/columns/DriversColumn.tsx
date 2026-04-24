@@ -7,10 +7,10 @@ import {
 } from '@chakra-ui/react';
 import { Plus } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
+import { DriverAppHeader } from '@packages/order-ui';
 
 import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
-import { DriverAppHeader } from '../components/DriverAppHeader';
 import { socket } from '../socket';
 import { store, checkOnline } from '../store';
 
