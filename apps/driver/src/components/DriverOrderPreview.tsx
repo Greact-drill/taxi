@@ -31,7 +31,7 @@ export function DriverOrderPreview({ order, onClick }: DriverOrderPreviewProps) 
       {order.status === OrderStatus.CANCELLED && (
         <OrderCancelReasonRow cancelReason={order.cancelReason} />
       )}
-      <OrderPassengerRow name={passenger.name} phone={passenger.phone} />
+      <OrderPassengerRow passenger={passenger} online={false} />
     </Box>
   );
 }

@@ -118,8 +118,8 @@ function DriverOrderFormScreen() {
       </HStack>
       <OrderRouteRow from={order.from} to={order.to} />
       <OrderPassengerRow
-        name={order.passenger.name}
-        phone={order.passenger.phone}
+        passenger={order.passenger}
+        online={false}
         attachToCardBottom={false}
       />
       <VStack gap="3" align="stretch" mt="4" flex="1" minH="0">

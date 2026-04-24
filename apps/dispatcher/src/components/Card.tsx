@@ -14,7 +14,7 @@ export function Card({ children, ...rest }: CardProps) {
       border="1px solid"
       borderColor="colorPalette.muted"
       borderRadius="md"
-      p="2"
+      // p="2"
       boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 10px 22px -4px rgba(0, 0, 0, 0.12)"
       {...rest}
     >

@@ -1,10 +1,11 @@
-import { Box, HStack, Text } from '@chakra-ui/react';
+import { Box, HStack } from '@chakra-ui/react';
+import type { Passenger } from '@packages/shared';
 import { UserRound } from 'lucide-react';
-import { OrderInlineSeparatorDot } from './OrderInlineSeparatorDot';
+import { ContactCard } from './ContactCard';
 
 export type OrderPassengerRowProps = {
-  name: string;
-  phone: string;
+  passenger: Passenger;
+  online: boolean;
   /**
    * When `true` (default), stretch to the bottom of a parent card with `p="4"` + `overflow="hidden"`.
    * Set `false` when more content (e.g. buttons) follows inside the same card.
@@ -12,17 +13,15 @@ export type OrderPassengerRowProps = {
   attachToCardBottom?: boolean;
 };
 
-/** Strip for driver app: passenger icon + name + dot + phone in one line (light blue panel). */
-export function OrderPassengerRow({ name, phone, attachToCardBottom = true }: OrderPassengerRowProps) {
-  const full = `${name} · ${phone}`;
-
+export function OrderPassengerRow({ passenger, online, attachToCardBottom = true }: OrderPassengerRowProps) {
   return (
     <HStack
+      bg="blue.50"
       gap="2.5"
       align="center"
-      bg="blue.50"
       px="3"
-      py="2.5"
+      py="1.5"
+      minW={0}
       mt="3"
       mx={attachToCardBottom ? '-4' : undefined}
       mb={attachToCardBottom ? '-4' : undefined}
@@ -31,15 +30,9 @@ export function OrderPassengerRow({ name, phone, attachToCardBottom = true }: Or
       <Box color="blue.600" lineHeight="0" flexShrink={0}>
         <UserRound size={18} strokeWidth={2} />
       </Box>
-      <HStack gap="1.5" align="center" flex="1" minW={0} title={full}>
-        <Text as="span" fontSize="sm" fontWeight="semibold" color="gray.800" truncate>
-          {name}
-        </Text>
-        <OrderInlineSeparatorDot />
-        <Text as="span" fontSize="sm" color="gray.600" flex="1" minW={0} truncate>
-          {phone}
-        </Text>
-      </HStack>
+      <Box flex="1" minW={0}>
+        <ContactCard title={passenger.name} subtitle={passenger.phone} online={online} />
+      </Box>
     </HStack>
   );
 }

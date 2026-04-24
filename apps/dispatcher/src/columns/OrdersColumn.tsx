@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 import { Box, Text } from '@chakra-ui/react';
-import { OrderCardHeader, OrderRouteRow } from '@packages/order-ui';
+import { OrderCardHeader, OrderPassengerRow, OrderRouteRow } from '@packages/order-ui';
 import { observer } from 'mobx-react-lite';
 
 import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
 import { OrderDriverRow } from '../components/OrderDriverRow';
-import { OrderPassengerRow } from '../components/OrderPassengerRow';
 import { socket } from '../socket';
 import { checkOnline, store } from '../store';
 
@@ -28,7 +27,11 @@ function OrdersColumn() {
             <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
             <OrderRouteRow from={order.from} to={order.to} />
           </Box>
-          <OrderPassengerRow passenger={order.passenger} online={checkOnline(`passenger:${order.passenger.id}`)} />
+          <OrderPassengerRow
+            passenger={order.passenger}
+            online={checkOnline(`passenger:${order.passenger.id}`)}
+            attachToCardBottom={false}
+          />
           {order.driver ? <OrderDriverRow driver={order.driver} online={checkOnline(`driver:${order.driver.id}`)} /> : null}
         </Card>
       ))}

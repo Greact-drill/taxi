@@ -28,7 +28,7 @@ export function DriverActiveOrderPreview({ order, onClick }: DriverActiveOrderPr
     >
       <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
       <OrderRouteRow from={order.from} to={order.to} />
-      <OrderPassengerRow name={passenger.name} phone={passenger.phone} />
+      <OrderPassengerRow passenger={passenger} online={false} />
     </Box>
   );
 }
