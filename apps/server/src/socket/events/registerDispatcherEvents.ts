@@ -8,7 +8,7 @@ import {
   type PassengerOrder,
 } from '@packages/shared';
 
-const ONLINE_TIMEOUT = 20_000;
+const ONLINE_TIMEOUT = 10_000;
 
 export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
 
@@ -17,12 +17,14 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
     let id: string | undefined;
     if (ctx.socket.data.driver) {
       id = `driver:${ctx.socket.data.driver.id}`;
+      ctx.send('passenger', 'server:status:change', id, 'online');
     } else if (ctx.socket.data.passenger) {
       id = `passenger:${ctx.socket.data.passenger.id}`;
+      ctx.send('driver', 'server:status:change', id, 'online');
     }
     if (id) {
       ctx.statusMap[id] = 'online';
-      ctx.send('dispatcher', 'dispatcher:status:change', id, 'online');
+      ctx.send('dispatcher', 'server:status:change', id, 'online');
     }
   })();
 
@@ -39,19 +41,21 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
       ctx.timeout(ONLINE_TIMEOUT, async () => {
         if (ctx.statusMap[id] === 'checking') {
           ctx.statusMap[id] = 'offline';
-          ctx.send('dispatcher', 'dispatcher:status:change', id, 'offline');
+          ctx.send('dispatcher', 'server:status:change', id, 'offline');
+          ctx.send('passenger', 'server:status:change', id, 'offline');
+          ctx.send('driver', 'server:status:change', id, 'offline');
         }
       });
     }
   });
 
-  ctx.on('server:online', async (id: number) => {
+  ctx.on('client:online', async (id: number) => {
     ctx.statusMap[id] = 'online';
-    ctx.send('dispatcher', 'dispatcher:status:change', id, 'online');
+    ctx.send('dispatcher', 'server:status:change', id, 'online');
   });
 
   ctx.on('dispatcher:status:map:request', async () => {
-    ctx.socket.emit('dispatcher:status:map', ctx.statusMap);
+    ctx.socket.emit('server:status:map', ctx.statusMap);
     ctx.statusMap = {};
     ctx.send('driver', 'server:online:request');
     ctx.send('passenger', 'server:online:request');

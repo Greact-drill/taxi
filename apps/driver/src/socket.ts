@@ -1,4 +1,4 @@
-import { Driver, DriverOrder, OrderChatMessage, OrderStatus, Passenger, PassengerOrder } from '@packages/shared';
+import { Driver, DriverOrder, onlinesFromChange, onlinesFromMap, OrderChatMessage, OrderStatus, Passenger, PassengerOrder, Status, StatusMap } from '@packages/shared';
 import { io } from 'socket.io-client';
 import { store } from './store';
 
@@ -103,5 +103,13 @@ socket.on('passenger:order:messages', (orderId: number, messages: OrderChatMessa
 });
 
 socket.on('server:online:request', () => {
-  if (store.currentUser) socket.emit('server:online', `driver:${store.currentUser.id}`);
+  if (store.currentUser) socket.emit('client:online', `driver:${store.currentUser.id}`);
+});
+
+socket.on('server:status:map', (statusMap: StatusMap) => {
+  store.setOnlines(onlinesFromMap(statusMap));
+});
+
+socket.on('server:status:change', (id: string, status: Status) => {
+  store.setOnlines(onlinesFromChange(store.onlines, id, status));
 });

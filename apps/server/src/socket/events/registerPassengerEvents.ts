@@ -141,5 +141,14 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
     }
     ctx.send('dispatcher', 'dispatcher:order:messages', passengerOrder.id, messages);
   });
+
+  ctx.on('passenger:status:map:request', async () => {
+    // отправить статусы только водителей (другие статусы не нужны пассажиру)
+    ctx.socket.emit('server:status:map', ctx.statusMap);
+    // TODO сбросить статусы водителей и запросить их заново с клиентов
+    // ctx.statusMap = {};
+    // ctx.send('driver', 'server:online:request');
+  });
+
 }
 

@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { Box, Flex, VStack } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
-import { DriverOrderPreview } from '../components/DriverOrderPreview';
-import DriverActiveOrdersListScreen from './DriverActiveOrdersListScreen';
 import { useStore } from '../store';
 import { socket } from '../socket';
+
+import DriverOrderPreview from '../components/DriverOrderPreview';
+import DriverActiveOrdersListScreen from './DriverActiveOrdersListScreen';
 
 function DriverOrdersListScreen() {
   const store = useStore();
@@ -12,6 +13,7 @@ function DriverOrdersListScreen() {
   useEffect(() => {
     socket.emit('driver:orders:active:request');
     socket.emit('driver:orders:request');
+    socket.emit('driver:status:map:request');
   }, [socket.id]);
 
   const hasAssigned = store.assignedOrders.length > 0;

@@ -1,7 +1,8 @@
 import { Box, Text, VStack } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
-import { DriverActiveOrderPreview } from '../components/DriverActiveOrderPreview';
 import { useStore } from '../store';
+
+import DriverActiveOrderPreview from '../components/DriverActiveOrderPreview';
 
 function DriverActiveOrdersListScreen() {
   const store = useStore();

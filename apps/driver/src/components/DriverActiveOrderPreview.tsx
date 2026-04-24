@@ -5,13 +5,16 @@ import {
   OrderRouteRow,
   OrderCardHeader,
 } from '@packages/order-ui';
+import { useStore } from '../store';
+import { observer } from 'mobx-react-lite';
 
 export type DriverActiveOrderPreviewProps = {
   order: DriverOrder;
   onClick: () => void;
 };
 
-export function DriverActiveOrderPreview({ order, onClick }: DriverActiveOrderPreviewProps) {
+function DriverActiveOrderPreview({ order, onClick }: DriverActiveOrderPreviewProps) {
+  const { onlines } = useStore();
   const { passenger } = order;
 
   return (
@@ -32,7 +35,12 @@ export function DriverActiveOrderPreview({ order, onClick }: DriverActiveOrderPr
     >
       <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
       <OrderRouteRow from={order.from} to={order.to} />
-      <OrderPassengerRow passenger={passenger} online={false} mx="-4" mb="-4" />
+      <OrderPassengerRow 
+        passenger={passenger} 
+        online={onlines.has(`passenger:${passenger.id}`)} 
+        mx="-4" mb="-4" />
     </Box>
   );
 }
+
+export default observer(DriverActiveOrderPreview);

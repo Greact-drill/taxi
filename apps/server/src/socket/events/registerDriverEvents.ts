@@ -127,5 +127,15 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
     );
     ctx.send('dispatcher', 'dispatcher:order:messages', driverOrder.id, messages);
   });
+
+  ctx.on('driver:status:map:request', async () => {
+    // отправить статусы только пассажиров (другие статусы не нужны водителю)
+    ctx.socket.emit('server:status:map', ctx.statusMap);
+    // TODO сбросить статусы пассажиров и запросить их заново с клиентов
+    // ctx.statusMap = {};
+    // ctx.send('passenger', 'server:online:request');
+  });
+
+
 }
 

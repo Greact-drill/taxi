@@ -7,13 +7,16 @@ import {
   OrderRouteRow,
 } from '@packages/order-ui';
 import { OrderStatus } from '@packages/shared';
+import { useStore } from '../store';
+import { observer } from 'mobx-react-lite';
 
 export type DriverOrderPreviewProps = {
   order: DriverOrder;
   onClick: () => void;
 };
 
-export function DriverOrderPreview({ order, onClick }: DriverOrderPreviewProps) {
+function DriverOrderPreview({ order, onClick }: DriverOrderPreviewProps) {
+  const { onlines } = useStore();
   const { passenger } = order;
 
   return (
@@ -34,7 +37,12 @@ export function DriverOrderPreview({ order, onClick }: DriverOrderPreviewProps) 
       {order.status === OrderStatus.CANCELLED && (
         <OrderCancelReasonRow cancelReason={order.cancelReason} />
       )}
-      <OrderPassengerRow passenger={passenger} online={false} mx="-4" mb="-4" />
+      <OrderPassengerRow 
+        passenger={passenger} 
+        online={onlines.has(`passenger:${passenger.id}`)} 
+        mx="-4" mb="-4" />
     </Box>
   );
 }
+
+export default observer(DriverOrderPreview);

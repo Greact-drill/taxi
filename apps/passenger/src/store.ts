@@ -45,6 +45,12 @@ class Store {
     this.currentUser = undefined;
   }
 
+  // online status map
+  onlines: Set<string>;
+  setOnlines(onlines: Set<string>) {
+    this.onlines = onlines;
+  }
+
   // orders
   orders: PassengerOrder[] = [];
 
@@ -129,6 +135,8 @@ class Store {
 
     this.isTransitioning = false;
 
+    this.onlines = new Set();
+    
     makeAutoObservable(this);
   }
 }

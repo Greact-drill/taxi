@@ -42,6 +42,13 @@ class Store {
     this.currentUser = undefined;
   }
 
+  // online status map
+  onlines: Set<string>;
+  setOnlines(onlines: Set<string>) {
+    this.onlines = onlines;
+  }
+
+  // orders
   activeOrders: DriverOrder[] = [];
 
   setActiveOrders(orders: DriverOrder[]) {
@@ -118,6 +125,8 @@ class Store {
     this.screenFormMessages = [];
 
     this.isTransitioning = false;
+    
+    this.onlines = new Set();
 
     makeAutoObservable(this);
   }

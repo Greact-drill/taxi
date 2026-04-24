@@ -7,13 +7,16 @@ import {
   OrderRouteRow,
 } from '@packages/order-ui';
 import { PassengerOrderWaitingDial } from './PassengerOrderWaitingDial';
+import { useStore } from '../store';
+import { observer } from 'mobx-react-lite';
 
 export type PassengerOrderPreviewProps = {
   order: PassengerOrder;
   onClick: () => void;
 };
 
-export function PassengerOrderPreview({ order, onClick }: PassengerOrderPreviewProps) {
+function PassengerOrderPreview({ order, onClick }: PassengerOrderPreviewProps) {
+  const { onlines } = useStore();
   return (
     <Box
       borderRadius="lg"
@@ -36,8 +39,13 @@ export function PassengerOrderPreview({ order, onClick }: PassengerOrderPreviewP
         <PassengerOrderWaitingDial createdAt={order.createdAt} />
       )}
       {order.driver && (
-        <OrderDriverRow driver={order.driver} online={false} mx="-4" mb="-4" />
+        <OrderDriverRow 
+          driver={order.driver} 
+          online={onlines.has(`driver:${order.driver.id}`)} 
+          mx="-4" mb="-4" />
       )}
     </Box>
   );
 }
+
+export default observer(PassengerOrderPreview);

@@ -2,10 +2,11 @@ import { useEffect } from 'react';
 import { Box, Button, Text, VStack } from '@chakra-ui/react';
 import { Plus } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-import { PassengerOrderPreview } from '../components/PassengerOrderPreview';
 import { useStore } from '../store';
 import { socket } from '../socket';
 import { OrderStatus } from '@packages/shared';
+
+import PassengerOrderPreview from '../components/PassengerOrderPreview';
 
 const CREATABLE_STATUSES: OrderStatus[] = [
   OrderStatus.ON_TRIP,
@@ -18,6 +19,7 @@ function PassengerOrdersListScreen() {
 
   useEffect(() => {
     socket.emit('passenger:orders:request');
+    socket.emit('passenger:status:map:request');
   }, [socket.id]);
 
   const canAdd = store.orders.every((storeOrder) =>

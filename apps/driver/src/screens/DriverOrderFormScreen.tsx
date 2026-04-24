@@ -120,7 +120,7 @@ function DriverOrderFormScreen() {
       <OrderRouteRow from={order.from} to={order.to} />
       <OrderPassengerRow
         passenger={order.passenger}
-        online={false}
+        online={store.onlines.has(`passenger:${order.passenger.id}`)}
       />
       <VStack gap="3" align="stretch" flex="1" minH="0">
         {order.status === OrderStatus.AWAITING_DRIVER && canTake && (

@@ -1,6 +1,14 @@
 import { io } from 'socket.io-client';
 import { store } from './store';
-import type { DriverOrder, OrderChatMessage, Passenger, PassengerOrder } from '@packages/shared';
+import {
+  onlinesFromChange,
+  onlinesFromMap,
+  type OrderChatMessage,
+  type Passenger,
+  type PassengerOrder,
+  type Status,
+  type StatusMap,
+} from '@packages/shared';
 
 export const socket = io({
   path: '/ws',
@@ -92,5 +100,13 @@ socket.on('driver:order:messages', (orderId: number, messages: OrderChatMessage[
 });
 
 socket.on('server:online:request', () => {
-  if (store.currentUser) socket.emit('server:online', `passenger:${store.currentUser?.id}`);
+  if (store.currentUser) socket.emit('client:online', `passenger:${store.currentUser?.id}`);
+});
+
+socket.on('server:status:map', (statusMap: StatusMap) => {
+  store.setOnlines(onlinesFromMap(statusMap));
+});
+
+socket.on('server:status:change', (id: string, status: Status) => {
+  store.setOnlines(onlinesFromChange(store.onlines, id, status));
 });

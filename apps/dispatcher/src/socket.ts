@@ -1,4 +1,13 @@
-import type { Driver, Order, OrderChatMessage, Passenger, Status, StatusMap } from '@packages/shared';
+import {
+  onlinesFromChange,
+  onlinesFromMap,
+  type Driver,
+  type Order,
+  type OrderChatMessage,
+  type Passenger,
+  type Status,
+  type StatusMap,
+} from '@packages/shared';
 import { io } from 'socket.io-client';
 import { store } from './store';
 
@@ -62,30 +71,12 @@ socket.on('dispatcher:orders', (orders: Order[]) => {
   store.setOrders(orders);
 });
 
-function onlinesFromMap(map: StatusMap): Set<string> {
-  return new Set(
-    Object.entries(map)
-      .filter(([, s]) => s === 'online')
-      .map(([id]) => id),
-  );
-}
-
-function onlinesFromChange(id: string, status: Status): Set<string> {
-  const next = new Set(store.onlines);
-  if (status === 'online') {
-    next.add(id);
-  } else {
-    next.delete(id);
-  }
-  return next;
-}
-
-socket.on('dispatcher:status:map', (statusMap: StatusMap) => {
+socket.on('server:status:map', (statusMap: StatusMap) => {
   store.setOnlines(onlinesFromMap(statusMap));
 });
 
-socket.on('dispatcher:status:change', (id: string, status: Status) => {
-  store.setOnlines(onlinesFromChange(id, status));
+socket.on('server:status:change', (id: string, status: Status) => {
+  store.setOnlines(onlinesFromChange(store.onlines, id, status));
 });
 
 socket.on('dispatcher:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
