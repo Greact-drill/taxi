@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 import { Box, Text } from '@chakra-ui/react';
-import { OrderCardHeader, OrderPassengerRow, OrderRouteRow } from '@packages/order-ui';
+import { OrderCardHeader, OrderDriverRow, OrderPassengerRow, OrderRouteRow } from '@packages/order-ui';
 import { observer } from 'mobx-react-lite';
 
 import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
-import { OrderDriverRow } from '../components/OrderDriverRow';
 import { socket } from '../socket';
 import { checkOnline, store } from '../store';
 
@@ -22,17 +21,29 @@ function OrdersColumn() {
         Заявки
       </Text>
       {orders.map((order) => (
-        <Card key={order.id} cursor="pointer" onClick={() => store.openEditOrderForm(order)}>
-          <Box px="3" pt="3" pb="2">
-            <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
-            <OrderRouteRow from={order.from} to={order.to} />
-          </Box>
+        <Card 
+          key={order.id} 
+          cursor="pointer" 
+          onClick={() => store.openEditOrderForm(order)}
+          display="flex"
+          flexDirection="column"
+          p="4"
+          gap="3"
+        >
+          <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />            
+          <OrderRouteRow from={order.from} to={order.to} />
           <OrderPassengerRow
             passenger={order.passenger}
             online={checkOnline(`passenger:${order.passenger.id}`)}
-            attachToCardBottom={false}
+            mx={'-4'} mb={order.driver ? '-4' : undefined}
           />
-          {order.driver ? <OrderDriverRow driver={order.driver} online={checkOnline(`driver:${order.driver.id}`)} /> : null}
+          {order.driver && (
+            <OrderDriverRow
+              driver={order.driver}
+              online={checkOnline(`driver:${order.driver.id}`)}
+              mx={'-4'} mb="-4"
+            />
+          )}
         </Card>
       ))}
     </DispatcherColumn>

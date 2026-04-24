@@ -25,10 +25,14 @@ export function DriverActiveOrderPreview({ order, onClick }: DriverActiveOrderPr
       overflow="hidden"
       cursor="pointer"
       onClick={onClick}
+
+      display="flex"
+      flexDirection="column"
+      gap="3"
     >
       <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
       <OrderRouteRow from={order.from} to={order.to} />
-      <OrderPassengerRow passenger={passenger} online={false} />
+      <OrderPassengerRow passenger={passenger} online={false} mx="-4" mb="-4" />
     </Box>
   );
 }

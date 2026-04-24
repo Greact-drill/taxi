@@ -23,6 +23,9 @@ export function PassengerOrderPreview({ order, onClick }: PassengerOrderPreviewP
       overflow="hidden"
       cursor="pointer"
       onClick={onClick}
+      display="flex"
+      flexDirection="column"
+      gap="3"
     >
       <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
       <OrderRouteRow from={order.from} to={order.to} />
@@ -32,9 +35,9 @@ export function PassengerOrderPreview({ order, onClick }: PassengerOrderPreviewP
       {order.status === OrderStatus.AWAITING_DRIVER && (
         <PassengerOrderWaitingDial createdAt={order.createdAt} />
       )}
-      {order.driver ? (
-        <OrderDriverRow name={order.driver.name} car={order.driver.car} />
-      ) : null}
+      {order.driver && (
+        <OrderDriverRow driver={order.driver} online={false} mx="-4" mb="-4" />
+      )}
     </Box>
   );
 }

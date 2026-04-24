@@ -8,7 +8,7 @@ export type OrderRouteRowProps = {
 
 export function OrderRouteRow({ from, to }: OrderRouteRowProps) {
   return (
-    <HStack gap="2" align="flex-start" mt="3">
+    <HStack gap="2" align="flex-start">
       <Box color="gray.400" lineHeight="0" mt="0.5" flexShrink={0} aria-hidden>
         <MapPin size={16} strokeWidth={2} />
       </Box>

@@ -25,13 +25,16 @@ export function DriverOrderPreview({ order, onClick }: DriverOrderPreviewProps) 
       overflow="hidden"
       cursor="pointer"
       onClick={onClick}
+      display="flex"
+      flexDirection="column"
+      gap="3"
     >
       <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
       <OrderRouteRow from={order.from} to={order.to} />
       {order.status === OrderStatus.CANCELLED && (
         <OrderCancelReasonRow cancelReason={order.cancelReason} />
       )}
-      <OrderPassengerRow passenger={passenger} online={false} />
+      <OrderPassengerRow passenger={passenger} online={false} mx="-4" mb="-4" />
     </Box>
   );
 }

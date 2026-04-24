@@ -10,10 +10,11 @@ export type OrderPassengerRowProps = {
    * When `true` (default), stretch to the bottom of a parent card with `p="4"` + `overflow="hidden"`.
    * Set `false` when more content (e.g. buttons) follows inside the same card.
    */
-  attachToCardBottom?: boolean;
+  mx?: string;
+  mb?: string;
 };
 
-export function OrderPassengerRow({ passenger, online, attachToCardBottom = true }: OrderPassengerRowProps) {
+export function OrderPassengerRow({ passenger, online, mx, mb }: OrderPassengerRowProps) {
   return (
     <HStack
       bg="blue.50"
@@ -22,10 +23,9 @@ export function OrderPassengerRow({ passenger, online, attachToCardBottom = true
       px="3"
       py="1.5"
       minW={0}
-      mt="3"
-      mx={attachToCardBottom ? '-4' : undefined}
-      mb={attachToCardBottom ? '-4' : undefined}
-      borderBottomRadius={attachToCardBottom ? 'lg' : 'md'}
+      mx={mx}
+      mb={mb}
+      borderBottomRadius={(mx || mb) ? 'lg' : 'md'}
     >
       <Box color="blue.600" lineHeight="0" flexShrink={0}>
         <UserRound size={18} strokeWidth={2} />

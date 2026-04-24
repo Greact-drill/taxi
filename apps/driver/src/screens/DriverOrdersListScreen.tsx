@@ -18,7 +18,7 @@ function DriverOrdersListScreen() {
 
   return (
     <Flex direction="column" flex="1" minH="0" align="stretch" gap="4">
-      {hasAssigned ? (
+      {hasAssigned && (
         <VStack gap="3" align="stretch" flexShrink={0}>
           {store.assignedOrders.map((order) => (
             <DriverOrderPreview
@@ -28,7 +28,7 @@ function DriverOrdersListScreen() {
             />
           ))}
         </VStack>
-      ) : null}
+      )}
 
       <Box flex="1" minH="0" display="flex" flexDirection="column">
         <DriverActiveOrdersListScreen />

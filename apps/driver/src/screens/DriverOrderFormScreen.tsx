@@ -81,6 +81,7 @@ function DriverOrderFormScreen() {
       h="100%"
       display="flex"
       flexDirection="column"
+      gap="3"
       minH="0"
     >
       <HStack justify="space-between" align="flex-start" gap="3">
@@ -120,9 +121,8 @@ function DriverOrderFormScreen() {
       <OrderPassengerRow
         passenger={order.passenger}
         online={false}
-        attachToCardBottom={false}
       />
-      <VStack gap="3" align="stretch" mt="4" flex="1" minH="0">
+      <VStack gap="3" align="stretch" flex="1" minH="0">
         {order.status === OrderStatus.AWAITING_DRIVER && canTake && (
           <Button size="lg" onClick={take}>
             Взять заказ
