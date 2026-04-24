@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Box, Text } from '@chakra-ui/react';
+import { Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
 
 import { Card } from '../components/Card';
@@ -21,16 +21,14 @@ function PassengersColumn() {
         Пассажиры
       </Text>
       {passengers.map((passenger) => (
-        <Box
+        <Card
           key={passenger.id}
           w="100%"
           cursor="pointer"
           onClick={() => store.openEditPassengerForm(passenger)}
         >
-          <Card>
-            <PassengerAppHeader passenger={passenger} online={checkOnline(`passenger:${passenger.id}`)} />
-          </Card>
-        </Box>
+          <PassengerAppHeader passenger={passenger} online={checkOnline(`passenger:${passenger.id}`)} />
+        </Card>
       ))}
     </DispatcherColumn>
   );

@@ -27,16 +27,14 @@ function DriversColumn() {
         Водители
       </Text>
       {drivers.map((driver) => (
-        <Box
+        <Card
           key={driver.id}
           w="100%"
           cursor="pointer"
           onClick={() => store.openEditDriverForm(driver)}
         >
-          <Card>
-            <DriverAppHeader driver={driver} online={checkOnline(`driver:${driver.id}`)} />
-          </Card>
-        </Box>
+          <DriverAppHeader driver={driver} online={checkOnline(`driver:${driver.id}`)} />
+        </Card>
       ))}
       <Button
         type="button"

@@ -73,6 +73,7 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
   ctx.on('dispatcher:orders:update', async (id: number, input: Partial<PassengerOrder> | Partial<DriverOrder>) => {
     await ctx.orderService.update(id, input);
     ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
+    // TODO уведомить так же водителей и пассажиров, которые видят этот заказ
   });
 
   ctx.on('dispatcher:orders:delete', async (id: number) => {

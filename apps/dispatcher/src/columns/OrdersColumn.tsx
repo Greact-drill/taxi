@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Box, Text } from '@chakra-ui/react';
-import { OrderCardHeader } from '@packages/order-ui';
+import { OrderCardHeader, OrderRouteRow } from '@packages/order-ui';
 import { observer } from 'mobx-react-lite';
 
 import { Card } from '../components/Card';
@@ -23,15 +23,14 @@ export const OrdersColumn = observer(function OrdersColumn() {
         Заявки
       </Text>
       {orders.map((order) => (
-        <Box key={order.id} cursor="pointer" onClick={() => store.openEditOrderForm(order)}>
-          <Card>
-          <Box px="3" pt="3" pb="1">
+        <Card key={order.id} cursor="pointer" onClick={() => store.openEditOrderForm(order)}>
+          <Box px="3" pt="3" pb="2">
             <OrderCardHeader orderId={order.id} status={order.status} createdAt={order.createdAt} />
+            <OrderRouteRow from={order.from} to={order.to} />
           </Box>
           <OrderPassengerRow passenger={order.passenger} online={checkOnline(`passenger:${order.passenger.id}`)} />
           {order.driver ? <OrderDriverRow driver={order.driver} online={checkOnline(`driver:${order.driver.id}`)} /> : null}
-          </Card>
-        </Box>
+        </Card>
       ))}
     </DispatcherColumn>
   );

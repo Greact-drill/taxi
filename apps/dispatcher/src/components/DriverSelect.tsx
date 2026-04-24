@@ -4,7 +4,7 @@ import type { Driver } from '@packages/shared';
 export type DriverSelectProps = {
   drivers: Driver[];
   value?: Driver;
-  onChange: (driver: Driver) => void;
+  onChange: (driver: Driver | undefined) => void;
 };
 
 export function DriverSelect({ drivers, value, onChange }: DriverSelectProps) {
@@ -13,11 +13,17 @@ export function DriverSelect({ drivers, value, onChange }: DriverSelectProps) {
       <NativeSelect.Field
         value={value ? String(value.id) : ''}
         onChange={(e) => {
-          const selectedId = Number(e.target.value);
+          const raw = e.target.value;
+          if (raw === '') {
+            onChange(undefined);
+            return;
+          }
+          const selectedId = Number(raw);
           const driver = drivers.find((d) => d.id === selectedId);
           if (driver) onChange(driver);
         }}
       >
+        <option value="">Не назначен</option>
         {drivers.map((d) => (
           <option key={d.id} value={d.id}>
             #{d.id} {d.name} ({d.car})
