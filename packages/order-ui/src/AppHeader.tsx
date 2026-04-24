@@ -9,7 +9,7 @@ export function AppHeader({ children }: AppHeaderProps) {
   return (
     <HStack
       as="header"
-      px="4"
+      px="3"
       borderBottomWidth="1px"
       borderColor="blackAlpha.200"
       justify="space-between"

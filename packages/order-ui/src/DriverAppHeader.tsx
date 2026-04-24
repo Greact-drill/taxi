@@ -9,7 +9,7 @@ export type DriverAppHeaderProps = {
 
 export function DriverAppHeader({ driver, online }: DriverAppHeaderProps) {
   return (
-    <HStack gap="2.5" align="center" px="3" py="2.5" minW={0}>
+    <HStack gap="2.5" align="center" px="3" py="2.5" minW={0} flex="1">
       <Text fontSize="sm" fontWeight="bold" color="purple.600">
         #{driver.id}
       </Text>

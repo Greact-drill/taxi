@@ -22,12 +22,7 @@ function App() {
       <AppHeader>
         {store.currentUser ? (
           <>
-            <Box flex="1" minW={0}>
-              <DriverAppHeader
-                driver={store.currentUser}
-                online={store.online}
-              />
-            </Box>
+            <DriverAppHeader driver={store.currentUser} online={store.online} />
             <DriverAppMenu />
           </>
         ) : (

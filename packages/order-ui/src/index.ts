@@ -12,6 +12,7 @@ export { OrderRouteRow, type OrderRouteRowProps } from './OrderRouteRow';
 export { OrderPassengerRow, type OrderPassengerRowProps } from './OrderPassengerRow';
 export { OrderDriverRow, type OrderDriverRowProps } from './OrderDriverRow';
 export { DriverAppHeader, type DriverAppHeaderProps } from './DriverAppHeader';
+export { PassengerAppHeader, type PassengerAppHeaderProps } from './PassengerAppHeader';
 export { OrderCancelReasonRow, type OrderCancelReasonRowProps } from './OrderCancelReasonRow';
 export { formatEvent } from './formatEvent';
 export { ScreenResolutionInfo } from './ScreenResolutionInfo';

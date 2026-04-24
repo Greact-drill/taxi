@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import { Box, Center } from '@chakra-ui/react';
-import { ScreenResolutionInfo } from '@packages/order-ui';
+import { AppHeader, OrderNetworkStatusBadge, PassengerAppHeader, ScreenResolutionInfo } from '@packages/order-ui';
 
-import PassengerAppHeader from './components/PassengerAppHeader';
+import PassengerAppMenu from './components/PassengerAppMenu';
 import PassengerAppContentScreen from './screens/PassengerAppContentScreen';
 import { store } from './store';
 
@@ -16,7 +16,19 @@ function App() {
       display="flex"
       flexDirection="column"
     >
-      <PassengerAppHeader />
+      <AppHeader>
+        {store.currentUser ? (
+          <>
+            <PassengerAppHeader passenger={store.currentUser} online={store.online} />
+            <PassengerAppMenu />
+          </>
+        ) : (
+          <>
+            <OrderNetworkStatusBadge online={store.online} />
+            <PassengerAppMenu />
+          </>
+        )}
+      </AppHeader>
 
       <Box as="main" position="relative" flex="1" display="flex" minH="0">
         <PassengerAppContentScreen />

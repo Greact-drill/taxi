@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react-lite';
+import { PassengerAppHeader } from '@packages/order-ui';
 
 import { Card } from '../components/Card';
 import { DispatcherColumn } from '../components/DispatcherColumn';
-import { PassengerAppHeader } from '../components/PassengerAppHeader';
 import { socket } from '../socket';
 import { checkOnline, store } from '../store';
 
