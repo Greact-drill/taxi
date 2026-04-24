@@ -1,4 +1,4 @@
-import type { Driver, StatusMap, Order, Passenger, Status } from '@packages/shared';
+import type { Driver, Order, OrderChatMessage, Passenger, Status, StatusMap } from '@packages/shared';
 import { io } from 'socket.io-client';
 import { store } from './store';
 
@@ -86,4 +86,11 @@ socket.on('dispatcher:status:map', (statusMap: StatusMap) => {
 
 socket.on('dispatcher:status:change', (id: string, status: Status) => {
   store.setOnlines(onlinesFromChange(id, status));
+});
+
+socket.on('dispatcher:order:messages', (orderId: number, messages: OrderChatMessage[]) => {
+  // свои сообщения
+  if (store.screenFormDataType === 'order' && store.screenFormData?.id === orderId) {
+    store.setOrderMessages(messages);
+  }
 });

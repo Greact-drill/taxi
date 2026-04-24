@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import type { Driver, Passenger, Order } from '@packages/shared';
+import type { Driver, Order, OrderChatMessage, Passenger } from '@packages/shared';
 
 const TOKEN_STORAGE_KEY = 'taxi_dispatcher_token';
 
@@ -57,13 +57,21 @@ class Store {
   screenFormData: Driver | Passenger | Order | null;
   screenFormDataType: 'driver' | 'passenger' | 'order' | null;
 
+  screenFormMessages: OrderChatMessage[];
+
+  setOrderMessages(messages: OrderChatMessage[]) {
+    this.screenFormMessages = [...messages];
+  }
+
   openCreateDriverForm() {
+    this.setOrderMessages([]);
     this.screen = 'form';
     this.screenForm = 'create';
     this.screenFormDataType = 'driver';
   }
 
   openEditDriverForm(driver: Driver) {
+    this.setOrderMessages([]);
     this.screen = 'form';
     this.screenForm = 'edit';
     this.screenFormData = driver;
@@ -71,6 +79,7 @@ class Store {
   }
 
   openEditPassengerForm(passenger: Passenger) {
+    this.setOrderMessages([]);
     this.screen = 'form';
     this.screenForm = 'edit';
     this.screenFormData = passenger;
@@ -78,6 +87,7 @@ class Store {
   }
 
   openEditOrderForm(order: Order) {
+    this.setOrderMessages([]);
     this.screen = 'form';
     this.screenForm = 'edit';
     this.screenFormData = order;
@@ -85,6 +95,7 @@ class Store {
   }
 
   openList() {
+    this.setOrderMessages([]);
     this.screen = 'list';
   }
 
@@ -97,6 +108,7 @@ class Store {
     this.screenForm = 'create';
     this.screenFormData = null;
     this.screenFormDataType = null;
+    this.screenFormMessages = [];
     makeAutoObservable(this);
   }
 }

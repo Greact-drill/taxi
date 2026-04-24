@@ -124,6 +124,7 @@ export function registerPassengerEvents(ctx: SocketRuntimeContext): void {
         messages,
       );
     }
+    ctx.send('dispatcher', 'dispatcher:order:messages', passengerOrder.id, messages);
   });
 }
 

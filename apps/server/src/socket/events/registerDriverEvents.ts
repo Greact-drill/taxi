@@ -125,6 +125,7 @@ export function registerDriverEvents(ctx: SocketRuntimeContext): void {
       driverOrder.id,
       messages,
     );
+    ctx.send('dispatcher', 'dispatcher:order:messages', driverOrder.id, messages);
   });
 }
 

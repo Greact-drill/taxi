@@ -15,6 +15,8 @@ import { PassengerEditDialog } from './PassengerEditDialog';
 
 function FormDialogRoot() {
   const { screen, screenForm, screenFormData, screenFormDataType } = store;
+  const orderFormOpen =
+    screen === 'form' && screenForm === 'edit' && screenFormDataType === 'order' && screenFormData;
 
   return (
     <DialogRoot
@@ -22,12 +24,19 @@ function FormDialogRoot() {
       onOpenChange={(dialog) => {
         if (!dialog.open) store.openList();
       }}
-      size="sm"
+      size={screenFormDataType === 'order' ? 'xl' : 'sm'}
     >
       <Portal>
         <DialogBackdrop />
         <DialogPositioner>
-          <DialogContent>
+          <DialogContent
+            display={orderFormOpen ? 'flex' : undefined}
+            flexDirection={orderFormOpen ? 'column' : undefined}
+            h={orderFormOpen ? '85dvh' : undefined}
+            maxH={orderFormOpen ? '85dvh' : undefined}
+            overflow={orderFormOpen ? 'hidden' : undefined}
+            minH={orderFormOpen ? 0 : undefined}
+          >
             {screenForm === 'create' && screenFormDataType === 'driver' && (
               <DriverCreateDialog close={() => store.openList()} />
             )}

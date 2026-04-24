@@ -1,10 +1,11 @@
 import { type SocketRuntimeContext } from '../SocketRuntime.js';
-import type {
-  Driver,
-  DriverCreateInput,
-  DriverOrder,
-  Passenger,
-  PassengerOrder,
+import {
+  ChatAuthorRole,
+  type Driver,
+  type DriverCreateInput,
+  type DriverOrder,
+  type Passenger,
+  type PassengerOrder,
 } from '@packages/shared';
 
 const ONLINE_TIMEOUT = 20_000;
@@ -79,6 +80,26 @@ export function registerDispatcherEvents(ctx: SocketRuntimeContext): void {
   ctx.on('dispatcher:orders:delete', async (id: number) => {
     await ctx.orderService.delete(id);
     ctx.send('dispatcher', 'dispatcher:orders', await ctx.orderService.list());
+  });
+
+  ctx.on('dispatcher:order:messages:request', async (orderId: number) => {
+    const order = await ctx.orderService.findById(orderId);
+    if (!order) throw Error('Заказ не найден');
+    const messages = await ctx.orderChatService.messages(order);
+    ctx.socket.emit('dispatcher:order:messages', orderId, messages);
+  });
+
+  ctx.on('dispatcher:order:messages:send', async (orderId: number, text: string) => {
+    const order = await ctx.orderService.findById(orderId);
+    if (!order) throw Error('Заказ не найден');
+    await ctx.orderChatService.sendMessage(order, { text, authorRole: ChatAuthorRole.DISPATCHER });
+    const messages = await ctx.orderChatService.messages(order);
+
+    ctx.send('dispatcher', 'dispatcher:order:messages', orderId, messages);
+    ctx.send(`passenger:${order.passenger.id}`, 'passenger:order:messages', orderId, messages);
+    if (order.driver) {
+      ctx.send(`driver:${order.driver.id}`, 'driver:order:messages', orderId, messages);
+    }
   });
 
   // drivers management events
