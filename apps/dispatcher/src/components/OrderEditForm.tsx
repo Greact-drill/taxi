@@ -14,7 +14,7 @@ export type OrderEditFormProps = {
   close: () => void;
 };
 
-export const OrderEditForm = observer(function OrderEditForm({ order, close }: OrderEditFormProps) {
+function OrderEditForm({ order, close }: OrderEditFormProps) {
   const [draft, setDraft] = useState<Order>({ ...order });
 
   const canSave = draft.createdAt.trim().length > 0 && draft.from.trim().length > 0 && draft.to.trim().length > 0;
@@ -82,4 +82,6 @@ export const OrderEditForm = observer(function OrderEditForm({ order, close }: O
       </VStack>
     </VStack>
   );
-});
+};
+
+export default observer(OrderEditForm);

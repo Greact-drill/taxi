@@ -10,7 +10,7 @@ import { OrderPassengerRow } from '../components/OrderPassengerRow';
 import { socket } from '../socket';
 import { checkOnline, store } from '../store';
 
-export const OrdersColumn = observer(function OrdersColumn() {
+function OrdersColumn() {
   const { orders } = store;
 
   useEffect(() => {
@@ -34,4 +34,6 @@ export const OrdersColumn = observer(function OrdersColumn() {
       ))}
     </DispatcherColumn>
   );
-});
+};
+
+export default observer(OrdersColumn);

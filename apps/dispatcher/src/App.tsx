@@ -3,12 +3,12 @@ import { socket } from './socket';
 
 import { Box, HStack } from '@chakra-ui/react';
 
-import FormDialogRoot from './components/FormDialogRoot';
+import SettingsColumn from './columns/SettingsColumn';
 import DriversColumn from './columns/DriversColumn';
 import PassengersColumn from './columns/PassengersColumn';
+import OrdersColumn from './columns/OrdersColumn';
 
-import { OrdersColumn } from './columns/OrdersColumn';
-import { SettingsColumn } from './columns/SettingsColumn';
+import FormDialogRoot from './components/FormDialogRoot';
 
 import { store } from './store';
 import { observer } from 'mobx-react-lite';

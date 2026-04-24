@@ -6,27 +6,23 @@ export type DispatcherOrderChatMessageRowProps = {
 };
 
 export function DispatcherOrderChatMessageRow({ message }: DispatcherOrderChatMessageRowProps) {
-  const isPassenger = message.authorRole === ChatAuthorRole.PASSENGER;
   const isDispatcher = message.authorRole === ChatAuthorRole.DISPATCHER;
-  const alignEnd = message.authorRole === ChatAuthorRole.DRIVER || isDispatcher;
 
   const messageTime = new Date(message.createdAt).toLocaleTimeString('ru-RU', {
     hour: '2-digit',
     minute: '2-digit',
   });
 
-  const bubbleBg = isPassenger ? 'white' : isDispatcher ? 'teal.subtle' : 'colorPalette.subtle';
-
   return (
-    <VStack align={alignEnd ? 'end' : 'start'} gap="0.5">
+    <VStack align={isDispatcher ? 'end' : 'start'} gap="0.5">
       <Box
         maxW="85%"
         px="3"
         py="2"
         borderRadius="xl"
-        bg={bubbleBg}
+        bg={isDispatcher ? 'colorPalette.subtle' : 'white'}
         color="gray.900"
-        alignSelf={alignEnd ? 'end' : 'start'}
+        alignSelf={isDispatcher ? 'end' : 'start'}
       >
         <Text fontSize="sm" lineHeight="1.35">
           {message.text}

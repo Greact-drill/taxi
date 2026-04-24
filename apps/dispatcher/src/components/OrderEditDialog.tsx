@@ -10,7 +10,7 @@ import {
 import type { Order } from '@packages/shared';
 import { ArrowLeft } from 'lucide-react';
 import DispatcherOrderChat from './DispatcherOrderChat';
-import { OrderEditForm } from './OrderEditForm';
+import OrderEditForm from './OrderEditForm';
 
 export type OrderEditDialogProps = {
   order: Order;

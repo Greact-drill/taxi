@@ -8,7 +8,7 @@ import { DispatcherColumn } from '../components/DispatcherColumn';
 import { socket } from '../socket';
 import { store } from '../store';
 
-export const SettingsColumn = observer(function SettingsColumn() {
+function SettingsColumn() {
   const { online } = store;
 
   useEffect(() => {}, [socket.id]);
@@ -26,4 +26,6 @@ export const SettingsColumn = observer(function SettingsColumn() {
       </Card>
     </DispatcherColumn>
   );
-});
+};
+
+export default observer(SettingsColumn);
