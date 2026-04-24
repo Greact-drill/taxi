@@ -14,7 +14,7 @@ function App() {
     <Box
       bg="white"
       h="100dvh"
-      maxW="420px"
+      maxW="400px"
       mx="auto"
       display="flex"
       flexDirection="column"

@@ -9,13 +9,15 @@ export function DispatcherColumn({ children }: DispatcherColumnProps) {
   return (
     <Box
       flex="1"
-      minW={0}
+
+      maxW="400px"
+
       h="full"
       alignSelf="stretch"
       borderRadius="xl"
       borderWidth="1px"
       borderColor="gray.200"
-      //bg="colorPalette.muted"
+
       boxShadow="inset 0 3px 14px rgba(0, 0, 0, 0.1), inset 0 1px 4px rgba(0, 0, 0, 0.06)"
       p="3"
       display="flex"
