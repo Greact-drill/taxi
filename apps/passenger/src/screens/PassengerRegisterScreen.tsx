@@ -7,12 +7,16 @@ import { observer } from 'mobx-react-lite';
 
 function PassengerRegisterScreen() {
   const store = useStore();
-  const [passenger, setPassenger] = useState<Partial<Passenger>>({});
+  const [passenger, setPassenger] = useState<Partial<Passenger>>({
+    name: '',
+    phone: '',
+  });
 
-  const name = (passenger.name ?? '').trim();
-  const phone = (passenger.phone ?? '').trim();
-  const isPhoneValid = /^\+?\d+$/.test(phone);
-  const canSubmit = name.length > 0 && phone.length > 0 && isPhoneValid;
+  const isPhoneValid = /^\+?\d+$/.test(passenger.phone!.trim());
+  const canSubmit =
+    passenger.name!.trim().length > 0 &&
+    passenger.phone!.trim().length > 0 &&
+    isPhoneValid;
   // TODO validation messages
 
   async function onRegister(): Promise<void> {
@@ -28,16 +32,16 @@ function PassengerRegisterScreen() {
       <VStack gap="3" align="stretch" mt="3">
         <Input
           placeholder="Имя"
-          value={name}
+          value={passenger.name!}
           onChange={(e) =>
-            setPassenger((prev) => ({ ...prev, name: e.target.value }))
+            setPassenger({ ...passenger, name: e.target.value })
           }
         />
         <Input
           placeholder="Телефон"
-          value={phone}
+          value={passenger.phone!}
           onChange={(e) =>
-            setPassenger((prev) => ({ ...prev, phone: e.target.value }))
+            setPassenger({ ...passenger, phone: e.target.value })
           }
         />
         <Button
